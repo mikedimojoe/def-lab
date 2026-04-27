@@ -2,9 +2,11 @@ import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
 
 const LINKS = [
-  { to: "/", label: "Home" },
-  { to: "/teams", label: "Teams" },
-  { to: "/matches", label: "Matches" },
+  { to: "/",          label: "Home" },
+  { to: "/standings", label: "Tabelle" },
+  { to: "/teams",     label: "Teams" },
+  { to: "/matches",   label: "Matches" },
+  { to: "/analytics", label: "Analytics" },
 ];
 
 export default function Nav() {
@@ -13,12 +15,11 @@ export default function Nav() {
 
   return (
     <nav className="nav">
-      <Link to="/" className="nav-logo">
+      <Link to="/" className="nav-logo" onClick={() => setOpen(false)}>
         <span className="nav-logo-def">def</span>
         <span className="nav-logo-lab">-lab</span>
       </Link>
 
-      {/* Desktop links */}
       <div className="nav-links">
         {LINKS.map(({ to, label }) => (
           <Link
@@ -31,16 +32,14 @@ export default function Nav() {
         ))}
       </div>
 
-      {/* Mobile burger */}
       <button
         className={`burger ${open ? "open" : ""}`}
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => setOpen(v => !v)}
         aria-label="Toggle menu"
       >
         <span /><span /><span />
       </button>
 
-      {/* Mobile drawer */}
       {open && (
         <div className="mobile-drawer">
           {LINKS.map(({ to, label }) => (
