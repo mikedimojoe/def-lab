@@ -50,7 +50,7 @@ export async function login(username, password) {
 export async function createUser(username, password, role, displayName) {
   const users = get(KEYS.users);
   if (users.find(u => u.username.toLowerCase() === username.toLowerCase()))
-    throw new Error("Benutzername bereits vergeben");
+    throw new Error("Username already taken");
   const hash = await hashPassword(password);
   const newUser = { id: uid(), username, passwordHash: hash, role, displayName: displayName || username };
   set(KEYS.users, [...users, newUser]);
@@ -76,7 +76,7 @@ export function getSeasons()         { return get(KEYS.seasons); }
 export function getSeason(id)        { return get(KEYS.seasons).find(s => s.id === id) || null; }
 
 export function createSeason(year, name) {
-  const s = { id: uid(), year: String(year), name: name || `GFL ${year} Saison` };
+  const s = { id: uid(), year: String(year), name: name || `GFL ${year} Season` };
   set(KEYS.seasons, [...get(KEYS.seasons), s]);
   return s;
 }
@@ -88,7 +88,7 @@ export function deleteSeason(id) {
 
 export function seedDefaultSeason() {
   if (get(KEYS.seasons).length > 0) return get(KEYS.seasons)[0];
-  return createSeason("2026", "GFL 2026 Saison");
+  return createSeason("2026", "GFL 2026 Season");
 }
 
 // ── Games ────────────────────────────────────────────────────────────────────

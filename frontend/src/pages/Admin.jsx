@@ -1,17 +1,16 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useApp }  from "../contexts/AppContext";
 import { useAuth } from "../contexts/AuthContext";
 import {
   getUsers, createUser, deleteUser, updateUser, updateUserPassword,
-  createSeason, deleteSeason,
-  createGame, deleteGame, saveGamePlaydata,
 } from "../lib/storage";
 import { parsePlaylistData } from "../lib/xlsxParser";
+import { saveGamePlaydata }  from "../lib/storage";
 
 const ACCENT = "#5CBF8A";
 const GREEN  = "#154734";
 
-// ── Tiny modal ────────────────────────────────────────────────────────────────
+// ── Modal ─────────────────────────────────────────────────────────────────────
 function Modal({ title, onClose, children }) {
   return (
     <div style={{
@@ -26,9 +25,8 @@ function Modal({ title, onClose, children }) {
           alignItems: "center", marginBottom: 16 }}>
           <h3 style={{ color: "#eee", margin: 0, fontSize: 15 }}>{title}</h3>
           <button onClick={onClose}
-            style={{ background: "none", border: "none", color: "#888", cursor: "pointer", fontSize: 20 }}>
-            ✕
-          </button>
+            style={{ background: "none", border: "none", color: "#888",
+              cursor: "pointer", fontSize: 20, lineHeight: 1 }}>✕</button>
         </div>
         {children}
       </div>
@@ -36,47 +34,69 @@ function Modal({ title, onClose, children }) {
   );
 }
 
-// ── Shared form styles ────────────────────────────────────────────────────────
 const inp = {
-  width: "100%", background: "#222", color: "#ddd", border: "1px solid #333",
+  width: "100%", background: "#181818", color: "#ddd", border: "1px solid #2a2a2a",
   borderRadius: 6, padding: "8px 10px", fontSize: 13, outline: "none",
   boxSizing: "border-box", marginBottom: 10,
 };
-function Btn({ onClick, children, variant = "default", style: extra = {} }) {
-  const base = {
-    border: "none", borderRadius: 6, padding: "8px 16px",
-    fontSize: 13, fontWeight: 600, cursor: "pointer",
-  };
+
+function Btn({ onClick, type = "button", children, variant = "default", style: extra = {} }) {
   const v = {
-    default: { background: "#2a2a2a", color: "#ccc" },
-    primary: { background: GREEN,     color: "#fff"  },
-    danger:  { background: "#3a1111", color: "#f66"  },
+    default: { background: "#2a2a2a", color: "#bbb" },
+    primary: { background: GREEN,     color: "#fff" },
+    danger:  { background: "#3a1111", color: "#f66" },
   };
-  return <button onClick={onClick} style={{ ...base, ...v[variant], ...extra }}>{children}</button>;
+  return (
+    <button type={type} onClick={onClick} style={{
+      border: "none", borderRadius: 6, padding: "8px 14px",
+      fontSize: 12, fontWeight: 600, cursor: "pointer",
+      ...v[variant], ...extra,
+    }}>
+      {children}
+    </button>
+  );
+}
+
+// ── Invitation link helper ────────────────────────────────────────────────────
+function buildInviteLink(userId, tempPassword) {
+  const base = window.location.origin;
+  return `${base}/?invite=${userId}&pw=${encodeURIComponent(tempPassword)}`;
 }
 
 // ── Users section ─────────────────────────────────────────────────────────────
 function UsersSection() {
   const { user: me, refreshUser } = useAuth();
-  const [users, setUsers] = useState(getUsers);
-  const [modal, setModal] = useState(null); // "create" | "passwd" | "edit"
+  const [users,  setUsers]  = useState(getUsers);
+  const [modal,  setModal]  = useState(null);
   const [target, setTarget] = useState(null);
-  const [form, setForm] = useState({});
-  const [err,  setErr]  = useState("");
+  const [form,   setForm]   = useState({});
+  const [err,    setErr]    = useState("");
+  const [inviteLink, setInviteLink] = useState("");
 
   function refresh() { setUsers(getUsers()); }
+  function f(k) { return e => setForm(prev => ({ ...prev, [k]: e.target.value })); }
 
   async function handleCreate(e) {
     e.preventDefault(); setErr("");
+    if (!form.username?.trim()) { setErr("Username required"); return; }
+    if (!form.password?.trim()) { setErr("Password required"); return; }
     try {
-      await createUser(form.username, form.password, form.role || "Player", form.displayName);
-      refresh(); setModal(null);
+      const u = await createUser(
+        form.username.trim(),
+        form.password.trim(),
+        form.role || "Player",
+        form.displayName?.trim() || form.username.trim(),
+      );
+      const link = buildInviteLink(u.id, form.password.trim());
+      setInviteLink(link);
+      refresh();
     } catch (ex) { setErr(ex.message); }
   }
 
   async function handlePasswd(e) {
     e.preventDefault(); setErr("");
-    if (!form.pw1 || form.pw1 !== form.pw2) { setErr("Passwörter stimmen nicht überein"); return; }
+    if (!form.pw1) { setErr("Enter a new password"); return; }
+    if (form.pw1 !== form.pw2) { setErr("Passwords do not match"); return; }
     await updateUserPassword(target.id, form.pw1);
     if (target.id === me?.id) refreshUser();
     setModal(null);
@@ -89,37 +109,40 @@ function UsersSection() {
   }
 
   function open(type, u) {
-    setTarget(u || null); setForm(u ? { displayName: u.displayName, role: u.role } : {}); setErr(""); setModal(type);
+    setTarget(u || null);
+    setForm(u ? { displayName: u.displayName, role: u.role } : {});
+    setErr(""); setInviteLink(""); setModal(type);
   }
 
   return (
-    <section style={section}>
-      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
-        <h3 style={secH}>Benutzer</h3>
+    <section style={sectionStyle}>
+      <div style={{ display: "flex", alignItems: "center", marginBottom: 14 }}>
+        <h3 style={secH}>Users</h3>
         <Btn variant="primary" onClick={() => open("create")} style={{ marginLeft: "auto" }}>
-          + Benutzer
+          + New User
         </Btn>
       </div>
 
       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
         <thead>
-          <tr style={{ color: "#666", borderBottom: "1px solid #2a2a2a" }}>
-            {["Username","Name","Rolle",""].map(h => (
-              <th key={h} style={{ padding: "6px 8px", textAlign: "left", fontWeight: 600, fontSize: 11 }}>{h}</th>
+          <tr style={{ borderBottom: "1px solid #222" }}>
+            {["Username","Display Name","Role",""].map(h => (
+              <th key={h} style={thStyle}>{h}</th>
             ))}
           </tr>
         </thead>
         <tbody>
           {users.map(u => (
-            <tr key={u.id} style={{ borderBottom: "1px solid #1e1e1e" }}>
-              <td style={tdS}>{u.username}</td>
-              <td style={tdS}>{u.displayName}</td>
-              <td style={{ ...tdS, color: u.role === "Admin" ? ACCENT : "#888" }}>{u.role}</td>
-              <td style={{ ...tdS, textAlign: "right" }}>
-                <Btn onClick={() => open("passwd", u)} style={{ marginRight: 6 }}>PW</Btn>
-                <Btn onClick={() => open("edit",   u)} style={{ marginRight: 6 }}>✏️</Btn>
+            <tr key={u.id} style={{ borderBottom: "1px solid #1a1a1a" }}>
+              <td style={tdStyle}>{u.username}</td>
+              <td style={tdStyle}>{u.displayName}</td>
+              <td style={{ ...tdStyle, color: u.role === "Admin" ? ACCENT : "#666" }}>{u.role}</td>
+              <td style={{ ...tdStyle, textAlign: "right" }}>
+                <Btn onClick={() => open("invite", u)} style={{ marginRight: 6 }}>Invite Link</Btn>
+                <Btn onClick={() => open("passwd", u)} style={{ marginRight: 6 }}>Password</Btn>
+                <Btn onClick={() => open("edit",   u)} style={{ marginRight: 6 }}>Edit</Btn>
                 {u.id !== me?.id && (
-                  <Btn variant="danger" onClick={() => { deleteUser(u.id); refresh(); }}>✕</Btn>
+                  <Btn variant="danger" onClick={() => { deleteUser(u.id); refresh(); }}>Delete</Btn>
                 )}
               </td>
             </tr>
@@ -127,49 +150,117 @@ function UsersSection() {
         </tbody>
       </table>
 
+      {/* Create user modal */}
       {modal === "create" && (
-        <Modal title="Benutzer anlegen" onClose={() => setModal(null)}>
-          <form onSubmit={handleCreate}>
-            <input placeholder="Username" style={inp} onChange={e => setForm(f=>({...f,username:e.target.value}))} />
-            <input placeholder="Anzeigename" style={inp} onChange={e => setForm(f=>({...f,displayName:e.target.value}))} />
-            <input type="password" placeholder="Passwort" style={inp} onChange={e => setForm(f=>({...f,password:e.target.value}))} />
-            <select style={{ ...inp }} value={form.role||"Player"} onChange={e => setForm(f=>({...f,role:e.target.value}))}>
-              <option>Player</option><option>Coach</option><option>Admin</option>
-            </select>
-            {err && <p style={{ color: "#f66", fontSize: 12 }}>{err}</p>}
-            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
-              <Btn onClick={() => setModal(null)}>Abbrechen</Btn>
-              <Btn variant="primary" onClick={() => {}}>Erstellen</Btn>
+        <Modal title="Create User" onClose={() => setModal(null)}>
+          {!inviteLink ? (
+            <form onSubmit={handleCreate}>
+              <input placeholder="Username" style={inp} onChange={f("username")} />
+              <input placeholder="Display name (optional)" style={inp} onChange={f("displayName")} />
+              <input type="password" placeholder="Temporary password" style={inp} onChange={f("password")} />
+              <select style={{ ...inp }} value={form.role || "Player"} onChange={f("role")}>
+                <option>Player</option><option>Coach</option><option>Admin</option>
+              </select>
+              {err && <p style={{ color: "#f66", fontSize: 12, margin: "0 0 8px" }}>{err}</p>}
+              <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+                <Btn onClick={() => setModal(null)}>Cancel</Btn>
+                <Btn type="submit" variant="primary">Create &amp; Get Link</Btn>
+              </div>
+            </form>
+          ) : (
+            <div>
+              <p style={{ color: "#888", fontSize: 13, marginBottom: 12 }}>
+                User created. Share this invite link — it auto-fills their credentials and lets them set a new password:
+              </p>
+              <div style={{
+                background: "#111", border: "1px solid #2a2a2a",
+                borderRadius: 6, padding: "10px 12px",
+                fontFamily: "monospace", fontSize: 11, color: ACCENT,
+                wordBreak: "break-all", marginBottom: 12,
+              }}>
+                {inviteLink}
+              </div>
+              <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+                <Btn onClick={() => { navigator.clipboard.writeText(inviteLink); }}>
+                  Copy Link
+                </Btn>
+                <Btn variant="primary" onClick={() => { refresh(); setModal(null); }}>Done</Btn>
+              </div>
             </div>
-          </form>
+          )}
         </Modal>
       )}
 
+      {/* Invite link for existing user */}
+      {modal === "invite" && target && (
+        <Modal title={`Invite Link — ${target.username}`} onClose={() => setModal(null)}>
+          {!inviteLink ? (
+            <div>
+              <p style={{ color: "#888", fontSize: 13, marginBottom: 12 }}>
+                Set a temporary password. The user will be prompted to change it via the invite link.
+              </p>
+              <input type="text" placeholder="Temporary password" style={inp}
+                value={form.tempPw || ""} onChange={f("tempPw")} />
+              {err && <p style={{ color: "#f66", fontSize: 12, margin: "0 0 8px" }}>{err}</p>}
+              <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+                <Btn onClick={() => setModal(null)}>Cancel</Btn>
+                <Btn variant="primary" onClick={async () => {
+                  if (!form.tempPw) { setErr("Enter a temporary password"); return; }
+                  await updateUserPassword(target.id, form.tempPw);
+                  setInviteLink(buildInviteLink(target.id, form.tempPw));
+                }}>
+                  Generate Link
+                </Btn>
+              </div>
+            </div>
+          ) : (
+            <div>
+              <p style={{ color: "#888", fontSize: 13, marginBottom: 12 }}>
+                Share this link with <strong style={{ color: "#ccc" }}>{target.username}</strong>:
+              </p>
+              <div style={{
+                background: "#111", border: "1px solid #2a2a2a", borderRadius: 6,
+                padding: "10px 12px", fontFamily: "monospace", fontSize: 11,
+                color: ACCENT, wordBreak: "break-all", marginBottom: 12,
+              }}>
+                {inviteLink}
+              </div>
+              <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+                <Btn onClick={() => navigator.clipboard.writeText(inviteLink)}>Copy Link</Btn>
+                <Btn variant="primary" onClick={() => setModal(null)}>Done</Btn>
+              </div>
+            </div>
+          )}
+        </Modal>
+      )}
+
+      {/* Change password */}
       {modal === "passwd" && (
-        <Modal title={`Passwort — ${target?.username}`} onClose={() => setModal(null)}>
+        <Modal title={`Change Password — ${target?.username}`} onClose={() => setModal(null)}>
           <form onSubmit={handlePasswd}>
-            <input type="password" placeholder="Neues Passwort" style={inp} onChange={e => setForm(f=>({...f,pw1:e.target.value}))} />
-            <input type="password" placeholder="Wiederholen"    style={inp} onChange={e => setForm(f=>({...f,pw2:e.target.value}))} />
-            {err && <p style={{ color: "#f66", fontSize: 12 }}>{err}</p>}
+            <input type="password" placeholder="New password" style={inp} onChange={f("pw1")} />
+            <input type="password" placeholder="Confirm password" style={inp} onChange={f("pw2")} />
+            {err && <p style={{ color: "#f66", fontSize: 12, margin: "0 0 8px" }}>{err}</p>}
             <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
-              <Btn onClick={() => setModal(null)}>Abbrechen</Btn>
-              <Btn variant="primary" onClick={() => {}}>Speichern</Btn>
+              <Btn onClick={() => setModal(null)}>Cancel</Btn>
+              <Btn type="submit" variant="primary">Save</Btn>
             </div>
           </form>
         </Modal>
       )}
 
+      {/* Edit user */}
       {modal === "edit" && (
-        <Modal title={`Benutzer — ${target?.username}`} onClose={() => setModal(null)}>
+        <Modal title={`Edit — ${target?.username}`} onClose={() => setModal(null)}>
           <form onSubmit={handleEdit}>
-            <input value={form.displayName||""} placeholder="Anzeigename" style={inp}
-              onChange={e => setForm(f=>({...f,displayName:e.target.value}))} />
-            <select style={{ ...inp }} value={form.role||"Player"} onChange={e => setForm(f=>({...f,role:e.target.value}))}>
+            <input value={form.displayName || ""} placeholder="Display name" style={inp}
+              onChange={f("displayName")} />
+            <select style={{ ...inp }} value={form.role || "Player"} onChange={f("role")}>
               <option>Player</option><option>Coach</option><option>Admin</option>
             </select>
             <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
-              <Btn onClick={() => setModal(null)}>Abbrechen</Btn>
-              <Btn variant="primary" onClick={() => {}}>Speichern</Btn>
+              <Btn onClick={() => setModal(null)}>Cancel</Btn>
+              <Btn type="submit" variant="primary">Save</Btn>
             </div>
           </form>
         </Modal>
@@ -178,31 +269,15 @@ function UsersSection() {
   );
 }
 
-// ── Seasons & Games section ───────────────────────────────────────────────────
-function SeasonsSection() {
+// ── Playdata upload section ───────────────────────────────────────────────────
+function PlaydataSection() {
   const { seasons, selectedSeason, selectSeason, refreshSeasons,
           games, selectedGame, setSelectedGame, refreshGames } = useApp();
-  const [modal, setModal] = useState(null);
-  const [form,  setForm]  = useState({});
+
+  const [modal,      setModal]      = useState(null);
   const [uploadGame, setUploadGame] = useState(null);
   const [uploading,  setUploading]  = useState(false);
   const [uploadMsg,  setUploadMsg]  = useState("");
-  const fileRef = useRef(null);
-
-  function handleCreateSeason(e) {
-    e.preventDefault();
-    createSeason(form.year, form.name);
-    refreshSeasons();
-    setModal(null);
-  }
-
-  function handleCreateGame(e) {
-    e.preventDefault();
-    if (!selectedSeason) return;
-    const g = createGame(selectedSeason.id, form.week || "1", form.opponent || "TBD", form.date || "");
-    refreshGames(selectedSeason.id, g.id);
-    setModal(null);
-  }
 
   async function handleUpload(file) {
     if (!uploadGame) return;
@@ -210,134 +285,65 @@ function SeasonsSection() {
     try {
       const rows = await parsePlaylistData(file);
       saveGamePlaydata(uploadGame.id, JSON.stringify(rows));
-      setUploadMsg(`✅ ${rows.length} Plays importiert`);
       refreshGames(selectedSeason?.id);
+      setUploadMsg(`✅ ${rows.length} plays imported successfully`);
     } catch (ex) {
-      setUploadMsg(`❌ Fehler: ${ex.message}`);
-    } finally {
-      setUploading(false);
-    }
+      setUploadMsg(`❌ Error: ${ex.message}`);
+    } finally { setUploading(false); }
   }
 
   return (
-    <section style={section}>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14, flexWrap: "wrap" }}>
-        <h3 style={secH}>Saisons & Spiele</h3>
-        <Btn variant="primary" onClick={() => { setForm({}); setModal("season"); }} style={{ marginLeft: "auto" }}>
-          + Saison
-        </Btn>
-        {selectedSeason && (
-          <Btn variant="primary" onClick={() => { setForm({}); setModal("game"); }}>
-            + Spiel
-          </Btn>
-        )}
-      </div>
+    <section style={sectionStyle}>
+      <h3 style={{ ...secH, marginBottom: 14 }}>Upload Playdata</h3>
+      <p style={{ color: "#555", fontSize: 13, marginBottom: 14 }}>
+        Select a game from the sidebar file tree, then upload a PlaylistData .xlsx file.
+      </p>
 
-      {/* Season tabs */}
-      <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
-        {seasons.map(s => (
-          <button key={s.id} onClick={() => selectSeason(s)} style={{
-            padding: "6px 14px", borderRadius: 6, border: "none", fontSize: 12,
-            fontWeight: 600, cursor: "pointer",
-            background: selectedSeason?.id === s.id ? GREEN : "#2a2a2a",
-            color: selectedSeason?.id === s.id ? "#fff" : "#888",
-          }}>
-            {s.name}
-          </button>
-        ))}
-      </div>
-
-      {/* Games list */}
-      {selectedSeason && (
+      {!selectedGame ? (
+        <p style={{ color: "#444", fontSize: 13 }}>No game selected. Use the sidebar to select a game.</p>
+      ) : (
         <div>
-          {games.length === 0 ? (
-            <p style={{ color: "#444", fontSize: 13 }}>Noch keine Spiele.</p>
-          ) : (
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
-              <thead>
-                <tr style={{ color: "#666", borderBottom: "1px solid #2a2a2a" }}>
-                  {["Woche","Gegner","Datum","Playdata",""].map(h => (
-                    <th key={h} style={{ padding: "6px 8px", textAlign: "left", fontWeight: 600, fontSize: 11 }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {games.map(g => {
-                  let playCount = 0;
-                  try { if (g.playdata) playCount = JSON.parse(g.playdata).length; } catch {}
-                  return (
-                    <tr key={g.id} style={{ borderBottom: "1px solid #1e1e1e" }}>
-                      <td style={tdS}>W{g.week}</td>
-                      <td style={tdS}>{g.opponent}</td>
-                      <td style={{ ...tdS, color: "#555" }}>{g.date || "—"}</td>
-                      <td style={{ ...tdS, color: playCount ? ACCENT : "#444" }}>
-                        {playCount ? `${playCount} Plays` : "–"}
-                      </td>
-                      <td style={{ ...tdS, textAlign: "right" }}>
-                        <Btn onClick={() => { setUploadGame(g); setUploadMsg(""); setModal("upload"); }}
-                          style={{ marginRight: 6 }}>
-                          Upload
-                        </Btn>
-                        <Btn variant="danger" onClick={() => {
-                          deleteGame(g.id);
-                          refreshGames(selectedSeason.id);
-                          if (selectedGame?.id === g.id) setSelectedGame(null);
-                        }}>✕</Btn>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          )}
+          <div style={{
+            background: "#181818", border: "1px solid #2a2a2a", borderRadius: 8,
+            padding: "12px 16px", display: "flex", alignItems: "center",
+            gap: 12, marginBottom: 12,
+          }}>
+            <div style={{ flex: 1 }}>
+              <div style={{ color: "#ccc", fontSize: 13, fontWeight: 600 }}>
+                W{selectedGame.week} — {selectedGame.opponent}
+              </div>
+              <div style={{ color: "#444", fontSize: 11, marginTop: 2 }}>
+                {(() => {
+                  let c = 0;
+                  try { if (selectedGame.playdata) c = JSON.parse(selectedGame.playdata).length; } catch {}
+                  return c > 0 ? `${c} plays loaded` : "No playdata yet";
+                })()}
+              </div>
+            </div>
+            <Btn variant="primary" onClick={() => { setUploadGame(selectedGame); setUploadMsg(""); setModal("upload"); }}>
+              Upload .xlsx
+            </Btn>
+          </div>
         </div>
       )}
 
-      {/* Modals */}
-      {modal === "season" && (
-        <Modal title="Neue Saison" onClose={() => setModal(null)}>
-          <form onSubmit={handleCreateSeason}>
-            <input placeholder="Jahr (z.B. 2026)" style={inp}
-              onChange={e => setForm(f => ({ ...f, year: e.target.value }))} />
-            <input placeholder="Name (optional)" style={inp}
-              onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
-            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
-              <Btn onClick={() => setModal(null)}>Abbrechen</Btn>
-              <Btn variant="primary" onClick={() => {}}>Erstellen</Btn>
-            </div>
-          </form>
-        </Modal>
-      )}
-
-      {modal === "game" && (
-        <Modal title="Neues Spiel" onClose={() => setModal(null)}>
-          <form onSubmit={handleCreateGame}>
-            <input placeholder="Woche (z.B. 1)" style={inp}
-              onChange={e => setForm(f => ({ ...f, week: e.target.value }))} />
-            <input placeholder="Gegner" style={inp}
-              onChange={e => setForm(f => ({ ...f, opponent: e.target.value }))} />
-            <input type="date" style={inp}
-              onChange={e => setForm(f => ({ ...f, date: e.target.value }))} />
-            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
-              <Btn onClick={() => setModal(null)}>Abbrechen</Btn>
-              <Btn variant="primary" onClick={() => {}}>Erstellen</Btn>
-            </div>
-          </form>
-        </Modal>
-      )}
-
       {modal === "upload" && uploadGame && (
-        <Modal title={`Playdata — W${uploadGame.week} vs. ${uploadGame.opponent}`} onClose={() => setModal(null)}>
-          <p style={{ color: "#888", fontSize: 13, margin: "0 0 12px" }}>
-            Lade eine PlaylistData-Excel-Datei (.xlsx) hoch.
+        <Modal title={`Upload Playdata — W${uploadGame.week} vs. ${uploadGame.opponent}`}
+          onClose={() => setModal(null)}>
+          <p style={{ color: "#666", fontSize: 13, margin: "0 0 12px" }}>
+            Upload a PlaylistData Excel file (.xlsx).
           </p>
-          <input ref={fileRef} type="file" accept=".xlsx"
-            style={{ ...inp, padding: "6px" }}
+          <input type="file" accept=".xlsx" style={{ ...inp, padding: "6px" }}
             onChange={e => { if (e.target.files[0]) handleUpload(e.target.files[0]); }} />
           {uploading && <p style={{ color: "#888", fontSize: 12 }}>Importing…</p>}
-          {uploadMsg && <p style={{ fontSize: 13, margin: "8px 0" }}>{uploadMsg}</p>}
+          {uploadMsg && (
+            <p style={{ fontSize: 13, margin: "8px 0",
+              color: uploadMsg.startsWith("✅") ? ACCENT : "#f66" }}>
+              {uploadMsg}
+            </p>
+          )}
           <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 8 }}>
-            <Btn onClick={() => setModal(null)}>Schließen</Btn>
+            <Btn onClick={() => setModal(null)}>Close</Btn>
           </div>
         </Modal>
       )}
@@ -349,28 +355,23 @@ function SeasonsSection() {
 export default function Admin() {
   const { user } = useAuth();
   if (user?.role !== "Admin") {
-    return (
-      <div style={{ padding: 32, color: "#555" }}>
-        Kein Zugriff.
-      </div>
-    );
+    return <div style={{ padding: 32, color: "#555" }}>Access denied.</div>;
   }
 
   return (
     <div style={{ padding: "24px 28px", maxWidth: 900 }}>
-      <h2 style={{ color: "#eee", margin: "0 0 24px", fontSize: 20, fontWeight: 700 }}>
-        Admin
-      </h2>
+      <h2 style={{ color: "#eee", margin: "0 0 24px", fontSize: 20, fontWeight: 700 }}>Admin</h2>
       <UsersSection />
-      <SeasonsSection />
+      <PlaydataSection />
     </div>
   );
 }
 
-// ── Shared styles ─────────────────────────────────────────────────────────────
-const section = {
-  background: "#1a1a1a", border: "1px solid #2a2a2a",
-  borderRadius: 10, padding: "20px 20px", marginBottom: 20,
+const sectionStyle = {
+  background: "#1a1a1a", border: "1px solid #222",
+  borderRadius: 10, padding: "18px 20px", marginBottom: 20,
 };
-const secH   = { color: "#ddd", margin: 0, fontSize: 15, fontWeight: 700 };
-const tdS    = { padding: "8px 8px", color: "#ccc" };
+const secH    = { color: "#ddd", margin: 0, fontSize: 15, fontWeight: 700 };
+const thStyle = { padding: "6px 8px", textAlign: "left", color: "#555",
+  fontWeight: 600, fontSize: 11, textTransform: "uppercase" };
+const tdStyle = { padding: "9px 8px", color: "#bbb" };
