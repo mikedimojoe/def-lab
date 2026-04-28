@@ -1,0 +1,8 @@
+[
+  {"name":"BSL","points_for":210,"points_against":98,"wins":5,"color":"#10b981"},
+  {"name":"UOL","points_for":198,"points_against":112,"wins":5,"color":"#ff6b35"},
+  {"name":"SHA","points_for":176,"points_against":134,"wins":4,"color":"#7c3aed"},
+  {"name":"DRS","points_for":154,"points_against":156,"wins":3,"color":"#f59e0b"},
+  {"name":"MCO","points_for":132,"points_against":168,"wins":2,"color":"#00c3ff"},
+  {"name":"BER","points_for":98,"points_against":201,"wins":1,"color":"#f87171"}
+]
