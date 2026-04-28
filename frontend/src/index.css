@@ -780,6 +780,371 @@ img { max-width: 100%; }
   .btn { width: 100%; justify-content: center; }
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   UNICORNS ANALYTICS — exact theme from desktop app
+   Dark green #154734 · Run purple #7B6EA0 · Pass blue #4472C4
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Page shell ──────────────────────────────────────────────── */
+.u-page {
+  min-height: 100vh;
+  background: #111111;
+  color: #FFFFFF;
+  font-family: "Segoe UI", system-ui, sans-serif;
+}
+
+/* ── Top bar ──────────────────────────────────────────────────── */
+.u-topbar {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  background: #111111;
+  border-bottom: 3px solid #154734;
+  padding: 0 1.25rem;
+  height: 72px;
+  flex-wrap: wrap;
+}
+.u-topbar__brand { display: flex; align-items: baseline; gap: 0.4rem; }
+.u-topbar__unicorns {
+  font-size: 2rem;
+  font-weight: 900;
+  color: #154734;
+  letter-spacing: 0.03em;
+}
+.u-topbar__analytics {
+  font-size: 1.4rem;
+  font-weight: 400;
+  color: #FFFFFF;
+}
+.u-topbar__controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-left: auto;
+  flex-wrap: wrap;
+}
+.u-topbar__plays {
+  font-size: 0.82rem;
+  color: #888888;
+  margin-left: 0.5rem;
+}
+
+/* ── Tab bar ──────────────────────────────────────────────────── */
+.u-tabbar {
+  display: flex;
+  background: #272727;
+  border-bottom: 1px solid #333333;
+  padding: 0 0.5rem;
+}
+.u-tab {
+  padding: 0.7rem 1.6rem;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: #888888;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  margin-bottom: -1px;
+}
+.u-tab:hover { color: #FFFFFF; }
+.u-tab--active {
+  color: #FFFFFF;
+  border-bottom-color: #154734;
+  background: rgba(21, 71, 52, 0.12);
+}
+
+/* ── Tab content area ─────────────────────────────────────────── */
+.u-tab-content {
+  padding: 1rem 1.25rem 2rem;
+}
+.u-tab-header { margin-bottom: 1rem; }
+.u-section-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin: 0 0 0.2rem;
+}
+.u-section-sub {
+  font-size: 0.82rem;
+  color: #888888;
+  margin: 0;
+}
+
+/* ── Filter bar ───────────────────────────────────────────────── */
+.u-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+.u-filter-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #FFFFFF;
+  white-space: nowrap;
+}
+
+/* ── Segmented filter (All/1st/2nd…) ─────────────────────────── */
+.u-seg-btns { display: flex; gap: 0; }
+.u-seg-btn {
+  padding: 0.35rem 0.9rem;
+  background: #272727;
+  border: 1px solid #333333;
+  color: #888888;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.u-seg-btn:first-child { border-radius: 6px 0 0 6px; }
+.u-seg-btn:last-child  { border-radius: 0 6px 6px 0; }
+.u-seg-btn + .u-seg-btn { border-left: none; }
+.u-seg-btn:hover { background: #1D6048; color: #fff; }
+.u-seg-btn--active { background: #154734; color: #FFFFFF; border-color: #154734; }
+
+/* ── Select dropdown ──────────────────────────────────────────── */
+.u-select {
+  padding: 0.4rem 2rem 0.4rem 0.7rem;
+  background: #272727;
+  border: 1px solid #444;
+  border-radius: 6px;
+  color: #FFFFFF;
+  font-size: 0.85rem;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.55rem center;
+  transition: border-color 0.15s;
+}
+.u-select:focus { outline: none; border-color: #154734; }
+
+/* ── Summary strip ───────────────────────────────────────────── */
+.u-summary-strip {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: #1C1C1C;
+  border: 1px solid #333333;
+  border-radius: 10px;
+  padding: 0.6rem 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+.u-summary-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin-right: 0.5rem;
+}
+.u-stat-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #272727;
+  border-radius: 8px;
+  padding: 0.35rem 0.75rem;
+  min-width: 80px;
+}
+.u-stat-badge__label { font-size: 0.72rem; color: #888888; }
+.u-stat-badge__value { font-size: 0.95rem; font-weight: 700; color: #FFFFFF; }
+
+/* ── Body split (table left + chart right) ────────────────────── */
+.u-body-split {
+  display: grid;
+  grid-template-columns: 2fr 3fr;
+  gap: 1rem;
+  margin-top: 0.75rem;
+}
+@media (max-width: 768px) { .u-body-split { grid-template-columns: 1fr; } }
+.u-body-split__left  { min-width: 0; }
+.u-body-split__right { min-width: 0; }
+
+/* ── Table ────────────────────────────────────────────────────── */
+.u-tbl-wrap {
+  overflow: auto;
+  border-radius: 8px;
+  border: 1px solid #2a2a2a;
+}
+.u-tbl {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+.u-tbl-hdr {}
+.u-tbl-th {
+  background: #154734;
+  color: #FFFFFF;
+  font-weight: 700;
+  font-size: 0.75rem;
+  padding: 0.55rem 0.6rem;
+  text-align: center;
+  white-space: nowrap;
+  border: none;
+}
+.u-tbl-th--left { text-align: left; padding-left: 0.75rem; }
+
+.u-tbl-grp {}
+.u-tbl-grp__cell {
+  background: #212121;
+  color: #5CBF8A;
+  font-weight: 700;
+  font-size: 0.75rem;
+  padding: 0.4rem 0.75rem;
+  letter-spacing: 0.05em;
+}
+.u-tbl-row { background: #1C1C1C; }
+.u-tbl-row--alt { background: #252525; }
+.u-tbl-row:hover td, .u-tbl-row--alt:hover td { background: #1a2d24; }
+.u-tbl-cell {
+  padding: 0.5rem 0.6rem;
+  text-align: center;
+  color: #FFFFFF;
+  border-bottom: 1px solid #2a2a2a;
+  white-space: nowrap;
+}
+.u-tbl-cell--left { text-align: left; padding-left: 0.75rem; font-weight: 500; }
+
+/* ── Percentage badges ────────────────────────────────────────── */
+.u-pct {
+  display: inline-block;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  font-weight: 500;
+  font-size: 0.8rem;
+  color: #888888;
+}
+.u-pct--run  { color: #7B6EA0; font-weight: 800; }
+.u-pct--pass { color: #4472C4; font-weight: 800; }
+
+/* ── Chart wrap ───────────────────────────────────────────────── */
+.u-chart-wrap {
+  background: #111111;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  padding: 0.75rem;
+  overflow: hidden;
+}
+.u-chart-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+/* ── Formation image ──────────────────────────────────────────── */
+.u-form-img-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+.u-form-img {
+  max-height: 160px;
+  max-width: 320px;
+  border-radius: 8px;
+  border: 1px solid #333;
+  object-fit: contain;
+  background: #1C1C1C;
+}
+
+/* ── Top-3 cards grid ─────────────────────────────────────────── */
+.u-top3-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+@media (max-width: 640px) { .u-top3-grid { grid-template-columns: 1fr; } }
+
+.u-top3-card {
+  background: #1C1C1C;
+  border: 1px solid #2a2a2a;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.u-top3-card__title {
+  background: #272727;
+  color: #FFFFFF;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 0.6rem 0.9rem;
+  border-bottom: 1px solid #333;
+}
+.u-top3-card__body { padding: 0.4rem 0.5rem 0.6rem; }
+.u-top3-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #272727;
+  border-radius: 6px;
+  padding: 0.4rem 0.6rem;
+  margin-bottom: 0.3rem;
+  font-size: 0.82rem;
+}
+.u-top3-rank { font-weight: 800; font-size: 0.8rem; min-width: 22px; }
+.u-top3-play { flex: 1; color: #FFFFFF; font-weight: 500; }
+.u-top3-stat { color: #888888; font-size: 0.78rem; white-space: nowrap; }
+
+.u-form-dd-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin-bottom: 0.5rem;
+  padding-left: 0.1rem;
+  letter-spacing: 0.03em;
+}
+
+/* ── Personnel 3-column layout ────────────────────────────────── */
+.u-pers-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+@media (max-width: 900px) { .u-pers-body { grid-template-columns: 1fr; } }
+
+.u-pers-col {}
+.u-pers-col__title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+.u-pers-count {
+  font-size: 0.82rem;
+  color: #888888;
+  margin-left: 0.5rem;
+}
+
+/* ── Pie chart ────────────────────────────────────────────────── */
+.u-pie-wrap {
+  background: #111111;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  padding: 0.75rem;
+}
+.u-pie-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 1rem;
+  margin-top: 0.5rem;
+  justify-content: center;
+}
+.u-pie-leg-row { display: flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; }
+.u-pie-leg-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+.u-pie-leg-name { color: #FFFFFF; }
+
+/* ── Misc ─────────────────────────────────────────────────────── */
+.u-empty { color: #888888; font-style: italic; padding: 1rem 0; text-align: center; font-size: 0.82rem; }
+.u-loading { color: #888888; padding: 3rem; text-align: center; }
+.u-error   { color: #f87171; padding: 3rem; text-align: center; }
+
 /* ─── Opponent Scout / Analytics ────────────────────────────────── */
 .scout-controls {
   display: flex;

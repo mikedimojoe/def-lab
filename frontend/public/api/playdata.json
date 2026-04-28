@@ -6,113 +6,113 @@
     "down_distance": [
       {
         "down_group": "1st & 10 (+)",
+        "total": 96,
         "run": 31,
         "pass_": 65,
-        "total": 96,
         "run_pct": 32.3,
         "pass_pct": 67.7
       },
       {
         "down_group": "1st short",
+        "total": 6,
         "run": 2,
         "pass_": 4,
-        "total": 6,
         "run_pct": 33.3,
         "pass_pct": 66.7
       },
       {
-        "down_group": "2nd & 1-3",
-        "run": 8,
-        "pass_": 7,
-        "total": 15,
-        "run_pct": 53.3,
-        "pass_pct": 46.7
-      },
-      {
-        "down_group": "2nd & 4-6",
-        "run": 4,
-        "pass_": 10,
-        "total": 14,
-        "run_pct": 28.6,
-        "pass_pct": 71.4
-      },
-      {
-        "down_group": "2nd & 9-7",
-        "run": 4,
-        "pass_": 6,
-        "total": 10,
-        "run_pct": 40.0,
-        "pass_pct": 60.0
-      },
-      {
         "down_group": "2nd & 10+",
+        "total": 31,
         "run": 6,
         "pass_": 25,
-        "total": 31,
         "run_pct": 19.4,
         "pass_pct": 80.6
       },
       {
-        "down_group": "3rd & 1-2",
+        "down_group": "2nd & 9-7",
+        "total": 10,
         "run": 4,
         "pass_": 6,
-        "total": 10,
         "run_pct": 40.0,
         "pass_pct": 60.0
       },
       {
+        "down_group": "2nd & 4-6",
+        "total": 14,
+        "run": 4,
+        "pass_": 10,
+        "run_pct": 28.6,
+        "pass_pct": 71.4
+      },
+      {
+        "down_group": "2nd & 1-3",
+        "total": 15,
+        "run": 8,
+        "pass_": 7,
+        "run_pct": 53.3,
+        "pass_pct": 46.7
+      },
+      {
+        "down_group": "3rd & 8+",
+        "total": 18,
+        "run": 2,
+        "pass_": 16,
+        "run_pct": 11.1,
+        "pass_pct": 88.9
+      },
+      {
+        "down_group": "3rd & 5-7",
+        "total": 9,
+        "run": 1,
+        "pass_": 8,
+        "run_pct": 11.1,
+        "pass_pct": 88.9
+      },
+      {
         "down_group": "3rd & 3-4",
+        "total": 6,
         "run": 0,
         "pass_": 6,
-        "total": 6,
         "run_pct": 0.0,
         "pass_pct": 100.0
       },
       {
-        "down_group": "3rd & 5-7",
-        "run": 1,
-        "pass_": 8,
-        "total": 9,
-        "run_pct": 11.1,
-        "pass_pct": 88.9
+        "down_group": "3rd & 1-2",
+        "total": 10,
+        "run": 4,
+        "pass_": 6,
+        "run_pct": 40.0,
+        "pass_pct": 60.0
       },
       {
-        "down_group": "3rd & 8+",
-        "run": 2,
-        "pass_": 16,
-        "total": 18,
-        "run_pct": 11.1,
-        "pass_pct": 88.9
+        "down_group": "4TH & 5-7",
+        "total": 2,
+        "run": 0,
+        "pass_": 2,
+        "run_pct": 0.0,
+        "pass_pct": 100.0
       },
       {
         "down_group": "4TH & 1-2",
+        "total": 3,
         "run": 1,
         "pass_": 2,
-        "total": 3,
         "run_pct": 33.3,
         "pass_pct": 66.7
       },
       {
         "down_group": "4TH & 3-4",
+        "total": 3,
         "run": 1,
         "pass_": 2,
-        "total": 3,
         "run_pct": 33.3,
         "pass_pct": 66.7
       },
       {
-        "down_group": "4TH & 5-7",
-        "run": 0,
-        "pass_": 2,
-        "total": 2,
-        "run_pct": 0.0,
-        "pass_pct": 100.0
-      },
-      {
         "down_group": "4TH & 8+",
+        "total": 1,
         "run": 0,
         "pass_": 1,
-        "total": 1,
         "run_pct": 0.0,
         "pass_pct": 100.0
       }
@@ -120,344 +120,3884 @@
     "formations": [
       {
         "name": "TRIO",
-        "count": 62
+        "count": 62,
+        "pct": 27.7,
+        "run_n": 9,
+        "pass_n": 53,
+        "run_pct": 14.5,
+        "pass_pct": 85.5,
+        "backfields": [
+          "GF",
+          "GN"
+        ],
+        "top3_run": [
+          {
+            "play": "DIVE",
+            "count": 8,
+            "pct": 88.9
+          },
+          {
+            "play": "IZR",
+            "count": 1,
+            "pct": 11.1
+          }
+        ],
+        "top3_pass_play": [
+          {
+            "play": "FLD",
+            "count": 8,
+            "pct": 15.1
+          },
+          {
+            "play": "F2 SLIP SCREEN",
+            "count": 4,
+            "pct": 7.5
+          },
+          {
+            "play": "STICK",
+            "count": 3,
+            "pct": 5.7
+          }
+        ],
+        "top3_f_routes": [
+          {
+            "play": "FLD 3 OUT POST",
+            "count": 9,
+            "pct": 17.0
+          },
+          {
+            "play": "HOSS",
+            "count": 6,
+            "pct": 11.3
+          },
+          {
+            "play": "VERTS",
+            "count": 5,
+            "pct": 9.4
+          }
+        ],
+        "top3_b_routes": [
+          {
+            "play": "DIG",
+            "count": 9,
+            "pct": 17.0
+          },
+          {
+            "play": "VERT",
+            "count": 6,
+            "pct": 11.3
+          },
+          {
+            "play": "UNDER",
+            "count": 6,
+            "pct": 11.3
+          }
+        ],
+        "dd": [
+          {
+            "down_group": "1st & 10 (+)",
+            "total": 25,
+            "run": 7,
+            "pass_": 18,
+            "run_pct": 28.0,
+            "pass_pct": 72.0
+          },
+          {
+            "down_group": "2nd & 10+",
+            "total": 9,
+            "run": 1,
+            "pass_": 8,
+            "run_pct": 11.1,
+            "pass_pct": 88.9
+          },
+          {
+            "down_group": "2nd & 9-7",
+            "total": 3,
+            "run": 1,
+            "pass_": 2,
+            "run_pct": 33.3,
+            "pass_pct": 66.7
+          },
+          {
+            "down_group": "2nd & 4-6",
+            "total": 2,
+            "run": 0,
+            "pass_": 2,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "2nd & 1-3",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "3rd & 8+",
+            "total": 11,
+            "run": 0,
+            "pass_": 11,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "3rd & 5-7",
+            "total": 6,
+            "run": 0,
+            "pass_": 6,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "3rd & 3-4",
+            "total": 2,
+            "run": 0,
+            "pass_": 2,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "3rd & 1-2",
+            "total": 3,
+            "run": 0,
+            "pass_": 3,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          }
+        ]
       },
       {
         "name": "DOUBLES",
-        "count": 53
+        "count": 53,
+        "pct": 23.7,
+        "run_n": 4,
+        "pass_n": 49,
+        "run_pct": 7.5,
+        "pass_pct": 92.5,
+        "backfields": [
+          "GF",
+          "GN"
+        ],
+        "top3_run": [
+          {
+            "play": "IZR",
+            "count": 4,
+            "pct": 100.0
+          }
+        ],
+        "top3_pass_play": [
+          {
+            "play": "MESH COMEBACK",
+            "count": 9,
+            "pct": 18.4
+          },
+          {
+            "play": "SNAG",
+            "count": 6,
+            "pct": 12.2
+          },
+          {
+            "play": "AUSSIE",
+            "count": 4,
+            "pct": 8.2
+          }
+        ],
+        "top3_f_routes": [
+          {
+            "play": "SLANTS",
+            "count": 10,
+            "pct": 20.4
+          },
+          {
+            "play": "COMEBACK 2 UNDER",
+            "count": 9,
+            "pct": 18.4
+          },
+          {
+            "play": "COMEBACK",
+            "count": 6,
+            "pct": 12.2
+          }
+        ],
+        "top3_b_routes": [
+          {
+            "play": "COMEBACK 2 UNDER",
+            "count": 9,
+            "pct": 18.4
+          },
+          {
+            "play": "OMAHA",
+            "count": 8,
+            "pct": 16.3
+          },
+          {
+            "play": "SNAG",
+            "count": 6,
+            "pct": 12.2
+          }
+        ],
+        "dd": [
+          {
+            "down_group": "1st & 10 (+)",
+            "total": 26,
+            "run": 4,
+            "pass_": 22,
+            "run_pct": 15.4,
+            "pass_pct": 84.6
+          },
+          {
+            "down_group": "1st short",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "2nd & 10+",
+            "total": 8,
+            "run": 0,
+            "pass_": 8,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "2nd & 9-7",
+            "total": 2,
+            "run": 0,
+            "pass_": 2,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "2nd & 4-6",
+            "total": 4,
+            "run": 0,
+            "pass_": 4,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "2nd & 1-3",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "3rd & 8+",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "3rd & 5-7",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "3rd & 3-4",
+            "total": 3,
+            "run": 0,
+            "pass_": 3,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "3rd & 1-2",
+            "total": 2,
+            "run": 0,
+            "pass_": 2,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "4TH & 5-7",
+            "total": 2,
+            "run": 0,
+            "pass_": 2,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "4TH & 1-2",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "4TH & 3-4",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          }
+        ]
       },
       {
         "name": "TREY",
-        "count": 35
+        "count": 35,
+        "pct": 15.6,
+        "run_n": 20,
+        "pass_n": 15,
+        "run_pct": 57.1,
+        "pass_pct": 42.9,
+        "backfields": [
+          "GF",
+          "GN",
+          "L"
+        ],
+        "top3_run": [
+          {
+            "play": "DUO",
+            "count": 8,
+            "pct": 40.0
+          },
+          {
+            "play": "POWER",
+            "count": 6,
+            "pct": 30.0
+          },
+          {
+            "play": "IZR",
+            "count": 2,
+            "pct": 10.0
+          }
+        ],
+        "top3_pass_play": [
+          {
+            "play": "MILLS",
+            "count": 2,
+            "pct": 13.3
+          },
+          {
+            "play": "RPO AUSSIE",
+            "count": 2,
+            "pct": 13.3
+          },
+          {
+            "play": "FLD",
+            "count": 1,
+            "pct": 6.7
+          }
+        ],
+        "top3_f_routes": [
+          {
+            "play": "MILLS",
+            "count": 3,
+            "pct": 20.0
+          },
+          {
+            "play": "VERTS",
+            "count": 2,
+            "pct": 13.3
+          },
+          {
+            "play": "MILLS COMEBACK",
+            "count": 2,
+            "pct": 13.3
+          }
+        ],
+        "top3_b_routes": [
+          {
+            "play": "VERT",
+            "count": 2,
+            "pct": 13.3
+          },
+          {
+            "play": "DIG",
+            "count": 2,
+            "pct": 13.3
+          },
+          {
+            "play": "AUSSIE",
+            "count": 2,
+            "pct": 13.3
+          }
+        ],
+        "dd": [
+          {
+            "down_group": "1st & 10 (+)",
+            "total": 19,
+            "run": 10,
+            "pass_": 9,
+            "run_pct": 52.6,
+            "pass_pct": 47.4
+          },
+          {
+            "down_group": "1st short",
+            "total": 2,
+            "run": 0,
+            "pass_": 2,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "2nd & 10+",
+            "total": 6,
+            "run": 3,
+            "pass_": 3,
+            "run_pct": 50.0,
+            "pass_pct": 50.0
+          },
+          {
+            "down_group": "2nd & 9-7",
+            "total": 2,
+            "run": 2,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          },
+          {
+            "down_group": "2nd & 4-6",
+            "total": 2,
+            "run": 2,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          },
+          {
+            "down_group": "2nd & 1-3",
+            "total": 1,
+            "run": 1,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          },
+          {
+            "down_group": "3rd & 8+",
+            "total": 2,
+            "run": 1,
+            "pass_": 1,
+            "run_pct": 50.0,
+            "pass_pct": 50.0
+          },
+          {
+            "down_group": "4TH & 3-4",
+            "total": 1,
+            "run": 1,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          }
+        ]
       },
       {
         "name": "OPEN",
-        "count": 19
+        "count": 19,
+        "pct": 8.5,
+        "run_n": 4,
+        "pass_n": 15,
+        "run_pct": 21.1,
+        "pass_pct": 78.9,
+        "backfields": [
+          "SG"
+        ],
+        "top3_run": [
+          {
+            "play": "IZR",
+            "count": 1,
+            "pct": 25.0
+          },
+          {
+            "play": "SEAL",
+            "count": 1,
+            "pct": 25.0
+          },
+          {
+            "play": "LEAD",
+            "count": 1,
+            "pct": 25.0
+          }
+        ],
+        "top3_pass_play": [
+          {
+            "play": "MESH",
+            "count": 2,
+            "pct": 13.3
+          },
+          {
+            "play": "STICK",
+            "count": 1,
+            "pct": 6.7
+          },
+          {
+            "play": "SNAG",
+            "count": 1,
+            "pct": 6.7
+          }
+        ],
+        "top3_f_routes": [
+          {
+            "play": "STICK",
+            "count": 3,
+            "pct": 20.0
+          },
+          {
+            "play": "Y OVER",
+            "count": 3,
+            "pct": 20.0
+          },
+          {
+            "play": "MESH",
+            "count": 2,
+            "pct": 13.3
+          }
+        ],
+        "top3_b_routes": [
+          {
+            "play": "SPOT SWING",
+            "count": 4,
+            "pct": 26.7
+          },
+          {
+            "play": "VERT",
+            "count": 4,
+            "pct": 26.7
+          },
+          {
+            "play": "MESH",
+            "count": 2,
+            "pct": 13.3
+          }
+        ],
+        "dd": [
+          {
+            "down_group": "1st & 10 (+)",
+            "total": 8,
+            "run": 2,
+            "pass_": 6,
+            "run_pct": 25.0,
+            "pass_pct": 75.0
+          },
+          {
+            "down_group": "1st short",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "2nd & 10+",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "2nd & 9-7",
+            "total": 1,
+            "run": 1,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          },
+          {
+            "down_group": "2nd & 4-6",
+            "total": 2,
+            "run": 0,
+            "pass_": 2,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "2nd & 1-3",
+            "total": 2,
+            "run": 0,
+            "pass_": 2,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "3rd & 5-7",
+            "total": 1,
+            "run": 1,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          },
+          {
+            "down_group": "3rd & 3-4",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "3rd & 1-2",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "4TH & 3-4",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          }
+        ]
       },
       {
         "name": "PRO DOUBLES",
-        "count": 11
+        "count": 11,
+        "pct": 4.9,
+        "run_n": 6,
+        "pass_n": 5,
+        "run_pct": 54.5,
+        "pass_pct": 45.5,
+        "backfields": [
+          "GF",
+          "GN",
+          "UC"
+        ],
+        "top3_run": [
+          {
+            "play": "OZR",
+            "count": 1,
+            "pct": 16.7
+          },
+          {
+            "play": "POWER",
+            "count": 1,
+            "pct": 16.7
+          },
+          {
+            "play": "IZR",
+            "count": 1,
+            "pct": 16.7
+          }
+        ],
+        "top3_pass_play": [
+          {
+            "play": "AUSSIE",
+            "count": 1,
+            "pct": 20.0
+          },
+          {
+            "play": "Y OVER",
+            "count": 1,
+            "pct": 20.0
+          }
+        ],
+        "top3_f_routes": [
+          {
+            "play": "SLANTS",
+            "count": 2,
+            "pct": 40.0
+          },
+          {
+            "play": "Y OVER",
+            "count": 2,
+            "pct": 40.0
+          },
+          {
+            "play": "AUSSIE",
+            "count": 1,
+            "pct": 20.0
+          }
+        ],
+        "top3_b_routes": [
+          {
+            "play": "STICK",
+            "count": 2,
+            "pct": 40.0
+          },
+          {
+            "play": "AUSSIE",
+            "count": 1,
+            "pct": 20.0
+          },
+          {
+            "play": "CORNER",
+            "count": 1,
+            "pct": 20.0
+          }
+        ],
+        "dd": [
+          {
+            "down_group": "1st & 10 (+)",
+            "total": 3,
+            "run": 1,
+            "pass_": 2,
+            "run_pct": 33.3,
+            "pass_pct": 66.7
+          },
+          {
+            "down_group": "2nd & 4-6",
+            "total": 3,
+            "run": 2,
+            "pass_": 1,
+            "run_pct": 66.7,
+            "pass_pct": 33.3
+          },
+          {
+            "down_group": "2nd & 1-3",
+            "total": 2,
+            "run": 1,
+            "pass_": 1,
+            "run_pct": 50.0,
+            "pass_pct": 50.0
+          },
+          {
+            "down_group": "3rd & 8+",
+            "total": 1,
+            "run": 1,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          },
+          {
+            "down_group": "3rd & 1-2",
+            "total": 1,
+            "run": 1,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          },
+          {
+            "down_group": "4TH & 1-2",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          }
+        ]
       },
       {
         "name": "EMPTY",
-        "count": 8
+        "count": 8,
+        "pct": 3.6,
+        "run_n": 0,
+        "pass_n": 8,
+        "run_pct": 0.0,
+        "pass_pct": 100.0,
+        "backfields": [
+          "G"
+        ],
+        "top3_run": [],
+        "top3_pass_play": [],
+        "top3_f_routes": [
+          {
+            "play": "OMAHA",
+            "count": 1,
+            "pct": 12.5
+          },
+          {
+            "play": "VERTS 3 IN",
+            "count": 1,
+            "pct": 12.5
+          },
+          {
+            "play": "SCISSORS 1 HITCH",
+            "count": 1,
+            "pct": 12.5
+          }
+        ],
+        "top3_b_routes": [
+          {
+            "play": "OMAHA",
+            "count": 3,
+            "pct": 37.5
+          },
+          {
+            "play": "COMEBACK",
+            "count": 1,
+            "pct": 12.5
+          },
+          {
+            "play": "VERTS",
+            "count": 1,
+            "pct": 12.5
+          }
+        ],
+        "dd": [
+          {
+            "down_group": "1st & 10 (+)",
+            "total": 4,
+            "run": 0,
+            "pass_": 4,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "2nd & 10+",
+            "total": 2,
+            "run": 0,
+            "pass_": 2,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "2nd & 4-6",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "3rd & 8+",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          }
+        ]
       },
       {
         "name": "PRO DOUBLES FIB",
-        "count": 7
+        "count": 7,
+        "pct": 3.1,
+        "run_n": 3,
+        "pass_n": 4,
+        "run_pct": 42.9,
+        "pass_pct": 57.1,
+        "backfields": [
+          "GF",
+          "GN",
+          "L"
+        ],
+        "top3_run": [
+          {
+            "play": "JAY",
+            "count": 1,
+            "pct": 33.3
+          },
+          {
+            "play": "DIVE",
+            "count": 1,
+            "pct": 33.3
+          }
+        ],
+        "top3_pass_play": [
+          {
+            "play": "MESH RAIL",
+            "count": 1,
+            "pct": 25.0
+          }
+        ],
+        "top3_f_routes": [
+          {
+            "play": "DIG",
+            "count": 1,
+            "pct": 25.0
+          },
+          {
+            "play": "STRIKE",
+            "count": 1,
+            "pct": 25.0
+          }
+        ],
+        "top3_b_routes": [
+          {
+            "play": "DRIVE",
+            "count": 1,
+            "pct": 25.0
+          },
+          {
+            "play": "FLD",
+            "count": 1,
+            "pct": 25.0
+          },
+          {
+            "play": "DBL POST",
+            "count": 1,
+            "pct": 25.0
+          }
+        ],
+        "dd": [
+          {
+            "down_group": "1st & 10 (+)",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "1st short",
+            "total": 1,
+            "run": 1,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          },
+          {
+            "down_group": "2nd & 10+",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "2nd & 1-3",
+            "total": 1,
+            "run": 1,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          },
+          {
+            "down_group": "3rd & 8+",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "3rd & 1-2",
+            "total": 1,
+            "run": 1,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          },
+          {
+            "down_group": "4TH & 8+",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          }
+        ]
       },
       {
         "name": "ACE",
-        "count": 7
+        "count": 7,
+        "pct": 3.1,
+        "run_n": 6,
+        "pass_n": 1,
+        "run_pct": 85.7,
+        "pass_pct": 14.3,
+        "backfields": [
+          "GF",
+          "L"
+        ],
+        "top3_run": [
+          {
+            "play": "DIVE",
+            "count": 4,
+            "pct": 66.7
+          },
+          {
+            "play": "IZR",
+            "count": 1,
+            "pct": 16.7
+          },
+          {
+            "play": "DUO",
+            "count": 1,
+            "pct": 16.7
+          }
+        ],
+        "top3_pass_play": [
+          {
+            "play": "HITCH & GO",
+            "count": 1,
+            "pct": 100.0
+          }
+        ],
+        "top3_f_routes": [
+          {
+            "play": "COMEBACK",
+            "count": 1,
+            "pct": 100.0
+          }
+        ],
+        "top3_b_routes": [
+          {
+            "play": "HITCH N GO",
+            "count": 1,
+            "pct": 100.0
+          }
+        ],
+        "dd": [
+          {
+            "down_group": "1st & 10 (+)",
+            "total": 2,
+            "run": 2,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          },
+          {
+            "down_group": "2nd & 10+",
+            "total": 2,
+            "run": 1,
+            "pass_": 1,
+            "run_pct": 50.0,
+            "pass_pct": 50.0
+          },
+          {
+            "down_group": "2nd & 1-3",
+            "total": 3,
+            "run": 3,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          }
+        ]
       },
       {
         "name": "PRO",
-        "count": 3
+        "count": 3,
+        "pct": 1.3,
+        "run_n": 3,
+        "pass_n": 0,
+        "run_pct": 100.0,
+        "pass_pct": 0.0,
+        "backfields": [
+          "SG"
+        ],
+        "top3_run": [
+          {
+            "play": "DIVE",
+            "count": 2,
+            "pct": 66.7
+          },
+          {
+            "play": "LEAD",
+            "count": 1,
+            "pct": 33.3
+          }
+        ],
+        "top3_pass_play": [],
+        "top3_f_routes": [],
+        "top3_b_routes": [],
+        "dd": [
+          {
+            "down_group": "1st & 10 (+)",
+            "total": 3,
+            "run": 3,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          }
+        ]
       },
       {
         "name": "OPEN FIB",
-        "count": 2
+        "count": 2,
+        "pct": 0.9,
+        "run_n": 0,
+        "pass_n": 2,
+        "run_pct": 0.0,
+        "pass_pct": 100.0,
+        "backfields": [
+          "SG"
+        ],
+        "top3_run": [],
+        "top3_pass_play": [
+          {
+            "play": "Y OVER",
+            "count": 1,
+            "pct": 50.0
+          }
+        ],
+        "top3_f_routes": [
+          {
+            "play": "VERT",
+            "count": 1,
+            "pct": 50.0
+          },
+          {
+            "play": "OMAHA",
+            "count": 1,
+            "pct": 50.0
+          }
+        ],
+        "top3_b_routes": [
+          {
+            "play": "COMEBACK",
+            "count": 1,
+            "pct": 50.0
+          },
+          {
+            "play": "Y OVER",
+            "count": 1,
+            "pct": 50.0
+          }
+        ],
+        "dd": [
+          {
+            "down_group": "1st & 10 (+)",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "2nd & 10+",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          }
+        ]
       },
       {
         "name": "TRIPS",
-        "count": 2
+        "count": 2,
+        "pct": 0.9,
+        "run_n": 1,
+        "pass_n": 1,
+        "run_pct": 50.0,
+        "pass_pct": 50.0,
+        "backfields": [
+          "GN"
+        ],
+        "top3_run": [
+          {
+            "play": "OZ",
+            "count": 1,
+            "pct": 100.0
+          }
+        ],
+        "top3_pass_play": [
+          {
+            "play": "SCREEN",
+            "count": 1,
+            "pct": 100.0
+          }
+        ],
+        "top3_f_routes": [
+          {
+            "play": "PACKER",
+            "count": 1,
+            "pct": 100.0
+          }
+        ],
+        "top3_b_routes": [],
+        "dd": [
+          {
+            "down_group": "1st & 10 (+)",
+            "total": 1,
+            "run": 1,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          },
+          {
+            "down_group": "2nd & 9-7",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          }
+        ]
       },
       {
         "name": "JUMBO",
-        "count": 2
+        "count": 2,
+        "pct": 0.9,
+        "run_n": 2,
+        "pass_n": 0,
+        "run_pct": 100.0,
+        "pass_pct": 0.0,
+        "backfields": [
+          "IU"
+        ],
+        "top3_run": [
+          {
+            "play": "FB DIVE",
+            "count": 1,
+            "pct": 50.0
+          },
+          {
+            "play": "SNEAK",
+            "count": 1,
+            "pct": 50.0
+          }
+        ],
+        "top3_pass_play": [],
+        "top3_f_routes": [],
+        "top3_b_routes": [],
+        "dd": [
+          {
+            "down_group": "3rd & 1-2",
+            "total": 1,
+            "run": 1,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          },
+          {
+            "down_group": "4TH & 1-2",
+            "total": 1,
+            "run": 1,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          }
+        ]
       },
       {
         "name": "STACK",
-        "count": 2
+        "count": 2,
+        "pct": 0.9,
+        "run_n": 0,
+        "pass_n": 2,
+        "run_pct": 0.0,
+        "pass_pct": 100.0,
+        "backfields": [
+          "GF",
+          "GN"
+        ],
+        "top3_run": [],
+        "top3_pass_play": [
+          {
+            "play": "DEEP SPACING",
+            "count": 2,
+            "pct": 100.0
+          }
+        ],
+        "top3_f_routes": [
+          {
+            "play": "HANK",
+            "count": 2,
+            "pct": 100.0
+          }
+        ],
+        "top3_b_routes": [
+          {
+            "play": "CURL SPOT",
+            "count": 2,
+            "pct": 100.0
+          }
+        ],
+        "dd": [
+          {
+            "down_group": "1st & 10 (+)",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "2nd & 9-7",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          }
+        ]
       },
       {
         "name": "KD",
-        "count": 2
+        "count": 2,
+        "pct": 0.9,
+        "run_n": 2,
+        "pass_n": 0,
+        "run_pct": 100.0,
+        "pass_pct": 0.0,
+        "backfields": [],
+        "top3_run": [],
+        "top3_pass_play": [],
+        "top3_f_routes": [],
+        "top3_b_routes": [],
+        "dd": [
+          {
+            "down_group": "1st short",
+            "total": 1,
+            "run": 1,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          },
+          {
+            "down_group": "2nd & 10+",
+            "total": 1,
+            "run": 1,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          }
+        ]
       },
       {
         "name": "PAIR",
-        "count": 2
+        "count": 2,
+        "pct": 0.9,
+        "run_n": 1,
+        "pass_n": 1,
+        "run_pct": 50.0,
+        "pass_pct": 50.0,
+        "backfields": [
+          "GN",
+          "U"
+        ],
+        "top3_run": [
+          {
+            "play": "DUO",
+            "count": 1,
+            "pct": 100.0
+          }
+        ],
+        "top3_pass_play": [],
+        "top3_f_routes": [
+          {
+            "play": "POST",
+            "count": 1,
+            "pct": 100.0
+          }
+        ],
+        "top3_b_routes": [
+          {
+            "play": "DIG",
+            "count": 1,
+            "pct": 100.0
+          }
+        ],
+        "dd": [
+          {
+            "down_group": "1st & 10 (+)",
+            "total": 2,
+            "run": 1,
+            "pass_": 1,
+            "run_pct": 50.0,
+            "pass_pct": 50.0
+          }
+        ]
       },
       {
         "name": "PRO TWIN FIB",
-        "count": 1
+        "count": 1,
+        "pct": 0.4,
+        "run_n": 1,
+        "pass_n": 0,
+        "run_pct": 100.0,
+        "pass_pct": 0.0,
+        "backfields": [
+          "SG"
+        ],
+        "top3_run": [
+          {
+            "play": "POWER",
+            "count": 1,
+            "pct": 100.0
+          }
+        ],
+        "top3_pass_play": [],
+        "top3_f_routes": [],
+        "top3_b_routes": [],
+        "dd": [
+          {
+            "down_group": "2nd & 1-3",
+            "total": 1,
+            "run": 1,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          }
+        ]
       },
       {
         "name": "ACE TWIN",
-        "count": 1
+        "count": 1,
+        "pct": 0.4,
+        "run_n": 0,
+        "pass_n": 1,
+        "run_pct": 0.0,
+        "pass_pct": 100.0,
+        "backfields": [
+          "L"
+        ],
+        "top3_run": [],
+        "top3_pass_play": [
+          {
+            "play": "FLD",
+            "count": 1,
+            "pct": 100.0
+          }
+        ],
+        "top3_f_routes": [
+          {
+            "play": "FLD",
+            "count": 1,
+            "pct": 100.0
+          }
+        ],
+        "top3_b_routes": [
+          {
+            "play": "DIG",
+            "count": 1,
+            "pct": 100.0
+          }
+        ],
+        "dd": [
+          {
+            "down_group": "3rd & 8+",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          }
+        ]
       },
       {
         "name": "EMPTY FIB",
-        "count": 1
+        "count": 1,
+        "pct": 0.4,
+        "run_n": 0,
+        "pass_n": 1,
+        "run_pct": 0.0,
+        "pass_pct": 100.0,
+        "backfields": [
+          "G"
+        ],
+        "top3_run": [],
+        "top3_pass_play": [],
+        "top3_f_routes": [
+          {
+            "play": "OMAHA",
+            "count": 1,
+            "pct": 100.0
+          }
+        ],
+        "top3_b_routes": [
+          {
+            "play": "MILLS",
+            "count": 1,
+            "pct": 100.0
+          }
+        ],
+        "dd": [
+          {
+            "down_group": "2nd & 1-3",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          }
+        ]
       },
       {
         "name": "PRO TWIN",
-        "count": 1
+        "count": 1,
+        "pct": 0.4,
+        "run_n": 1,
+        "pass_n": 0,
+        "run_pct": 100.0,
+        "pass_pct": 0.0,
+        "backfields": [
+          "SG"
+        ],
+        "top3_run": [
+          {
+            "play": "OZR",
+            "count": 1,
+            "pct": 100.0
+          }
+        ],
+        "top3_pass_play": [],
+        "top3_f_routes": [],
+        "top3_b_routes": [],
+        "dd": [
+          {
+            "down_group": "2nd & 1-3",
+            "total": 1,
+            "run": 1,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          }
+        ]
       },
       {
         "name": "PAIR FIB",
-        "count": 1
+        "count": 1,
+        "pct": 0.4,
+        "run_n": 1,
+        "pass_n": 0,
+        "run_pct": 100.0,
+        "pass_pct": 0.0,
+        "backfields": [
+          "GF"
+        ],
+        "top3_run": [
+          {
+            "play": "DIVE",
+            "count": 1,
+            "pct": 100.0
+          }
+        ],
+        "top3_pass_play": [],
+        "top3_f_routes": [],
+        "top3_b_routes": [],
+        "dd": [
+          {
+            "down_group": "3rd & 1-2",
+            "total": 1,
+            "run": 1,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          }
+        ]
       },
       {
         "name": "BUNCH",
-        "count": 1
+        "count": 1,
+        "pct": 0.4,
+        "run_n": 0,
+        "pass_n": 1,
+        "run_pct": 0.0,
+        "pass_pct": 100.0,
+        "backfields": [
+          "GF"
+        ],
+        "top3_run": [],
+        "top3_pass_play": [],
+        "top3_f_routes": [
+          {
+            "play": "SMASH",
+            "count": 1,
+            "pct": 100.0
+          }
+        ],
+        "top3_b_routes": [
+          {
+            "play": "COMEBACK",
+            "count": 1,
+            "pct": 100.0
+          }
+        ],
+        "dd": [
+          {
+            "down_group": "3rd & 5-7",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          }
+        ]
       }
+    ],
+    "backfields": [
+      "G",
+      "GF",
+      "GN",
+      "IU",
+      "L",
+      "SG",
+      "U",
+      "UC"
     ],
     "personnel": [
       {
         "name": "10",
-        "count": 110
+        "count": 110,
+        "pct": 49.1,
+        "dd": [
+          {
+            "down_group": "1st & 10 (+)",
+            "total": 47,
+            "run": 9,
+            "pass_": 38,
+            "run_pct": 19.1,
+            "pass_pct": 80.9
+          },
+          {
+            "down_group": "1st short",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "2nd & 10+",
+            "total": 17,
+            "run": 1,
+            "pass_": 16,
+            "run_pct": 5.9,
+            "pass_pct": 94.1
+          },
+          {
+            "down_group": "2nd & 9-7",
+            "total": 6,
+            "run": 1,
+            "pass_": 5,
+            "run_pct": 16.7,
+            "pass_pct": 83.3
+          },
+          {
+            "down_group": "2nd & 4-6",
+            "total": 5,
+            "run": 0,
+            "pass_": 5,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "2nd & 1-3",
+            "total": 3,
+            "run": 0,
+            "pass_": 3,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "3rd & 8+",
+            "total": 11,
+            "run": 0,
+            "pass_": 11,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "3rd & 5-7",
+            "total": 8,
+            "run": 0,
+            "pass_": 8,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "3rd & 3-4",
+            "total": 4,
+            "run": 0,
+            "pass_": 4,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "3rd & 1-2",
+            "total": 4,
+            "run": 0,
+            "pass_": 4,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "4TH & 5-7",
+            "total": 2,
+            "run": 0,
+            "pass_": 2,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "4TH & 1-2",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "4TH & 3-4",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          }
+        ],
+        "formations": [
+          {
+            "name": "TRIO",
+            "count": 57,
+            "pct": 51.8,
+            "run_pct": 14.0,
+            "pass_pct": 86.0
+          },
+          {
+            "name": "DOUBLES",
+            "count": 46,
+            "pct": 41.8,
+            "run_pct": 6.5,
+            "pass_pct": 93.5
+          },
+          {
+            "name": "OPEN FIB",
+            "count": 2,
+            "pct": 1.8,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "name": "OPEN",
+            "count": 1,
+            "pct": 0.9,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "name": "PRO DOUBLES FIB",
+            "count": 1,
+            "pct": 0.9,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "name": "STACK",
+            "count": 1,
+            "pct": 0.9,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "name": "EMPTY",
+            "count": 1,
+            "pct": 0.9,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "name": "BUNCH",
+            "count": 1,
+            "pct": 0.9,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          }
+        ]
       },
       {
         "name": "11",
-        "count": 67
+        "count": 67,
+        "pct": 29.9,
+        "dd": [
+          {
+            "down_group": "1st & 10 (+)",
+            "total": 30,
+            "run": 13,
+            "pass_": 17,
+            "run_pct": 43.3,
+            "pass_pct": 56.7
+          },
+          {
+            "down_group": "1st short",
+            "total": 3,
+            "run": 1,
+            "pass_": 2,
+            "run_pct": 33.3,
+            "pass_pct": 66.7
+          },
+          {
+            "down_group": "2nd & 10+",
+            "total": 8,
+            "run": 3,
+            "pass_": 5,
+            "run_pct": 37.5,
+            "pass_pct": 62.5
+          },
+          {
+            "down_group": "2nd & 9-7",
+            "total": 3,
+            "run": 2,
+            "pass_": 1,
+            "run_pct": 66.7,
+            "pass_pct": 33.3
+          },
+          {
+            "down_group": "2nd & 4-6",
+            "total": 6,
+            "run": 4,
+            "pass_": 2,
+            "run_pct": 66.7,
+            "pass_pct": 33.3
+          },
+          {
+            "down_group": "2nd & 1-3",
+            "total": 5,
+            "run": 3,
+            "pass_": 2,
+            "run_pct": 60.0,
+            "pass_pct": 40.0
+          },
+          {
+            "down_group": "3rd & 8+",
+            "total": 5,
+            "run": 2,
+            "pass_": 3,
+            "run_pct": 40.0,
+            "pass_pct": 60.0
+          },
+          {
+            "down_group": "3rd & 3-4",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "3rd & 1-2",
+            "total": 3,
+            "run": 2,
+            "pass_": 1,
+            "run_pct": 66.7,
+            "pass_pct": 33.3
+          },
+          {
+            "down_group": "4TH & 1-2",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "4TH & 3-4",
+            "total": 1,
+            "run": 1,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          },
+          {
+            "down_group": "4TH & 8+",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          }
+        ],
+        "formations": [
+          {
+            "name": "TREY",
+            "count": 35,
+            "pct": 52.2,
+            "run_pct": 57.1,
+            "pass_pct": 42.9
+          },
+          {
+            "name": "PRO DOUBLES",
+            "count": 10,
+            "pct": 14.9,
+            "run_pct": 50.0,
+            "pass_pct": 50.0
+          },
+          {
+            "name": "DOUBLES",
+            "count": 7,
+            "pct": 10.4,
+            "run_pct": 14.3,
+            "pass_pct": 85.7
+          },
+          {
+            "name": "PRO DOUBLES FIB",
+            "count": 6,
+            "pct": 9.0,
+            "run_pct": 50.0,
+            "pass_pct": 50.0
+          },
+          {
+            "name": "TRIO",
+            "count": 5,
+            "pct": 7.5,
+            "run_pct": 20.0,
+            "pass_pct": 80.0
+          },
+          {
+            "name": "TRIPS",
+            "count": 2,
+            "pct": 3.0,
+            "run_pct": 50.0,
+            "pass_pct": 50.0
+          },
+          {
+            "name": "EMPTY FIB",
+            "count": 1,
+            "pct": 1.5,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "name": "STACK",
+            "count": 1,
+            "pct": 1.5,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          }
+        ]
       },
       {
         "name": "20",
-        "count": 17
+        "count": 17,
+        "pct": 7.6,
+        "dd": [
+          {
+            "down_group": "1st & 10 (+)",
+            "total": 8,
+            "run": 2,
+            "pass_": 6,
+            "run_pct": 25.0,
+            "pass_pct": 75.0
+          },
+          {
+            "down_group": "1st short",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "2nd & 10+",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "2nd & 4-6",
+            "total": 2,
+            "run": 0,
+            "pass_": 2,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "2nd & 1-3",
+            "total": 2,
+            "run": 0,
+            "pass_": 2,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "3rd & 5-7",
+            "total": 1,
+            "run": 1,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          },
+          {
+            "down_group": "3rd & 1-2",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "4TH & 3-4",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          }
+        ],
+        "formations": [
+          {
+            "name": "OPEN",
+            "count": 16,
+            "pct": 100.0,
+            "run_pct": 18.8,
+            "pass_pct": 81.2
+          }
+        ]
       },
       {
         "name": "12",
-        "count": 12
+        "count": 12,
+        "pct": 5.4,
+        "dd": [
+          {
+            "down_group": "1st & 10 (+)",
+            "total": 5,
+            "run": 4,
+            "pass_": 1,
+            "run_pct": 80.0,
+            "pass_pct": 20.0
+          },
+          {
+            "down_group": "2nd & 10+",
+            "total": 2,
+            "run": 1,
+            "pass_": 1,
+            "run_pct": 50.0,
+            "pass_pct": 50.0
+          },
+          {
+            "down_group": "2nd & 1-3",
+            "total": 3,
+            "run": 3,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          },
+          {
+            "down_group": "3rd & 8+",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "3rd & 1-2",
+            "total": 1,
+            "run": 1,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          }
+        ],
+        "formations": [
+          {
+            "name": "ACE",
+            "count": 7,
+            "pct": 58.3,
+            "run_pct": 85.7,
+            "pass_pct": 14.3
+          },
+          {
+            "name": "PAIR",
+            "count": 2,
+            "pct": 16.7,
+            "run_pct": 50.0,
+            "pass_pct": 50.0
+          },
+          {
+            "name": "ACE TWIN",
+            "count": 1,
+            "pct": 8.3,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "name": "PAIR FIB",
+            "count": 1,
+            "pct": 8.3,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          },
+          {
+            "name": "PRO DOUBLES",
+            "count": 1,
+            "pct": 8.3,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          }
+        ]
       },
       {
         "name": "0",
-        "count": 7
+        "count": 7,
+        "pct": 3.1,
+        "dd": [
+          {
+            "down_group": "1st & 10 (+)",
+            "total": 3,
+            "run": 0,
+            "pass_": 3,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "2nd & 10+",
+            "total": 2,
+            "run": 0,
+            "pass_": 2,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "2nd & 4-6",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "3rd & 8+",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          }
+        ],
+        "formations": [
+          {
+            "name": "EMPTY",
+            "count": 7,
+            "pct": 100.0,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          }
+        ]
       },
       {
         "name": "21",
-        "count": 7
+        "count": 7,
+        "pct": 3.1,
+        "dd": [
+          {
+            "down_group": "1st & 10 (+)",
+            "total": 3,
+            "run": 3,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          },
+          {
+            "down_group": "2nd & 9-7",
+            "total": 1,
+            "run": 1,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          },
+          {
+            "down_group": "2nd & 1-3",
+            "total": 2,
+            "run": 2,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          },
+          {
+            "down_group": "3rd & 3-4",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          }
+        ],
+        "formations": [
+          {
+            "name": "PRO",
+            "count": 3,
+            "pct": 42.9,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          },
+          {
+            "name": "OPEN",
+            "count": 2,
+            "pct": 28.6,
+            "run_pct": 50.0,
+            "pass_pct": 50.0
+          },
+          {
+            "name": "PRO TWIN FIB",
+            "count": 1,
+            "pct": 14.3,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          },
+          {
+            "name": "PRO TWIN",
+            "count": 1,
+            "pct": 14.3,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          }
+        ]
       },
       {
         "name": "13E",
-        "count": 2
-      }
-    ],
-    "top_f_routes": [
-      {
-        "name": "SLANTS",
-        "count": 13
+        "count": 2,
+        "pct": 0.9,
+        "dd": [
+          {
+            "down_group": "3rd & 1-2",
+            "total": 1,
+            "run": 1,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          },
+          {
+            "down_group": "4TH & 1-2",
+            "total": 1,
+            "run": 1,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          }
+        ],
+        "formations": [
+          {
+            "name": "JUMBO",
+            "count": 2,
+            "pct": 100.0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          }
+        ]
       },
       {
-        "name": "VERTS",
-        "count": 11
-      },
-      {
-        "name": "FLD 3 OUT POST",
-        "count": 10
-      },
-      {
-        "name": "MILLS",
-        "count": 9
-      },
-      {
-        "name": "Y OVER",
-        "count": 9
-      }
-    ],
-    "top_b_routes": [
-      {
-        "name": "VERT",
-        "count": 13
-      },
-      {
-        "name": "DIG",
-        "count": 13
-      },
-      {
-        "name": "COMEBACK",
-        "count": 12
-      },
-      {
-        "name": "OMAHA",
-        "count": 12
-      },
-      {
-        "name": "AUSSIE",
-        "count": 9
+        "name": "",
+        "count": 2,
+        "pct": 0.9,
+        "dd": [
+          {
+            "down_group": "1st short",
+            "total": 1,
+            "run": 1,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          },
+          {
+            "down_group": "2nd & 10+",
+            "total": 1,
+            "run": 1,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          }
+        ],
+        "formations": [
+          {
+            "name": "KD",
+            "count": 2,
+            "pct": 100.0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          }
+        ]
       }
     ]
   },
   {
     "id": "dp",
-    "game": "W? vs. Dresden Monarchs",
-    "total_plays": 44,
+    "game": "W? vs. Dresden Monarchs (Apr 21)",
+    "total_plays": 173,
     "down_distance": [
       {
         "down_group": "1st & 10 (+)",
-        "run": 6,
-        "pass_": 12,
-        "total": 18,
-        "run_pct": 33.3,
-        "pass_pct": 66.7
+        "total": 76,
+        "run": 23,
+        "pass_": 53,
+        "run_pct": 30.3,
+        "pass_pct": 69.7
       },
       {
-        "down_group": "2nd & 1-3",
+        "down_group": "1st short",
+        "total": 4,
         "run": 1,
-        "pass_": 0,
-        "total": 1,
-        "run_pct": 100.0,
-        "pass_pct": 0.0
-      },
-      {
-        "down_group": "2nd & 4-6",
-        "run": 0,
-        "pass_": 2,
-        "total": 2,
-        "run_pct": 0.0,
-        "pass_pct": 100.0
-      },
-      {
-        "down_group": "2nd & 9-7",
-        "run": 1,
-        "pass_": 2,
-        "total": 3,
-        "run_pct": 33.3,
-        "pass_pct": 66.7
+        "pass_": 3,
+        "run_pct": 25.0,
+        "pass_pct": 75.0
       },
       {
         "down_group": "2nd & 10+",
-        "run": 1,
-        "pass_": 9,
-        "total": 10,
-        "run_pct": 10.0,
-        "pass_pct": 90.0
+        "total": 23,
+        "run": 3,
+        "pass_": 20,
+        "run_pct": 13.0,
+        "pass_pct": 87.0
       },
       {
-        "down_group": "3rd & 1-2",
+        "down_group": "2nd & 9-7",
+        "total": 8,
+        "run": 2,
+        "pass_": 6,
+        "run_pct": 25.0,
+        "pass_pct": 75.0
+      },
+      {
+        "down_group": "2nd & 4-6",
+        "total": 11,
+        "run": 3,
+        "pass_": 8,
+        "run_pct": 27.3,
+        "pass_pct": 72.7
+      },
+      {
+        "down_group": "2nd & 1-3",
+        "total": 12,
+        "run": 7,
+        "pass_": 5,
+        "run_pct": 58.3,
+        "pass_pct": 41.7
+      },
+      {
+        "down_group": "3rd & 8+",
+        "total": 13,
         "run": 0,
-        "pass_": 2,
-        "total": 2,
+        "pass_": 13,
         "run_pct": 0.0,
         "pass_pct": 100.0
       },
       {
         "down_group": "3rd & 5-7",
+        "total": 8,
+        "run": 1,
+        "pass_": 7,
+        "run_pct": 12.5,
+        "pass_pct": 87.5
+      },
+      {
+        "down_group": "3rd & 3-4",
+        "total": 4,
         "run": 0,
-        "pass_": 3,
-        "total": 3,
+        "pass_": 4,
         "run_pct": 0.0,
         "pass_pct": 100.0
       },
       {
-        "down_group": "3rd & 8+",
-        "run": 0,
-        "pass_": 5,
-        "total": 5,
-        "run_pct": 0.0,
-        "pass_pct": 100.0
+        "down_group": "3rd & 1-2",
+        "total": 7,
+        "run": 3,
+        "pass_": 4,
+        "run_pct": 42.9,
+        "pass_pct": 57.1
       }
     ],
     "formations": [
       {
-        "name": "TREY",
-        "count": 8
-      },
-      {
         "name": "TRIO",
-        "count": 8
-      },
-      {
-        "name": "PRO DOUBLES FIB",
-        "count": 7
+        "count": 48,
+        "pct": 27.7,
+        "run_n": 5,
+        "pass_n": 43,
+        "run_pct": 10.4,
+        "pass_pct": 89.6,
+        "backfields": [
+          "G",
+          "GF",
+          "GN"
+        ],
+        "top3_run": [
+          {
+            "play": "IZR",
+            "count": 2,
+            "pct": 40.0
+          },
+          {
+            "play": "BASE",
+            "count": 1,
+            "pct": 20.0
+          }
+        ],
+        "top3_pass_play": [
+          {
+            "play": "FLOOD",
+            "count": 2,
+            "pct": 4.7
+          }
+        ],
+        "top3_f_routes": [
+          {
+            "play": "DAGGER 3 SEAM",
+            "count": 1,
+            "pct": 2.3
+          }
+        ],
+        "top3_b_routes": [
+          {
+            "play": "CURL",
+            "count": 1,
+            "pct": 2.3
+          }
+        ],
+        "dd": [
+          {
+            "down_group": "1st & 10 (+)",
+            "total": 20,
+            "run": 4,
+            "pass_": 16,
+            "run_pct": 20.0,
+            "pass_pct": 80.0
+          },
+          {
+            "down_group": "2nd & 10+",
+            "total": 5,
+            "run": 0,
+            "pass_": 5,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "2nd & 9-7",
+            "total": 3,
+            "run": 1,
+            "pass_": 2,
+            "run_pct": 33.3,
+            "pass_pct": 66.7
+          },
+          {
+            "down_group": "2nd & 4-6",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "2nd & 1-3",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "3rd & 8+",
+            "total": 10,
+            "run": 0,
+            "pass_": 10,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "3rd & 5-7",
+            "total": 6,
+            "run": 0,
+            "pass_": 6,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "3rd & 1-2",
+            "total": 2,
+            "run": 0,
+            "pass_": 2,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          }
+        ]
       },
       {
         "name": "DOUBLES",
-        "count": 6
+        "count": 44,
+        "pct": 25.4,
+        "run_n": 4,
+        "pass_n": 40,
+        "run_pct": 9.1,
+        "pass_pct": 90.9,
+        "backfields": [
+          "GF",
+          "GN"
+        ],
+        "top3_run": [
+          {
+            "play": "IZR",
+            "count": 4,
+            "pct": 100.0
+          }
+        ],
+        "top3_pass_play": [
+          {
+            "play": "MILLS",
+            "count": 1,
+            "pct": 2.5
+          },
+          {
+            "play": "HOSS AUSSIE",
+            "count": 1,
+            "pct": 2.5
+          },
+          {
+            "play": "MESH",
+            "count": 1,
+            "pct": 2.5
+          }
+        ],
+        "top3_f_routes": [
+          {
+            "play": "H OVER",
+            "count": 1,
+            "pct": 2.5
+          },
+          {
+            "play": "OMAHA",
+            "count": 1,
+            "pct": 2.5
+          }
+        ],
+        "top3_b_routes": [
+          {
+            "play": "SNAG SWING",
+            "count": 1,
+            "pct": 2.5
+          },
+          {
+            "play": "SLANTS",
+            "count": 1,
+            "pct": 2.5
+          }
+        ],
+        "dd": [
+          {
+            "down_group": "1st & 10 (+)",
+            "total": 22,
+            "run": 4,
+            "pass_": 18,
+            "run_pct": 18.2,
+            "pass_pct": 81.8
+          },
+          {
+            "down_group": "1st short",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "2nd & 10+",
+            "total": 7,
+            "run": 0,
+            "pass_": 7,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "2nd & 9-7",
+            "total": 2,
+            "run": 0,
+            "pass_": 2,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "2nd & 4-6",
+            "total": 3,
+            "run": 0,
+            "pass_": 3,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "3rd & 5-7",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "3rd & 3-4",
+            "total": 3,
+            "run": 0,
+            "pass_": 3,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "3rd & 1-2",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          }
+        ]
       },
       {
-        "name": "PRO DOUBLES",
-        "count": 5
+        "name": "TREY",
+        "count": 20,
+        "pct": 11.6,
+        "run_n": 11,
+        "pass_n": 9,
+        "run_pct": 55.0,
+        "pass_pct": 45.0,
+        "backfields": [
+          "GF",
+          "GN"
+        ],
+        "top3_run": [
+          {
+            "play": "DUO",
+            "count": 2,
+            "pct": 18.2
+          }
+        ],
+        "top3_pass_play": [],
+        "top3_f_routes": [],
+        "top3_b_routes": [],
+        "dd": [
+          {
+            "down_group": "1st & 10 (+)",
+            "total": 14,
+            "run": 7,
+            "pass_": 7,
+            "run_pct": 50.0,
+            "pass_pct": 50.0
+          },
+          {
+            "down_group": "1st short",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "2nd & 10+",
+            "total": 2,
+            "run": 1,
+            "pass_": 1,
+            "run_pct": 50.0,
+            "pass_pct": 50.0
+          },
+          {
+            "down_group": "2nd & 4-6",
+            "total": 2,
+            "run": 2,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          },
+          {
+            "down_group": "2nd & 1-3",
+            "total": 1,
+            "run": 1,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          }
+        ]
       },
       {
         "name": "OPEN",
-        "count": 4
+        "count": 18,
+        "pct": 10.4,
+        "run_n": 4,
+        "pass_n": 14,
+        "run_pct": 22.2,
+        "pass_pct": 77.8,
+        "backfields": [
+          "SG"
+        ],
+        "top3_run": [
+          {
+            "play": "SEAL",
+            "count": 1,
+            "pct": 25.0
+          },
+          {
+            "play": "OPTION",
+            "count": 1,
+            "pct": 25.0
+          },
+          {
+            "play": "ISO",
+            "count": 1,
+            "pct": 25.0
+          }
+        ],
+        "top3_pass_play": [],
+        "top3_f_routes": [],
+        "top3_b_routes": [],
+        "dd": [
+          {
+            "down_group": "1st & 10 (+)",
+            "total": 8,
+            "run": 2,
+            "pass_": 6,
+            "run_pct": 25.0,
+            "pass_pct": 75.0
+          },
+          {
+            "down_group": "1st short",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "2nd & 10+",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "2nd & 9-7",
+            "total": 1,
+            "run": 1,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          },
+          {
+            "down_group": "2nd & 4-6",
+            "total": 2,
+            "run": 0,
+            "pass_": 2,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "2nd & 1-3",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "3rd & 5-7",
+            "total": 1,
+            "run": 1,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          },
+          {
+            "down_group": "3rd & 3-4",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "3rd & 1-2",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          }
+        ]
+      },
+      {
+        "name": "PRO DOUBLES",
+        "count": 6,
+        "pct": 3.5,
+        "run_n": 2,
+        "pass_n": 4,
+        "run_pct": 33.3,
+        "pass_pct": 66.7,
+        "backfields": [
+          "GF",
+          "GN"
+        ],
+        "top3_run": [
+          {
+            "play": "IZR",
+            "count": 1,
+            "pct": 50.0
+          }
+        ],
+        "top3_pass_play": [],
+        "top3_f_routes": [],
+        "top3_b_routes": [],
+        "dd": [
+          {
+            "down_group": "1st & 10 (+)",
+            "total": 2,
+            "run": 0,
+            "pass_": 2,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "2nd & 4-6",
+            "total": 2,
+            "run": 1,
+            "pass_": 1,
+            "run_pct": 50.0,
+            "pass_pct": 50.0
+          },
+          {
+            "down_group": "2nd & 1-3",
+            "total": 1,
+            "run": 1,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          }
+        ]
+      },
+      {
+        "name": "ACE",
+        "count": 6,
+        "pct": 3.5,
+        "run_n": 5,
+        "pass_n": 1,
+        "run_pct": 83.3,
+        "pass_pct": 16.7,
+        "backfields": [
+          "GF",
+          "L"
+        ],
+        "top3_run": [],
+        "top3_pass_play": [],
+        "top3_f_routes": [],
+        "top3_b_routes": [],
+        "dd": [
+          {
+            "down_group": "1st & 10 (+)",
+            "total": 1,
+            "run": 1,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          },
+          {
+            "down_group": "2nd & 10+",
+            "total": 2,
+            "run": 1,
+            "pass_": 1,
+            "run_pct": 50.0,
+            "pass_pct": 50.0
+          },
+          {
+            "down_group": "2nd & 1-3",
+            "total": 2,
+            "run": 2,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          },
+          {
+            "down_group": "3rd & 1-2",
+            "total": 1,
+            "run": 1,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          }
+        ]
       },
       {
         "name": "EMPTY",
-        "count": 2
+        "count": 4,
+        "pct": 2.3,
+        "run_n": 0,
+        "pass_n": 4,
+        "run_pct": 0.0,
+        "pass_pct": 100.0,
+        "backfields": [
+          "G"
+        ],
+        "top3_run": [],
+        "top3_pass_play": [],
+        "top3_f_routes": [],
+        "top3_b_routes": [],
+        "dd": [
+          {
+            "down_group": "1st & 10 (+)",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "2nd & 10+",
+            "total": 2,
+            "run": 0,
+            "pass_": 2,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "3rd & 8+",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          }
+        ]
       },
       {
         "name": "PRO",
-        "count": 1
+        "count": 4,
+        "pct": 2.3,
+        "run_n": 3,
+        "pass_n": 1,
+        "run_pct": 75.0,
+        "pass_pct": 25.0,
+        "backfields": [
+          "GN",
+          "SG"
+        ],
+        "top3_run": [],
+        "top3_pass_play": [],
+        "top3_f_routes": [],
+        "top3_b_routes": [],
+        "dd": [
+          {
+            "down_group": "1st & 10 (+)",
+            "total": 3,
+            "run": 3,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          },
+          {
+            "down_group": "2nd & 10+",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          }
+        ]
       },
       {
-        "name": "TRIPS FIB",
-        "count": 1
+        "name": "OPEN FIB",
+        "count": 3,
+        "pct": 1.7,
+        "run_n": 0,
+        "pass_n": 3,
+        "run_pct": 0.0,
+        "pass_pct": 100.0,
+        "backfields": [
+          "SG"
+        ],
+        "top3_run": [],
+        "top3_pass_play": [],
+        "top3_f_routes": [],
+        "top3_b_routes": [],
+        "dd": [
+          {
+            "down_group": "1st & 10 (+)",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "2nd & 10+",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "2nd & 1-3",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          }
+        ]
       },
       {
-        "name": "TREY BUNCH",
-        "count": 1
+        "name": "PRO TWIN FIB",
+        "count": 3,
+        "pct": 1.7,
+        "run_n": 2,
+        "pass_n": 1,
+        "run_pct": 66.7,
+        "pass_pct": 33.3,
+        "backfields": [
+          "GF",
+          "SG"
+        ],
+        "top3_run": [],
+        "top3_pass_play": [],
+        "top3_f_routes": [],
+        "top3_b_routes": [],
+        "dd": [
+          {
+            "down_group": "2nd & 10+",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "2nd & 1-3",
+            "total": 2,
+            "run": 2,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          }
+        ]
       },
       {
-        "name": "TRIO FIB",
-        "count": 1
+        "name": "PRO DOUBLES FIB",
+        "count": 2,
+        "pct": 1.2,
+        "run_n": 2,
+        "pass_n": 0,
+        "run_pct": 100.0,
+        "pass_pct": 0.0,
+        "backfields": [
+          "GF"
+        ],
+        "top3_run": [],
+        "top3_pass_play": [],
+        "top3_f_routes": [],
+        "top3_b_routes": [],
+        "dd": [
+          {
+            "down_group": "3rd & 1-2",
+            "total": 2,
+            "run": 2,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          }
+        ]
+      },
+      {
+        "name": "TRIPS",
+        "count": 2,
+        "pct": 1.2,
+        "run_n": 1,
+        "pass_n": 1,
+        "run_pct": 50.0,
+        "pass_pct": 50.0,
+        "backfields": [
+          "GN"
+        ],
+        "top3_run": [],
+        "top3_pass_play": [],
+        "top3_f_routes": [],
+        "top3_b_routes": [],
+        "dd": [
+          {
+            "down_group": "1st & 10 (+)",
+            "total": 1,
+            "run": 1,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          },
+          {
+            "down_group": "2nd & 9-7",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          }
+        ]
+      },
+      {
+        "name": "JUMBO",
+        "count": 2,
+        "pct": 1.2,
+        "run_n": 2,
+        "pass_n": 0,
+        "run_pct": 100.0,
+        "pass_pct": 0.0,
+        "backfields": [
+          "IU"
+        ],
+        "top3_run": [],
+        "top3_pass_play": [],
+        "top3_f_routes": [],
+        "top3_b_routes": [],
+        "dd": [
+          {
+            "down_group": "1st & 10 (+)",
+            "total": 1,
+            "run": 1,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          }
+        ]
+      },
+      {
+        "name": "STACK",
+        "count": 2,
+        "pct": 1.2,
+        "run_n": 0,
+        "pass_n": 2,
+        "run_pct": 0.0,
+        "pass_pct": 100.0,
+        "backfields": [
+          "GF",
+          "GN"
+        ],
+        "top3_run": [],
+        "top3_pass_play": [],
+        "top3_f_routes": [],
+        "top3_b_routes": [],
+        "dd": [
+          {
+            "down_group": "1st & 10 (+)",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "2nd & 9-7",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          }
+        ]
+      },
+      {
+        "name": "KD",
+        "count": 2,
+        "pct": 1.2,
+        "run_n": 2,
+        "pass_n": 0,
+        "run_pct": 100.0,
+        "pass_pct": 0.0,
+        "backfields": [],
+        "top3_run": [],
+        "top3_pass_play": [],
+        "top3_f_routes": [],
+        "top3_b_routes": [],
+        "dd": [
+          {
+            "down_group": "1st short",
+            "total": 1,
+            "run": 1,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          },
+          {
+            "down_group": "2nd & 10+",
+            "total": 1,
+            "run": 1,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          }
+        ]
+      },
+      {
+        "name": "PRO TWIN",
+        "count": 1,
+        "pct": 0.6,
+        "run_n": 0,
+        "pass_n": 1,
+        "run_pct": 0.0,
+        "pass_pct": 100.0,
+        "backfields": [
+          "GN"
+        ],
+        "top3_run": [],
+        "top3_pass_play": [],
+        "top3_f_routes": [],
+        "top3_b_routes": [],
+        "dd": [
+          {
+            "down_group": "2nd & 4-6",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          }
+        ]
+      },
+      {
+        "name": "ACE TWIN",
+        "count": 1,
+        "pct": 0.6,
+        "run_n": 0,
+        "pass_n": 1,
+        "run_pct": 0.0,
+        "pass_pct": 100.0,
+        "backfields": [
+          "L"
+        ],
+        "top3_run": [],
+        "top3_pass_play": [],
+        "top3_f_routes": [],
+        "top3_b_routes": [],
+        "dd": [
+          {
+            "down_group": "1st & 10 (+)",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          }
+        ]
+      },
+      {
+        "name": "TREY FIB",
+        "count": 1,
+        "pct": 0.6,
+        "run_n": 0,
+        "pass_n": 1,
+        "run_pct": 0.0,
+        "pass_pct": 100.0,
+        "backfields": [
+          "GF"
+        ],
+        "top3_run": [],
+        "top3_pass_play": [],
+        "top3_f_routes": [],
+        "top3_b_routes": [],
+        "dd": [
+          {
+            "down_group": "3rd & 8+",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          }
+        ]
+      },
+      {
+        "name": "EMPTY FIB",
+        "count": 1,
+        "pct": 0.6,
+        "run_n": 0,
+        "pass_n": 1,
+        "run_pct": 0.0,
+        "pass_pct": 100.0,
+        "backfields": [],
+        "top3_run": [],
+        "top3_pass_play": [],
+        "top3_f_routes": [],
+        "top3_b_routes": [],
+        "dd": [
+          {
+            "down_group": "2nd & 1-3",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          }
+        ]
+      },
+      {
+        "name": "TWIN",
+        "count": 1,
+        "pct": 0.6,
+        "run_n": 1,
+        "pass_n": 0,
+        "run_pct": 100.0,
+        "pass_pct": 0.0,
+        "backfields": [
+          "SG"
+        ],
+        "top3_run": [
+          {
+            "play": "OZR",
+            "count": 1,
+            "pct": 100.0
+          }
+        ],
+        "top3_pass_play": [],
+        "top3_f_routes": [],
+        "top3_b_routes": [],
+        "dd": [
+          {
+            "down_group": "2nd & 1-3",
+            "total": 1,
+            "run": 1,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          }
+        ]
       }
+    ],
+    "backfields": [
+      "G",
+      "GF",
+      "GN",
+      "IU",
+      "L",
+      "SG"
     ],
     "personnel": [
       {
-        "name": "11",
-        "count": 32
-      },
-      {
         "name": "10",
-        "count": 5
+        "count": 94,
+        "pct": 54.3,
+        "dd": [
+          {
+            "down_group": "1st & 10 (+)",
+            "total": 40,
+            "run": 7,
+            "pass_": 33,
+            "run_pct": 17.5,
+            "pass_pct": 82.5
+          },
+          {
+            "down_group": "1st short",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "2nd & 10+",
+            "total": 14,
+            "run": 0,
+            "pass_": 14,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "2nd & 9-7",
+            "total": 6,
+            "run": 1,
+            "pass_": 5,
+            "run_pct": 16.7,
+            "pass_pct": 83.3
+          },
+          {
+            "down_group": "2nd & 4-6",
+            "total": 4,
+            "run": 0,
+            "pass_": 4,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "2nd & 1-3",
+            "total": 3,
+            "run": 0,
+            "pass_": 3,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "3rd & 8+",
+            "total": 10,
+            "run": 0,
+            "pass_": 10,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "3rd & 5-7",
+            "total": 7,
+            "run": 0,
+            "pass_": 7,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "3rd & 3-4",
+            "total": 3,
+            "run": 0,
+            "pass_": 3,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "3rd & 1-2",
+            "total": 2,
+            "run": 0,
+            "pass_": 2,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          }
+        ],
+        "formations": [
+          {
+            "name": "TRIO",
+            "count": 46,
+            "pct": 49.5,
+            "run_pct": 10.9,
+            "pass_pct": 89.1
+          },
+          {
+            "name": "DOUBLES",
+            "count": 40,
+            "pct": 43.0,
+            "run_pct": 7.5,
+            "pass_pct": 92.5
+          },
+          {
+            "name": "OPEN FIB",
+            "count": 3,
+            "pct": 3.2,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "name": "OPEN",
+            "count": 1,
+            "pct": 1.1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "name": "PRO TWIN",
+            "count": 1,
+            "pct": 1.1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "name": "PRO TWIN FIB",
+            "count": 1,
+            "pct": 1.1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "name": "STACK",
+            "count": 1,
+            "pct": 1.1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          }
+        ]
       },
       {
-        "name": "21",
-        "count": 3
+        "name": "11",
+        "count": 44,
+        "pct": 25.4,
+        "dd": [
+          {
+            "down_group": "1st & 10 (+)",
+            "total": 24,
+            "run": 12,
+            "pass_": 12,
+            "run_pct": 50.0,
+            "pass_pct": 50.0
+          },
+          {
+            "down_group": "1st short",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "2nd & 10+",
+            "total": 3,
+            "run": 1,
+            "pass_": 2,
+            "run_pct": 33.3,
+            "pass_pct": 66.7
+          },
+          {
+            "down_group": "2nd & 9-7",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "2nd & 4-6",
+            "total": 5,
+            "run": 3,
+            "pass_": 2,
+            "run_pct": 60.0,
+            "pass_pct": 40.0
+          },
+          {
+            "down_group": "2nd & 1-3",
+            "total": 4,
+            "run": 3,
+            "pass_": 1,
+            "run_pct": 75.0,
+            "pass_pct": 25.0
+          },
+          {
+            "down_group": "3rd & 8+",
+            "total": 2,
+            "run": 0,
+            "pass_": 2,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "3rd & 1-2",
+            "total": 3,
+            "run": 2,
+            "pass_": 1,
+            "run_pct": 66.7,
+            "pass_pct": 33.3
+          }
+        ],
+        "formations": [
+          {
+            "name": "TREY",
+            "count": 20,
+            "pct": 45.5,
+            "run_pct": 55.0,
+            "pass_pct": 45.0
+          },
+          {
+            "name": "PRO DOUBLES",
+            "count": 6,
+            "pct": 13.6,
+            "run_pct": 33.3,
+            "pass_pct": 66.7
+          },
+          {
+            "name": "DOUBLES",
+            "count": 4,
+            "pct": 9.1,
+            "run_pct": 25.0,
+            "pass_pct": 75.0
+          },
+          {
+            "name": "PRO",
+            "count": 4,
+            "pct": 9.1,
+            "run_pct": 75.0,
+            "pass_pct": 25.0
+          },
+          {
+            "name": "TRIO",
+            "count": 2,
+            "pct": 4.5,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "name": "PRO DOUBLES FIB",
+            "count": 2,
+            "pct": 4.5,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          },
+          {
+            "name": "TRIPS",
+            "count": 2,
+            "pct": 4.5,
+            "run_pct": 50.0,
+            "pass_pct": 50.0
+          },
+          {
+            "name": "TREY FIB",
+            "count": 1,
+            "pct": 2.3,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "name": "EMPTY FIB",
+            "count": 1,
+            "pct": 2.3,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "name": "PRO TWIN FIB",
+            "count": 1,
+            "pct": 2.3,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          },
+          {
+            "name": "STACK",
+            "count": 1,
+            "pct": 2.3,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          }
+        ]
       },
       {
         "name": "20",
-        "count": 3
+        "count": 18,
+        "pct": 10.4,
+        "dd": [
+          {
+            "down_group": "1st & 10 (+)",
+            "total": 8,
+            "run": 2,
+            "pass_": 6,
+            "run_pct": 25.0,
+            "pass_pct": 75.0
+          },
+          {
+            "down_group": "1st short",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "2nd & 10+",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "2nd & 9-7",
+            "total": 1,
+            "run": 1,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          },
+          {
+            "down_group": "2nd & 4-6",
+            "total": 2,
+            "run": 0,
+            "pass_": 2,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "2nd & 1-3",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "3rd & 5-7",
+            "total": 1,
+            "run": 1,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          },
+          {
+            "down_group": "3rd & 3-4",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "3rd & 1-2",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          }
+        ],
+        "formations": [
+          {
+            "name": "OPEN",
+            "count": 17,
+            "pct": 100.0,
+            "run_pct": 23.5,
+            "pass_pct": 76.5
+          }
+        ]
+      },
+      {
+        "name": "12",
+        "count": 7,
+        "pct": 4.0,
+        "dd": [
+          {
+            "down_group": "1st & 10 (+)",
+            "total": 2,
+            "run": 1,
+            "pass_": 1,
+            "run_pct": 50.0,
+            "pass_pct": 50.0
+          },
+          {
+            "down_group": "2nd & 10+",
+            "total": 2,
+            "run": 1,
+            "pass_": 1,
+            "run_pct": 50.0,
+            "pass_pct": 50.0
+          },
+          {
+            "down_group": "2nd & 1-3",
+            "total": 2,
+            "run": 2,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          },
+          {
+            "down_group": "3rd & 1-2",
+            "total": 1,
+            "run": 1,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          }
+        ],
+        "formations": [
+          {
+            "name": "ACE",
+            "count": 6,
+            "pct": 85.7,
+            "run_pct": 83.3,
+            "pass_pct": 16.7
+          },
+          {
+            "name": "ACE TWIN",
+            "count": 1,
+            "pct": 14.3,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          }
+        ]
       },
       {
         "name": "0",
-        "count": 1
-      }
-    ],
-    "top_f_routes": [
-      {
-        "name": "HOSS",
-        "count": 4
+        "count": 4,
+        "pct": 2.3,
+        "dd": [
+          {
+            "down_group": "1st & 10 (+)",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "2nd & 10+",
+            "total": 2,
+            "run": 0,
+            "pass_": 2,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          },
+          {
+            "down_group": "3rd & 8+",
+            "total": 1,
+            "run": 0,
+            "pass_": 1,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          }
+        ],
+        "formations": [
+          {
+            "name": "EMPTY",
+            "count": 4,
+            "pct": 100.0,
+            "run_pct": 0.0,
+            "pass_pct": 100.0
+          }
+        ]
       },
       {
-        "name": "SLANTS",
-        "count": 4
+        "name": "21",
+        "count": 2,
+        "pct": 1.2,
+        "dd": [
+          {
+            "down_group": "2nd & 1-3",
+            "total": 2,
+            "run": 2,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          }
+        ],
+        "formations": [
+          {
+            "name": "PRO TWIN FIB",
+            "count": 1,
+            "pct": 50.0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          },
+          {
+            "name": "TWIN",
+            "count": 1,
+            "pct": 50.0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          }
+        ]
       },
       {
-        "name": "SHOOT",
-        "count": 3
+        "name": "13E",
+        "count": 2,
+        "pct": 1.2,
+        "dd": [
+          {
+            "down_group": "1st & 10 (+)",
+            "total": 1,
+            "run": 1,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          }
+        ],
+        "formations": [
+          {
+            "name": "JUMBO",
+            "count": 2,
+            "pct": 100.0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          }
+        ]
       },
       {
-        "name": "LEVELS",
-        "count": 2
-      },
-      {
-        "name": "SNAG",
-        "count": 2
-      }
-    ],
-    "top_b_routes": [
-      {
-        "name": "HOSS",
-        "count": 4
-      },
-      {
-        "name": "OMAHA",
-        "count": 3
-      },
-      {
-        "name": "SHOOT",
-        "count": 3
-      },
-      {
-        "name": "COMEBACK",
-        "count": 3
-      },
-      {
-        "name": "SLANTS",
-        "count": 3
+        "name": "",
+        "count": 2,
+        "pct": 1.2,
+        "dd": [
+          {
+            "down_group": "1st short",
+            "total": 1,
+            "run": 1,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          },
+          {
+            "down_group": "2nd & 10+",
+            "total": 1,
+            "run": 1,
+            "pass_": 0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          }
+        ],
+        "formations": [
+          {
+            "name": "KD",
+            "count": 2,
+            "pct": 100.0,
+            "run_pct": 100.0,
+            "pass_pct": 0.0
+          }
+        ]
       }
     ]
   }
