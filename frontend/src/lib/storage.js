@@ -23,9 +23,17 @@ function set(key, value) { localStorage.setItem(key, JSON.stringify(value)); }
 export function uid() { return Math.random().toString(36).slice(2) + Date.now().toString(36); }
 
 // ── Password hashing ─────────────────────────────────────────────────────────
+// Uses SHA-256 via WebCrypto when available (HTTPS), falls back to a simple
+// deterministic hash for non-secure contexts (dev over HTTP).
 export async function hashPassword(pw) {
-  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(pw));
-  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,"0")).join("");
+  if (typeof crypto !== "undefined" && crypto.subtle) {
+    const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(pw));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,"0")).join("");
+  }
+  // Fallback: djb2 variant (non-secure, only used in HTTP dev)
+  let h = 5381;
+  for (let i = 0; i < pw.length; i++) h = ((h << 5) + h) ^ pw.charCodeAt(i);
+  return "fb_" + (h >>> 0).toString(16).padStart(8, "0");
 }
 
 // ── Teams ────────────────────────────────────────────────────────────────────

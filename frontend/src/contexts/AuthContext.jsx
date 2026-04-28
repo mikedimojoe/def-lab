@@ -8,24 +8,26 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    seedAdmin().then(() => {
-      const saved = sessionStorage.getItem("dl_session");
-      if (saved) {
-        try {
-          const u = JSON.parse(saved);
-          // re-verify user still exists
-          const users = getUsers();
-          const fresh = users.find(x => x.id === u.id);
-          if (fresh) setUser(fresh);
-        } catch { /* ignore */ }
-      }
-      setLoading(false);
-    });
+    seedAdmin()
+      .catch(err => console.warn("seedAdmin error:", err))
+      .finally(() => {
+        // Restore session regardless of whether seedAdmin succeeded
+        const saved = sessionStorage.getItem("dl_session");
+        if (saved) {
+          try {
+            const u     = JSON.parse(saved);
+            const users = getUsers();
+            const fresh = users.find(x => x.id === u.id);
+            if (fresh) setUser(fresh);
+          } catch { /* ignore */ }
+        }
+        setLoading(false);
+      });
   }, []);
 
   async function login(username, password) {
     const u = await storageLogin(username, password);
-    if (!u) throw new Error("Ungültige Anmeldedaten");
+    if (!u) throw new Error("Invalid username or password");
     sessionStorage.setItem("dl_session", JSON.stringify(u));
     setUser(u);
     return u;
