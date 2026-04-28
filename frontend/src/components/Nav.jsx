@@ -6,7 +6,7 @@ const LINKS = [
   { to: "/standings", label: "Tabelle" },
   { to: "/teams",     label: "Teams" },
   { to: "/matches",   label: "Matches" },
-  { to: "/analytics", label: "Analytics" },
+  { to: "/analytics", label: "Scout" },
 ];
 
 export default function Nav() {

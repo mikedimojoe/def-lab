@@ -15,6 +15,7 @@ function resolveUrl(path) {
     "/api/stats/standings":    "/api/stats/standings.json",
     "/api/stats/scoring-by-week": "/api/stats/scoring-by-week.json",
     "/api/stats/team-performance": "/api/stats/team-performance.json",
+    "/api/playdata":           "/api/playdata.json",
   };
 
   // Team detail: /api/teams/1 → /api/teams.json (filter client-side)

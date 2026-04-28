@@ -1,0 +1,464 @@
+[
+  {
+    "id": "w1_muc",
+    "game": "W1 vs. Munich Cowboys",
+    "total_plays": 224,
+    "down_distance": [
+      {
+        "down_group": "1st & 10 (+)",
+        "run": 31,
+        "pass_": 65,
+        "total": 96,
+        "run_pct": 32.3,
+        "pass_pct": 67.7
+      },
+      {
+        "down_group": "1st short",
+        "run": 2,
+        "pass_": 4,
+        "total": 6,
+        "run_pct": 33.3,
+        "pass_pct": 66.7
+      },
+      {
+        "down_group": "2nd & 1-3",
+        "run": 8,
+        "pass_": 7,
+        "total": 15,
+        "run_pct": 53.3,
+        "pass_pct": 46.7
+      },
+      {
+        "down_group": "2nd & 4-6",
+        "run": 4,
+        "pass_": 10,
+        "total": 14,
+        "run_pct": 28.6,
+        "pass_pct": 71.4
+      },
+      {
+        "down_group": "2nd & 9-7",
+        "run": 4,
+        "pass_": 6,
+        "total": 10,
+        "run_pct": 40.0,
+        "pass_pct": 60.0
+      },
+      {
+        "down_group": "2nd & 10+",
+        "run": 6,
+        "pass_": 25,
+        "total": 31,
+        "run_pct": 19.4,
+        "pass_pct": 80.6
+      },
+      {
+        "down_group": "3rd & 1-2",
+        "run": 4,
+        "pass_": 6,
+        "total": 10,
+        "run_pct": 40.0,
+        "pass_pct": 60.0
+      },
+      {
+        "down_group": "3rd & 3-4",
+        "run": 0,
+        "pass_": 6,
+        "total": 6,
+        "run_pct": 0.0,
+        "pass_pct": 100.0
+      },
+      {
+        "down_group": "3rd & 5-7",
+        "run": 1,
+        "pass_": 8,
+        "total": 9,
+        "run_pct": 11.1,
+        "pass_pct": 88.9
+      },
+      {
+        "down_group": "3rd & 8+",
+        "run": 2,
+        "pass_": 16,
+        "total": 18,
+        "run_pct": 11.1,
+        "pass_pct": 88.9
+      },
+      {
+        "down_group": "4TH & 1-2",
+        "run": 1,
+        "pass_": 2,
+        "total": 3,
+        "run_pct": 33.3,
+        "pass_pct": 66.7
+      },
+      {
+        "down_group": "4TH & 3-4",
+        "run": 1,
+        "pass_": 2,
+        "total": 3,
+        "run_pct": 33.3,
+        "pass_pct": 66.7
+      },
+      {
+        "down_group": "4TH & 5-7",
+        "run": 0,
+        "pass_": 2,
+        "total": 2,
+        "run_pct": 0.0,
+        "pass_pct": 100.0
+      },
+      {
+        "down_group": "4TH & 8+",
+        "run": 0,
+        "pass_": 1,
+        "total": 1,
+        "run_pct": 0.0,
+        "pass_pct": 100.0
+      }
+    ],
+    "formations": [
+      {
+        "name": "TRIO",
+        "count": 62
+      },
+      {
+        "name": "DOUBLES",
+        "count": 53
+      },
+      {
+        "name": "TREY",
+        "count": 35
+      },
+      {
+        "name": "OPEN",
+        "count": 19
+      },
+      {
+        "name": "PRO DOUBLES",
+        "count": 11
+      },
+      {
+        "name": "EMPTY",
+        "count": 8
+      },
+      {
+        "name": "PRO DOUBLES FIB",
+        "count": 7
+      },
+      {
+        "name": "ACE",
+        "count": 7
+      },
+      {
+        "name": "PRO",
+        "count": 3
+      },
+      {
+        "name": "OPEN FIB",
+        "count": 2
+      },
+      {
+        "name": "TRIPS",
+        "count": 2
+      },
+      {
+        "name": "JUMBO",
+        "count": 2
+      },
+      {
+        "name": "STACK",
+        "count": 2
+      },
+      {
+        "name": "KD",
+        "count": 2
+      },
+      {
+        "name": "PAIR",
+        "count": 2
+      },
+      {
+        "name": "PRO TWIN FIB",
+        "count": 1
+      },
+      {
+        "name": "ACE TWIN",
+        "count": 1
+      },
+      {
+        "name": "EMPTY FIB",
+        "count": 1
+      },
+      {
+        "name": "PRO TWIN",
+        "count": 1
+      },
+      {
+        "name": "PAIR FIB",
+        "count": 1
+      },
+      {
+        "name": "BUNCH",
+        "count": 1
+      }
+    ],
+    "personnel": [
+      {
+        "name": "10",
+        "count": 110
+      },
+      {
+        "name": "11",
+        "count": 67
+      },
+      {
+        "name": "20",
+        "count": 17
+      },
+      {
+        "name": "12",
+        "count": 12
+      },
+      {
+        "name": "0",
+        "count": 7
+      },
+      {
+        "name": "21",
+        "count": 7
+      },
+      {
+        "name": "13E",
+        "count": 2
+      }
+    ],
+    "top_f_routes": [
+      {
+        "name": "SLANTS",
+        "count": 13
+      },
+      {
+        "name": "VERTS",
+        "count": 11
+      },
+      {
+        "name": "FLD 3 OUT POST",
+        "count": 10
+      },
+      {
+        "name": "MILLS",
+        "count": 9
+      },
+      {
+        "name": "Y OVER",
+        "count": 9
+      }
+    ],
+    "top_b_routes": [
+      {
+        "name": "VERT",
+        "count": 13
+      },
+      {
+        "name": "DIG",
+        "count": 13
+      },
+      {
+        "name": "COMEBACK",
+        "count": 12
+      },
+      {
+        "name": "OMAHA",
+        "count": 12
+      },
+      {
+        "name": "AUSSIE",
+        "count": 9
+      }
+    ]
+  },
+  {
+    "id": "dp",
+    "game": "W? vs. Dresden Monarchs",
+    "total_plays": 44,
+    "down_distance": [
+      {
+        "down_group": "1st & 10 (+)",
+        "run": 6,
+        "pass_": 12,
+        "total": 18,
+        "run_pct": 33.3,
+        "pass_pct": 66.7
+      },
+      {
+        "down_group": "2nd & 1-3",
+        "run": 1,
+        "pass_": 0,
+        "total": 1,
+        "run_pct": 100.0,
+        "pass_pct": 0.0
+      },
+      {
+        "down_group": "2nd & 4-6",
+        "run": 0,
+        "pass_": 2,
+        "total": 2,
+        "run_pct": 0.0,
+        "pass_pct": 100.0
+      },
+      {
+        "down_group": "2nd & 9-7",
+        "run": 1,
+        "pass_": 2,
+        "total": 3,
+        "run_pct": 33.3,
+        "pass_pct": 66.7
+      },
+      {
+        "down_group": "2nd & 10+",
+        "run": 1,
+        "pass_": 9,
+        "total": 10,
+        "run_pct": 10.0,
+        "pass_pct": 90.0
+      },
+      {
+        "down_group": "3rd & 1-2",
+        "run": 0,
+        "pass_": 2,
+        "total": 2,
+        "run_pct": 0.0,
+        "pass_pct": 100.0
+      },
+      {
+        "down_group": "3rd & 5-7",
+        "run": 0,
+        "pass_": 3,
+        "total": 3,
+        "run_pct": 0.0,
+        "pass_pct": 100.0
+      },
+      {
+        "down_group": "3rd & 8+",
+        "run": 0,
+        "pass_": 5,
+        "total": 5,
+        "run_pct": 0.0,
+        "pass_pct": 100.0
+      }
+    ],
+    "formations": [
+      {
+        "name": "TREY",
+        "count": 8
+      },
+      {
+        "name": "TRIO",
+        "count": 8
+      },
+      {
+        "name": "PRO DOUBLES FIB",
+        "count": 7
+      },
+      {
+        "name": "DOUBLES",
+        "count": 6
+      },
+      {
+        "name": "PRO DOUBLES",
+        "count": 5
+      },
+      {
+        "name": "OPEN",
+        "count": 4
+      },
+      {
+        "name": "EMPTY",
+        "count": 2
+      },
+      {
+        "name": "PRO",
+        "count": 1
+      },
+      {
+        "name": "TRIPS FIB",
+        "count": 1
+      },
+      {
+        "name": "TREY BUNCH",
+        "count": 1
+      },
+      {
+        "name": "TRIO FIB",
+        "count": 1
+      }
+    ],
+    "personnel": [
+      {
+        "name": "11",
+        "count": 32
+      },
+      {
+        "name": "10",
+        "count": 5
+      },
+      {
+        "name": "21",
+        "count": 3
+      },
+      {
+        "name": "20",
+        "count": 3
+      },
+      {
+        "name": "0",
+        "count": 1
+      }
+    ],
+    "top_f_routes": [
+      {
+        "name": "HOSS",
+        "count": 4
+      },
+      {
+        "name": "SLANTS",
+        "count": 4
+      },
+      {
+        "name": "SHOOT",
+        "count": 3
+      },
+      {
+        "name": "LEVELS",
+        "count": 2
+      },
+      {
+        "name": "SNAG",
+        "count": 2
+      }
+    ],
+    "top_b_routes": [
+      {
+        "name": "HOSS",
+        "count": 4
+      },
+      {
+        "name": "OMAHA",
+        "count": 3
+      },
+      {
+        "name": "SHOOT",
+        "count": 3
+      },
+      {
+        "name": "COMEBACK",
+        "count": 3
+      },
+      {
+        "name": "SLANTS",
+        "count": 3
+      }
+    ]
+  }
+]
