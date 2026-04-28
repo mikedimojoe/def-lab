@@ -1,13 +1,14 @@
 // ── Persistent storage layer (localStorage) ──────────────────────────────────
-// All data lives in localStorage under namespaced keys.
 // Structure:
-//   dl_users     → [{id, username, passwordHash, role, displayName}]
-//   dl_seasons   → [{id, year, name}]
-//   dl_games     → [{id, seasonId, week, opponent, date, playdata}]
-//   dl_liverows  → {gameId: [...rows]}
-//   dl_colvis    → {visible: [...colNames]}
+//   dl_teams    → [{id, name, color1, color2}]
+//   dl_users    → [{id, username, passwordHash, role, displayName, teamId}]
+//   dl_seasons  → [{id, year, name, teamId}]
+//   dl_games    → [{id, seasonId, week, opponent, date, playdata, rosterData, formationData}]
+//   dl_liverows → {gameId: [...rows]}
+//   dl_colvis   → {visible: [...colNames]}
 
 const KEYS = {
+  teams:    "dl_teams",
   users:    "dl_users",
   seasons:  "dl_seasons",
   games:    "dl_games",
@@ -19,13 +20,40 @@ function get(key)        { try { return JSON.parse(localStorage.getItem(key)) ??
 function getObj(key)     { try { return JSON.parse(localStorage.getItem(key)) ?? {}; } catch { return {}; } }
 function set(key, value) { localStorage.setItem(key, JSON.stringify(value)); }
 
-function uid() { return Math.random().toString(36).slice(2) + Date.now().toString(36); }
+export function uid() { return Math.random().toString(36).slice(2) + Date.now().toString(36); }
 
-// ── Password hashing (SHA-256 via WebCrypto) ─────────────────────────────────
+// ── Password hashing ─────────────────────────────────────────────────────────
 export async function hashPassword(pw) {
-  const buf = await crypto.subtle.digest("SHA-256",
-    new TextEncoder().encode(pw));
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(pw));
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,"0")).join("");
+}
+
+// ── Teams ────────────────────────────────────────────────────────────────────
+export function getTeams()   { return get(KEYS.teams); }
+export function getTeam(id)  { return get(KEYS.teams).find(t => t.id === id) || null; }
+
+export function createTeam(name, color1 = "#154734", color2 = "#5CBF8A") {
+  const t = { id: uid(), name, color1, color2 };
+  set(KEYS.teams, [...get(KEYS.teams), t]);
+  return t;
+}
+
+export function updateTeam(id, changes) {
+  set(KEYS.teams, get(KEYS.teams).map(t => t.id === id ? { ...t, ...changes } : t));
+}
+
+export function deleteTeam(id) {
+  set(KEYS.teams, get(KEYS.teams).filter(t => t.id !== id));
+  // Remove seasons belonging to this team
+  const seasonIds = get(KEYS.seasons).filter(s => s.teamId === id).map(s => s.id);
+  set(KEYS.seasons, get(KEYS.seasons).filter(s => s.teamId !== id));
+  set(KEYS.games,   get(KEYS.games).filter(g => !seasonIds.includes(g.seasonId)));
+}
+
+export function seedDefaultTeam() {
+  const teams = get(KEYS.teams);
+  if (teams.length > 0) return teams[0];
+  return createTeam("Schwäbisch Hall Unicorns", "#154734", "#5CBF8A");
 }
 
 // ── Users ────────────────────────────────────────────────────────────────────
@@ -34,8 +62,9 @@ export function getUsers() { return get(KEYS.users); }
 export async function seedAdmin() {
   if (get(KEYS.users).length > 0) return;
   const hash = await hashPassword("admin123");
+  // Admin has no teamId — sees all teams
   set(KEYS.users, [{ id: uid(), username: "admin", passwordHash: hash,
-    role: "Admin", displayName: "Administrator" }]);
+    role: "Admin", displayName: "Administrator", teamId: null }]);
 }
 
 export async function login(username, password) {
@@ -47,20 +76,21 @@ export async function login(username, password) {
   return user;
 }
 
-export async function createUser(username, password, role, displayName) {
+export async function createUser(username, password, role, displayName, teamId = null) {
   const users = get(KEYS.users);
   if (users.find(u => u.username.toLowerCase() === username.toLowerCase()))
     throw new Error("Username already taken");
-  const hash = await hashPassword(password);
-  const newUser = { id: uid(), username, passwordHash: hash, role, displayName: displayName || username };
+  const hash    = await hashPassword(password);
+  const newUser = { id: uid(), username, passwordHash: hash, role,
+    displayName: displayName || username, teamId: teamId || null };
   set(KEYS.users, [...users, newUser]);
   return newUser;
 }
 
 export async function updateUserPassword(userId, newPassword) {
-  const users = get(KEYS.users);
-  const hash  = await hashPassword(newPassword);
-  set(KEYS.users, users.map(u => u.id === userId ? { ...u, passwordHash: hash } : u));
+  const hash = await hashPassword(newPassword);
+  set(KEYS.users, get(KEYS.users).map(u =>
+    u.id === userId ? { ...u, passwordHash: hash } : u));
 }
 
 export function deleteUser(userId) {
@@ -68,15 +98,21 @@ export function deleteUser(userId) {
 }
 
 export function updateUser(userId, changes) {
-  set(KEYS.users, get(KEYS.users).map(u => u.id === userId ? { ...u, ...changes } : u));
+  set(KEYS.users, get(KEYS.users).map(u =>
+    u.id === userId ? { ...u, ...changes } : u));
 }
 
 // ── Seasons ──────────────────────────────────────────────────────────────────
-export function getSeasons()         { return get(KEYS.seasons); }
-export function getSeason(id)        { return get(KEYS.seasons).find(s => s.id === id) || null; }
+// teamId = null means visible to all (Admin)
+export function getSeasons(teamId) {
+  const all = get(KEYS.seasons);
+  if (!teamId) return all;          // Admin sees everything
+  return all.filter(s => s.teamId === teamId);
+}
+export function getSeason(id) { return get(KEYS.seasons).find(s => s.id === id) || null; }
 
-export function createSeason(year, name) {
-  const s = { id: uid(), year: String(year), name: name || `GFL ${year} Season` };
+export function createSeason(year, name, teamId = null) {
+  const s = { id: uid(), year: String(year), name: name || `GFL ${year} Season`, teamId };
   set(KEYS.seasons, [...get(KEYS.seasons), s]);
   return s;
 }
@@ -86,25 +122,33 @@ export function deleteSeason(id) {
   set(KEYS.games,   get(KEYS.games).filter(g => g.seasonId !== id));
 }
 
-export function seedDefaultSeason() {
-  if (get(KEYS.seasons).length > 0) return get(KEYS.seasons)[0];
-  return createSeason("2026", "GFL 2026 Season");
+export function seedDefaultSeason(teamId = null) {
+  const all = teamId
+    ? get(KEYS.seasons).filter(s => s.teamId === teamId)
+    : get(KEYS.seasons);
+  if (all.length > 0) return all[0];
+  return createSeason("2026", "GFL 2026 Season", teamId);
 }
 
 // ── Games ────────────────────────────────────────────────────────────────────
-export function getGames(seasonId)    { return get(KEYS.games).filter(g => g.seasonId === seasonId); }
-export function getGame(id)           { return get(KEYS.games).find(g => g.id === id) || null; }
+export function getGames(seasonId)  { return get(KEYS.games).filter(g => g.seasonId === seasonId); }
+export function getGame(id)         { return get(KEYS.games).find(g => g.id === id) || null; }
 
 export function createGame(seasonId, week, opponent, date) {
-  const g = { id: uid(), seasonId, week, opponent, date: date || "", playdata: null };
+  const g = { id: uid(), seasonId, week, opponent, date: date || "",
+    playdata: null, rosterData: null, formationData: null };
   set(KEYS.games, [...get(KEYS.games), g]);
   return g;
 }
 
-export function saveGamePlaydata(gameId, playdataJson) {
+export function saveGameData(gameId, field, jsonStr) {
+  // field: "playdata" | "rosterData" | "formationData"
   set(KEYS.games, get(KEYS.games).map(g =>
-    g.id === gameId ? { ...g, playdata: playdataJson } : g));
+    g.id === gameId ? { ...g, [field]: jsonStr } : g));
 }
+
+// Keep backwards-compat alias
+export function saveGamePlaydata(gameId, json) { saveGameData(gameId, "playdata", json); }
 
 export function deleteGame(gameId) {
   set(KEYS.games, get(KEYS.games).filter(g => g.id !== gameId));
@@ -114,10 +158,7 @@ export function deleteGame(gameId) {
 }
 
 // ── Live tagging rows ────────────────────────────────────────────────────────
-export function getLiveRows(gameId) {
-  return getObj(KEYS.liverows)[gameId] || [];
-}
-
+export function getLiveRows(gameId)       { return getObj(KEYS.liverows)[gameId] || []; }
 export function saveLiveRows(gameId, rows) {
   const all = getObj(KEYS.liverows);
   all[gameId] = rows;

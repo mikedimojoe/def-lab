@@ -23,7 +23,12 @@ function ProtectedRoute({ children, adminOnly = false }) {
 
 function AppRoutes() {
   const { user, loading } = useAuth();
-  if (loading) return null;
+  if (loading) return (
+    <div style={{ minHeight: "100vh", background: "#111",
+      display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <span style={{ color: "#5CBF8A", fontSize: 13, letterSpacing: 2 }}>DEF LAB</span>
+    </div>
+  );
 
   return (
     <Routes>

@@ -3,30 +3,28 @@ import { useApp }  from "../contexts/AppContext";
 import { useAuth } from "../contexts/AuthContext";
 import {
   getUsers, createUser, deleteUser, updateUser, updateUserPassword,
+  getTeams, createTeam, updateTeam, deleteTeam,
+  saveGameData,
 } from "../lib/storage";
 import { parsePlaylistData } from "../lib/xlsxParser";
-import { saveGamePlaydata }  from "../lib/storage";
 
 const ACCENT = "#5CBF8A";
 const GREEN  = "#154734";
 
-// ── Modal ─────────────────────────────────────────────────────────────────────
+// ── Shared UI ─────────────────────────────────────────────────────────────────
 function Modal({ title, onClose, children }) {
   return (
-    <div style={{
-      position: "fixed", inset: 0, background: "rgba(0,0,0,.75)",
-      zIndex: 300, display: "flex", alignItems: "center", justifyContent: "center",
-    }} onClick={onClose}>
-      <div style={{
-        background: "#1e1e1e", border: "1px solid #333", borderRadius: 10,
-        padding: 24, width: 420, maxWidth: "95vw",
-      }} onClick={e => e.stopPropagation()}>
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.75)",
+      zIndex: 300, display: "flex", alignItems: "center", justifyContent: "center" }}
+      onClick={onClose}>
+      <div style={{ background: "var(--surface)", border: "1px solid var(--border)",
+        borderRadius: 10, padding: 24, width: 440, maxWidth: "95vw" }}
+        onClick={e => e.stopPropagation()}>
         <div style={{ display: "flex", justifyContent: "space-between",
           alignItems: "center", marginBottom: 16 }}>
-          <h3 style={{ color: "#eee", margin: 0, fontSize: 15 }}>{title}</h3>
-          <button onClick={onClose}
-            style={{ background: "none", border: "none", color: "#888",
-              cursor: "pointer", fontSize: 20, lineHeight: 1 }}>✕</button>
+          <h3 style={{ color: "var(--text)", margin: 0, fontSize: 15 }}>{title}</h3>
+          <button onClick={onClose} style={{ background: "none", border: "none",
+            color: "var(--text3)", cursor: "pointer", fontSize: 20, lineHeight: 1 }}>✕</button>
         </div>
         {children}
       </div>
@@ -35,46 +33,174 @@ function Modal({ title, onClose, children }) {
 }
 
 const inp = {
-  width: "100%", background: "#181818", color: "#ddd", border: "1px solid #2a2a2a",
-  borderRadius: 6, padding: "8px 10px", fontSize: 13, outline: "none",
+  width: "100%", background: "var(--bg)", color: "var(--text)",
+  border: "1px solid var(--border)", borderRadius: 6,
+  padding: "8px 10px", fontSize: 13, outline: "none",
   boxSizing: "border-box", marginBottom: 10,
 };
 
-function Btn({ onClick, type = "button", children, variant = "default", style: extra = {} }) {
+function Btn({ onClick, type = "button", children, variant = "default", style: ex = {} }) {
   const v = {
-    default: { background: "#2a2a2a", color: "#bbb" },
-    primary: { background: GREEN,     color: "#fff" },
+    default: { background: "var(--surface2)", color: "var(--text2)" },
+    primary: { background: GREEN, color: "#fff" },
     danger:  { background: "#3a1111", color: "#f66" },
   };
   return (
     <button type={type} onClick={onClick} style={{
-      border: "none", borderRadius: 6, padding: "8px 14px",
+      border: "none", borderRadius: 6, padding: "7px 14px",
       fontSize: 12, fontWeight: 600, cursor: "pointer",
-      ...v[variant], ...extra,
+      ...v[variant], ...ex,
     }}>
       {children}
     </button>
   );
 }
 
-// ── Invitation link helper ────────────────────────────────────────────────────
+// ── Color picker input ────────────────────────────────────────────────────────
+function ColorInput({ label, value, onChange }) {
+  return (
+    <div style={{ marginBottom: 10 }}>
+      <label style={{ display: "block", color: "var(--text3)", fontSize: 11, marginBottom: 4 }}>
+        {label}
+      </label>
+      <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+        <input type="color" value={value} onChange={e => onChange(e.target.value)}
+          style={{ width: 36, height: 30, border: "1px solid var(--border)",
+            borderRadius: 4, cursor: "pointer", background: "none", padding: 2 }} />
+        <input type="text" value={value}
+          onChange={e => { if (/^#[0-9A-Fa-f]{0,6}$/.test(e.target.value)) onChange(e.target.value); }}
+          placeholder="#154734"
+          style={{ ...inp, marginBottom: 0, width: 100, fontFamily: "monospace" }} />
+        <div style={{ width: 24, height: 24, borderRadius: 4,
+          background: value, border: "1px solid var(--border)" }} />
+      </div>
+    </div>
+  );
+}
+
 function buildInviteLink(userId, tempPassword) {
-  const base = window.location.origin;
-  return `${base}/?invite=${userId}&pw=${encodeURIComponent(tempPassword)}`;
+  return `${window.location.origin}/?invite=${userId}&pw=${encodeURIComponent(tempPassword)}`;
+}
+
+// ── Teams section ─────────────────────────────────────────────────────────────
+function TeamsSection() {
+  const [teams,  setTeams]  = useState(getTeams);
+  const [modal,  setModal]  = useState(null);
+  const [target, setTarget] = useState(null);
+  const [form,   setForm]   = useState({});
+
+  function refresh() { setTeams(getTeams()); }
+  function f(k) { return v => setForm(p => ({ ...p, [k]: typeof v === "string" ? v : v.target.value })); }
+
+  function handleCreate(e) {
+    e.preventDefault();
+    if (!form.name?.trim()) return;
+    createTeam(form.name.trim(), form.color1 || "#154734", form.color2 || "#5CBF8A");
+    refresh(); setModal(null);
+  }
+
+  function handleEdit(e) {
+    e.preventDefault();
+    updateTeam(target.id, { name: form.name, color1: form.color1, color2: form.color2 });
+    refresh(); setModal(null);
+  }
+
+  function open(type, t) {
+    setTarget(t || null);
+    setForm(t ? { name: t.name, color1: t.color1, color2: t.color2 } : { color1: "#154734", color2: "#5CBF8A" });
+    setModal(type);
+  }
+
+  return (
+    <section style={sec}>
+      <div style={{ display: "flex", alignItems: "center", marginBottom: 14 }}>
+        <h3 style={secH}>Teams</h3>
+        <Btn variant="primary" onClick={() => open("create")} style={{ marginLeft: "auto" }}>
+          + New Team
+        </Btn>
+      </div>
+
+      {teams.length === 0
+        ? <p style={{ color: "var(--text3)", fontSize: 13 }}>No teams yet.</p>
+        : (
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+            <thead>
+              <tr style={{ borderBottom: "1px solid var(--border)" }}>
+                {["Team","Colors",""].map(h => <th key={h} style={th}>{h}</th>)}
+              </tr>
+            </thead>
+            <tbody>
+              {teams.map(t => (
+                <tr key={t.id} style={{ borderBottom: "1px solid var(--bg)" }}>
+                  <td style={td}>{t.name}</td>
+                  <td style={td}>
+                    <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                      <span style={{ width: 16, height: 16, borderRadius: 3,
+                        background: t.color1, border: "1px solid var(--border)" }} />
+                      <span style={{ fontFamily: "monospace", fontSize: 11,
+                        color: "var(--text3)" }}>{t.color1}</span>
+                      <span style={{ width: 16, height: 16, borderRadius: 3,
+                        background: t.color2, border: "1px solid var(--border)" }} />
+                      <span style={{ fontFamily: "monospace", fontSize: 11,
+                        color: "var(--text3)" }}>{t.color2}</span>
+                    </div>
+                  </td>
+                  <td style={{ ...td, textAlign: "right" }}>
+                    <Btn onClick={() => open("edit", t)} style={{ marginRight: 6 }}>Edit</Btn>
+                    <Btn variant="danger" onClick={() => { deleteTeam(t.id); refresh(); }}>Delete</Btn>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+
+      {modal === "create" && (
+        <Modal title="New Team" onClose={() => setModal(null)}>
+          <form onSubmit={handleCreate}>
+            <input placeholder="Team name" style={inp} value={form.name || ""}
+              onChange={f("name")} autoFocus />
+            <ColorInput label="Primary Color" value={form.color1 || "#154734"} onChange={f("color1")} />
+            <ColorInput label="Secondary Color" value={form.color2 || "#5CBF8A"} onChange={f("color2")} />
+            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 4 }}>
+              <Btn onClick={() => setModal(null)}>Cancel</Btn>
+              <Btn type="submit" variant="primary">Create</Btn>
+            </div>
+          </form>
+        </Modal>
+      )}
+
+      {modal === "edit" && target && (
+        <Modal title={`Edit — ${target.name}`} onClose={() => setModal(null)}>
+          <form onSubmit={handleEdit}>
+            <input placeholder="Team name" style={inp} value={form.name || ""}
+              onChange={f("name")} autoFocus />
+            <ColorInput label="Primary Color" value={form.color1 || "#154734"} onChange={f("color1")} />
+            <ColorInput label="Secondary Color" value={form.color2 || "#5CBF8A"} onChange={f("color2")} />
+            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 4 }}>
+              <Btn onClick={() => setModal(null)}>Cancel</Btn>
+              <Btn type="submit" variant="primary">Save</Btn>
+            </div>
+          </form>
+        </Modal>
+      )}
+    </section>
+  );
 }
 
 // ── Users section ─────────────────────────────────────────────────────────────
 function UsersSection() {
   const { user: me, refreshUser } = useAuth();
   const [users,  setUsers]  = useState(getUsers);
+  const [teams,  setTeams]  = useState(getTeams);
   const [modal,  setModal]  = useState(null);
   const [target, setTarget] = useState(null);
   const [form,   setForm]   = useState({});
   const [err,    setErr]    = useState("");
   const [inviteLink, setInviteLink] = useState("");
 
-  function refresh() { setUsers(getUsers()); }
-  function f(k) { return e => setForm(prev => ({ ...prev, [k]: e.target.value })); }
+  function refresh() { setUsers(getUsers()); setTeams(getTeams()); }
+  function f(k) { return e => setForm(p => ({ ...p, [k]: e.target.value })); }
 
   async function handleCreate(e) {
     e.preventDefault(); setErr("");
@@ -82,13 +208,12 @@ function UsersSection() {
     if (!form.password?.trim()) { setErr("Password required"); return; }
     try {
       const u = await createUser(
-        form.username.trim(),
-        form.password.trim(),
+        form.username.trim(), form.password.trim(),
         form.role || "Player",
         form.displayName?.trim() || form.username.trim(),
+        form.teamId || null,
       );
-      const link = buildInviteLink(u.id, form.password.trim());
-      setInviteLink(link);
+      setInviteLink(buildInviteLink(u.id, form.password.trim()));
       refresh();
     } catch (ex) { setErr(ex.message); }
   }
@@ -104,18 +229,22 @@ function UsersSection() {
 
   function handleEdit(e) {
     e.preventDefault();
-    updateUser(target.id, { displayName: form.displayName, role: form.role });
+    updateUser(target.id, { displayName: form.displayName, role: form.role, teamId: form.teamId || null });
     refresh(); setModal(null);
   }
 
   function open(type, u) {
     setTarget(u || null);
-    setForm(u ? { displayName: u.displayName, role: u.role } : {});
+    setForm(u ? { displayName: u.displayName, role: u.role, teamId: u.teamId || "" } : {});
     setErr(""); setInviteLink(""); setModal(type);
   }
 
+  function teamName(teamId) {
+    return teams.find(t => t.id === teamId)?.name || "—";
+  }
+
   return (
-    <section style={sectionStyle}>
+    <section style={sec}>
       <div style={{ display: "flex", alignItems: "center", marginBottom: 14 }}>
         <h3 style={secH}>Users</h3>
         <Btn variant="primary" onClick={() => open("create")} style={{ marginLeft: "auto" }}>
@@ -125,24 +254,28 @@ function UsersSection() {
 
       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
         <thead>
-          <tr style={{ borderBottom: "1px solid #222" }}>
-            {["Username","Display Name","Role",""].map(h => (
-              <th key={h} style={thStyle}>{h}</th>
-            ))}
+          <tr style={{ borderBottom: "1px solid var(--border)" }}>
+            {["Username","Name","Role","Team",""].map(h => <th key={h} style={th}>{h}</th>)}
           </tr>
         </thead>
         <tbody>
           {users.map(u => (
-            <tr key={u.id} style={{ borderBottom: "1px solid #1a1a1a" }}>
-              <td style={tdStyle}>{u.username}</td>
-              <td style={tdStyle}>{u.displayName}</td>
-              <td style={{ ...tdStyle, color: u.role === "Admin" ? ACCENT : "#666" }}>{u.role}</td>
-              <td style={{ ...tdStyle, textAlign: "right" }}>
-                <Btn onClick={() => open("invite", u)} style={{ marginRight: 6 }}>Invite Link</Btn>
-                <Btn onClick={() => open("passwd", u)} style={{ marginRight: 6 }}>Password</Btn>
-                <Btn onClick={() => open("edit",   u)} style={{ marginRight: 6 }}>Edit</Btn>
+            <tr key={u.id} style={{ borderBottom: "1px solid var(--bg)" }}>
+              <td style={td}>{u.username}</td>
+              <td style={td}>{u.displayName}</td>
+              <td style={{ ...td, color: u.role === "Admin" ? ACCENT : "var(--text3)" }}>{u.role}</td>
+              <td style={{ ...td, color: "var(--text3)", fontSize: 12 }}>
+                {u.teamId ? teamName(u.teamId) : <span style={{ color: "var(--text3)" }}>All Teams</span>}
+              </td>
+              <td style={{ ...td, textAlign: "right" }}>
+                <Btn onClick={() => {
+                  setTarget(u); setForm({ tempPw: "" }); setInviteLink(""); setModal("invite");
+                }} style={{ marginRight: 4 }}>Invite</Btn>
+                <Btn onClick={() => { setTarget(u); setForm({}); setErr(""); setModal("passwd"); }}
+                  style={{ marginRight: 4 }}>PW</Btn>
+                <Btn onClick={() => open("edit", u)} style={{ marginRight: 4 }}>Edit</Btn>
                 {u.id !== me?.id && (
-                  <Btn variant="danger" onClick={() => { deleteUser(u.id); refresh(); }}>Delete</Btn>
+                  <Btn variant="danger" onClick={() => { deleteUser(u.id); refresh(); }}>✕</Btn>
                 )}
               </td>
             </tr>
@@ -150,16 +283,20 @@ function UsersSection() {
         </tbody>
       </table>
 
-      {/* Create user modal */}
+      {/* Create */}
       {modal === "create" && (
         <Modal title="Create User" onClose={() => setModal(null)}>
           {!inviteLink ? (
             <form onSubmit={handleCreate}>
-              <input placeholder="Username" style={inp} onChange={f("username")} />
+              <input placeholder="Username" style={inp} onChange={f("username")} autoFocus />
               <input placeholder="Display name (optional)" style={inp} onChange={f("displayName")} />
               <input type="password" placeholder="Temporary password" style={inp} onChange={f("password")} />
               <select style={{ ...inp }} value={form.role || "Player"} onChange={f("role")}>
                 <option>Player</option><option>Coach</option><option>Admin</option>
+              </select>
+              <select style={{ ...inp }} value={form.teamId || ""} onChange={f("teamId")}>
+                <option value="">No team (Admin only)</option>
+                {teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
               </select>
               {err && <p style={{ color: "#f66", fontSize: 12, margin: "0 0 8px" }}>{err}</p>}
               <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
@@ -168,25 +305,7 @@ function UsersSection() {
               </div>
             </form>
           ) : (
-            <div>
-              <p style={{ color: "#888", fontSize: 13, marginBottom: 12 }}>
-                User created. Share this invite link — it auto-fills their credentials and lets them set a new password:
-              </p>
-              <div style={{
-                background: "#111", border: "1px solid #2a2a2a",
-                borderRadius: 6, padding: "10px 12px",
-                fontFamily: "monospace", fontSize: 11, color: ACCENT,
-                wordBreak: "break-all", marginBottom: 12,
-              }}>
-                {inviteLink}
-              </div>
-              <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
-                <Btn onClick={() => { navigator.clipboard.writeText(inviteLink); }}>
-                  Copy Link
-                </Btn>
-                <Btn variant="primary" onClick={() => { refresh(); setModal(null); }}>Done</Btn>
-              </div>
-            </div>
+            <InviteLinkDisplay link={inviteLink} onDone={() => { refresh(); setModal(null); }} />
           )}
         </Modal>
       )}
@@ -196,8 +315,8 @@ function UsersSection() {
         <Modal title={`Invite Link — ${target.username}`} onClose={() => setModal(null)}>
           {!inviteLink ? (
             <div>
-              <p style={{ color: "#888", fontSize: 13, marginBottom: 12 }}>
-                Set a temporary password. The user will be prompted to change it via the invite link.
+              <p style={{ color: "var(--text3)", fontSize: 13, marginBottom: 12 }}>
+                Set a temporary password. The user will be prompted to change it.
               </p>
               <input type="text" placeholder="Temporary password" style={inp}
                 value={form.tempPw || ""} onChange={f("tempPw")} />
@@ -208,28 +327,11 @@ function UsersSection() {
                   if (!form.tempPw) { setErr("Enter a temporary password"); return; }
                   await updateUserPassword(target.id, form.tempPw);
                   setInviteLink(buildInviteLink(target.id, form.tempPw));
-                }}>
-                  Generate Link
-                </Btn>
+                }}>Generate Link</Btn>
               </div>
             </div>
           ) : (
-            <div>
-              <p style={{ color: "#888", fontSize: 13, marginBottom: 12 }}>
-                Share this link with <strong style={{ color: "#ccc" }}>{target.username}</strong>:
-              </p>
-              <div style={{
-                background: "#111", border: "1px solid #2a2a2a", borderRadius: 6,
-                padding: "10px 12px", fontFamily: "monospace", fontSize: 11,
-                color: ACCENT, wordBreak: "break-all", marginBottom: 12,
-              }}>
-                {inviteLink}
-              </div>
-              <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
-                <Btn onClick={() => navigator.clipboard.writeText(inviteLink)}>Copy Link</Btn>
-                <Btn variant="primary" onClick={() => setModal(null)}>Done</Btn>
-              </div>
-            </div>
+            <InviteLinkDisplay link={inviteLink} onDone={() => setModal(null)} />
           )}
         </Modal>
       )}
@@ -238,8 +340,8 @@ function UsersSection() {
       {modal === "passwd" && (
         <Modal title={`Change Password — ${target?.username}`} onClose={() => setModal(null)}>
           <form onSubmit={handlePasswd}>
-            <input type="password" placeholder="New password" style={inp} onChange={f("pw1")} />
-            <input type="password" placeholder="Confirm password" style={inp} onChange={f("pw2")} />
+            <input type="password" placeholder="New password" style={inp} onChange={f("pw1")} autoFocus />
+            <input type="password" placeholder="Confirm" style={inp} onChange={f("pw2")} />
             {err && <p style={{ color: "#f66", fontSize: 12, margin: "0 0 8px" }}>{err}</p>}
             <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
               <Btn onClick={() => setModal(null)}>Cancel</Btn>
@@ -249,14 +351,18 @@ function UsersSection() {
         </Modal>
       )}
 
-      {/* Edit user */}
+      {/* Edit */}
       {modal === "edit" && (
         <Modal title={`Edit — ${target?.username}`} onClose={() => setModal(null)}>
           <form onSubmit={handleEdit}>
             <input value={form.displayName || ""} placeholder="Display name" style={inp}
-              onChange={f("displayName")} />
+              onChange={f("displayName")} autoFocus />
             <select style={{ ...inp }} value={form.role || "Player"} onChange={f("role")}>
               <option>Player</option><option>Coach</option><option>Admin</option>
+            </select>
+            <select style={{ ...inp }} value={form.teamId || ""} onChange={f("teamId")}>
+              <option value="">No team (Admin only)</option>
+              {teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
             </select>
             <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
               <Btn onClick={() => setModal(null)}>Cancel</Btn>
@@ -269,109 +375,186 @@ function UsersSection() {
   );
 }
 
-// ── Playdata upload section ───────────────────────────────────────────────────
-function PlaydataSection() {
-  const { seasons, selectedSeason, selectSeason, refreshSeasons,
-          games, selectedGame, setSelectedGame, refreshGames } = useApp();
-
-  const [modal,      setModal]      = useState(null);
-  const [uploadGame, setUploadGame] = useState(null);
-  const [uploading,  setUploading]  = useState(false);
-  const [uploadMsg,  setUploadMsg]  = useState("");
-
-  async function handleUpload(file) {
-    if (!uploadGame) return;
-    setUploading(true); setUploadMsg("");
-    try {
-      const rows = await parsePlaylistData(file);
-      saveGamePlaydata(uploadGame.id, JSON.stringify(rows));
-      refreshGames(selectedSeason?.id);
-      setUploadMsg(`✅ ${rows.length} plays imported successfully`);
-    } catch (ex) {
-      setUploadMsg(`❌ Error: ${ex.message}`);
-    } finally { setUploading(false); }
-  }
-
+function InviteLinkDisplay({ link, onDone }) {
+  const [copied, setCopied] = useState(false);
   return (
-    <section style={sectionStyle}>
-      <h3 style={{ ...secH, marginBottom: 14 }}>Upload Playdata</h3>
-      <p style={{ color: "#555", fontSize: 13, marginBottom: 14 }}>
-        Select a game from the sidebar file tree, then upload a PlaylistData .xlsx file.
+    <div>
+      <p style={{ color: "var(--text3)", fontSize: 13, marginBottom: 12 }}>
+        Share this invite link. The user will set their own password on first login:
       </p>
-
-      {!selectedGame ? (
-        <p style={{ color: "#444", fontSize: 13 }}>No game selected. Use the sidebar to select a game.</p>
-      ) : (
-        <div>
-          <div style={{
-            background: "#181818", border: "1px solid #2a2a2a", borderRadius: 8,
-            padding: "12px 16px", display: "flex", alignItems: "center",
-            gap: 12, marginBottom: 12,
-          }}>
-            <div style={{ flex: 1 }}>
-              <div style={{ color: "#ccc", fontSize: 13, fontWeight: 600 }}>
-                W{selectedGame.week} — {selectedGame.opponent}
-              </div>
-              <div style={{ color: "#444", fontSize: 11, marginTop: 2 }}>
-                {(() => {
-                  let c = 0;
-                  try { if (selectedGame.playdata) c = JSON.parse(selectedGame.playdata).length; } catch {}
-                  return c > 0 ? `${c} plays loaded` : "No playdata yet";
-                })()}
-              </div>
-            </div>
-            <Btn variant="primary" onClick={() => { setUploadGame(selectedGame); setUploadMsg(""); setModal("upload"); }}>
-              Upload .xlsx
-            </Btn>
-          </div>
-        </div>
-      )}
-
-      {modal === "upload" && uploadGame && (
-        <Modal title={`Upload Playdata — W${uploadGame.week} vs. ${uploadGame.opponent}`}
-          onClose={() => setModal(null)}>
-          <p style={{ color: "#666", fontSize: 13, margin: "0 0 12px" }}>
-            Upload a PlaylistData Excel file (.xlsx).
-          </p>
-          <input type="file" accept=".xlsx" style={{ ...inp, padding: "6px" }}
-            onChange={e => { if (e.target.files[0]) handleUpload(e.target.files[0]); }} />
-          {uploading && <p style={{ color: "#888", fontSize: 12 }}>Importing…</p>}
-          {uploadMsg && (
-            <p style={{ fontSize: 13, margin: "8px 0",
-              color: uploadMsg.startsWith("✅") ? ACCENT : "#f66" }}>
-              {uploadMsg}
-            </p>
-          )}
-          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 8 }}>
-            <Btn onClick={() => setModal(null)}>Close</Btn>
-          </div>
-        </Modal>
-      )}
-    </section>
-  );
-}
-
-// ── Main Admin page ───────────────────────────────────────────────────────────
-export default function Admin() {
-  const { user } = useAuth();
-  if (user?.role !== "Admin") {
-    return <div style={{ padding: 32, color: "#555" }}>Access denied.</div>;
-  }
-
-  return (
-    <div style={{ padding: "24px 28px", maxWidth: 900 }}>
-      <h2 style={{ color: "#eee", margin: "0 0 24px", fontSize: 20, fontWeight: 700 }}>Admin</h2>
-      <UsersSection />
-      <PlaydataSection />
+      <div style={{
+        background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 6,
+        padding: "10px 12px", fontFamily: "monospace", fontSize: 11,
+        color: ACCENT, wordBreak: "break-all", marginBottom: 12,
+      }}>{link}</div>
+      <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+        <Btn onClick={() => { navigator.clipboard.writeText(link); setCopied(true); }}>
+          {copied ? "✓ Copied!" : "Copy Link"}
+        </Btn>
+        <Btn variant="primary" onClick={onDone}>Done</Btn>
+      </div>
     </div>
   );
 }
 
-const sectionStyle = {
-  background: "#1a1a1a", border: "1px solid #222",
-  borderRadius: 10, padding: "18px 20px", marginBottom: 20,
-};
-const secH    = { color: "#ddd", margin: 0, fontSize: 15, fontWeight: 700 };
-const thStyle = { padding: "6px 8px", textAlign: "left", color: "#555",
+// ── Data upload section ───────────────────────────────────────────────────────
+function DataSection() {
+  const { selectedGame, refreshGames, selectedSeason } = useApp();
+  const [status, setStatus] = useState({});  // {field: message}
+  const [loading, setLoading] = useState({});
+
+  async function handleUpload(field, file, parser) {
+    if (!selectedGame) return;
+    setLoading(l => ({ ...l, [field]: true }));
+    setStatus(s => ({ ...s, [field]: "" }));
+    try {
+      const data = await parser(file);
+      saveGameData(selectedGame.id, field, JSON.stringify(data));
+      refreshGames(selectedSeason?.id);
+      setStatus(s => ({ ...s, [field]: `✅ ${data.length} rows imported` }));
+    } catch (ex) {
+      setStatus(s => ({ ...s, [field]: `❌ ${ex.message}` }));
+    } finally {
+      setLoading(l => ({ ...l, [field]: false }));
+    }
+  }
+
+  const DATA_TYPES = [
+    {
+      field: "playdata",
+      label: "Play Data",
+      description: "PlaylistData .xlsx — main play-by-play data",
+      accept: ".xlsx",
+      parser: parsePlaylistData,
+    },
+    {
+      field: "rosterData",
+      label: "Roster",
+      description: "Roster file (CSV or .xlsx) — player information",
+      accept: ".xlsx,.csv",
+      parser: async (file) => {
+        // Generic row parser — just read as JSON
+        const { default: XLSX } = await import("xlsx");
+        return new Promise((res, rej) => {
+          const reader = new FileReader();
+          reader.onload = e => {
+            const wb = XLSX.read(new Uint8Array(e.target.result), { type: "array" });
+            const ws = wb.Sheets[wb.SheetNames[0]];
+            res(XLSX.utils.sheet_to_json(ws, { defval: "" }));
+          };
+          reader.onerror = rej;
+          reader.readAsArrayBuffer(file);
+        });
+      },
+    },
+    {
+      field: "formationData",
+      label: "Formation Data",
+      description: "Formation reference file (.xlsx)",
+      accept: ".xlsx",
+      parser: async (file) => {
+        const { default: XLSX } = await import("xlsx");
+        return new Promise((res, rej) => {
+          const reader = new FileReader();
+          reader.onload = e => {
+            const wb = XLSX.read(new Uint8Array(e.target.result), { type: "array" });
+            const ws = wb.Sheets[wb.SheetNames[0]];
+            res(XLSX.utils.sheet_to_json(ws, { defval: "" }));
+          };
+          reader.onerror = rej;
+          reader.readAsArrayBuffer(file);
+        });
+      },
+    },
+  ];
+
+  if (!selectedGame) {
+    return (
+      <section style={sec}>
+        <h3 style={{ ...secH, marginBottom: 10 }}>Data</h3>
+        <p style={{ color: "var(--text3)", fontSize: 13 }}>
+          Select a game from the sidebar to upload data.
+        </p>
+      </section>
+    );
+  }
+
+  let playdataCount = 0, rosterCount = 0, formationCount = 0;
+  try { if (selectedGame.playdata)     playdataCount  = JSON.parse(selectedGame.playdata).length; } catch {}
+  try { if (selectedGame.rosterData)   rosterCount    = JSON.parse(selectedGame.rosterData).length; } catch {}
+  try { if (selectedGame.formationData) formationCount = JSON.parse(selectedGame.formationData).length; } catch {}
+  const counts = { playdata: playdataCount, rosterData: rosterCount, formationData: formationCount };
+
+  return (
+    <section style={sec}>
+      <h3 style={{ ...secH, marginBottom: 4 }}>Data</h3>
+      <p style={{ color: "var(--text3)", fontSize: 12, marginBottom: 16 }}>
+        W{selectedGame.week} — {selectedGame.opponent}
+      </p>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        {DATA_TYPES.map(({ field, label, description, accept, parser }) => (
+          <div key={field} style={{
+            background: "var(--bg)", border: "1px solid var(--border)",
+            borderRadius: 8, padding: "14px 16px",
+            display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap",
+          }}>
+            <div style={{ flex: 1, minWidth: 160 }}>
+              <div style={{ color: "var(--text)", fontSize: 13, fontWeight: 600 }}>{label}</div>
+              <div style={{ color: "var(--text3)", fontSize: 11, marginTop: 2 }}>{description}</div>
+              {counts[field] > 0 && (
+                <div style={{ color: ACCENT, fontSize: 11, marginTop: 3 }}>
+                  {counts[field]} rows loaded
+                </div>
+              )}
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              {status[field] && (
+                <span style={{ fontSize: 12,
+                  color: status[field].startsWith("✅") ? ACCENT : "#f66" }}>
+                  {status[field]}
+                </span>
+              )}
+              <label style={{
+                background: GREEN, color: "#fff", border: "none", borderRadius: 6,
+                padding: "7px 14px", fontSize: 12, fontWeight: 600,
+                cursor: "pointer", whiteSpace: "nowrap",
+              }}>
+                {loading[field] ? "Uploading…" : "Upload"}
+                <input type="file" accept={accept} style={{ display: "none" }}
+                  onChange={e => { if (e.target.files[0]) handleUpload(field, e.target.files[0], parser); e.target.value = ""; }}
+                />
+              </label>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// ── Main ──────────────────────────────────────────────────────────────────────
+export default function Admin() {
+  const { user } = useAuth();
+  if (user?.role !== "Admin") {
+    return <div style={{ padding: 32, color: "var(--text3)" }}>Access denied.</div>;
+  }
+
+  return (
+    <div style={{ padding: "24px 28px", maxWidth: 960 }}>
+      <h2 style={{ color: "var(--text)", margin: "0 0 24px", fontSize: 20, fontWeight: 700 }}>
+        Admin
+      </h2>
+      <TeamsSection />
+      <UsersSection />
+      <DataSection />
+    </div>
+  );
+}
+
+const sec  = { background: "var(--surface)", border: "1px solid var(--border)",
+  borderRadius: 10, padding: "18px 20px", marginBottom: 20 };
+const secH = { color: "var(--text)", margin: 0, fontSize: 15, fontWeight: 700 };
+const th   = { padding: "6px 8px", textAlign: "left", color: "var(--text3)",
   fontWeight: 600, fontSize: 11, textTransform: "uppercase" };
-const tdStyle = { padding: "9px 8px", color: "#bbb" };
+const td   = { padding: "9px 8px", color: "var(--text2)" };

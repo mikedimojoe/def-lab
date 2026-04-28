@@ -1,24 +1,30 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import { getSeasons, getGames, seedDefaultSeason } from "../lib/storage";
+import { getSeasons, getGames, seedDefaultSeason, seedDefaultTeam } from "../lib/storage";
+import { useAuth } from "./AuthContext";
 
 const AppContext = createContext(null);
 
 export function AppProvider({ children }) {
+  const { user } = useAuth();
+
+  // Admin (teamId=null) sees all; others filtered by their teamId
+  const teamId = user?.role === "Admin" ? null : (user?.teamId || null);
+
   const [seasons,        setSeasons]        = useState([]);
   const [selectedSeason, setSelectedSeason] = useState(null);
   const [games,          setGames]          = useState([]);
   const [selectedGame,   setSelectedGame]   = useState(null);
-  const [mode,           setMode]           = useState("prep"); // "prep" | "live"
+  const [mode,           setMode]           = useState("prep");
   const [sidebarOpen,    setSidebarOpen]    = useState(true);
 
-  // Boot: seed default season then load
   useEffect(() => {
-    const s = seedDefaultSeason();
+    seedDefaultTeam();
+    const s = seedDefaultSeason(teamId);
     refreshSeasons(s.id);
-  }, []);
+  }, [teamId]);
 
   function refreshSeasons(selectId) {
-    const all = getSeasons();
+    const all  = getSeasons(teamId);
     setSeasons(all);
     const pick = selectId
       ? all.find(s => s.id === selectId) || all[0]
@@ -28,11 +34,16 @@ export function AppProvider({ children }) {
     if (pick) {
       setSelectedSeason(pick);
       refreshGames(pick.id);
+    } else {
+      setSelectedSeason(null);
+      setGames([]);
     }
   }
 
   function refreshGames(seasonId, selectId) {
-    const all = getGames(seasonId || selectedSeason?.id);
+    const sid = seasonId || selectedSeason?.id;
+    if (!sid) { setGames([]); return; }
+    const all  = getGames(sid);
     setGames(all);
     const pick = selectId
       ? all.find(g => g.id === selectId)
@@ -50,6 +61,7 @@ export function AppProvider({ children }) {
 
   return (
     <AppContext.Provider value={{
+      teamId,
       seasons, selectedSeason, selectSeason, refreshSeasons,
       games, selectedGame, setSelectedGame, refreshGames,
       mode, setMode,
