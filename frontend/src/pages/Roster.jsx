@@ -307,36 +307,54 @@ export default function Roster() {
       alert("No roster data uploaded for this game.\nGo to Admin → Upload Roster to upload a roster file.");
       return;
     }
+    let parsed;
     try {
-      const parsed = JSON.parse(selectedGame.rosterData);
-      // Try to build depth chart from parsed players
-      const depth = Object.fromEntries(POSITIONS.map(p => [p.key, []]));
-      const players = Array.isArray(parsed) ? parsed : (parsed.players || []);
-      players.forEach((p, i) => {
-        const pos = String(p.position || p.Position || p.POS || "").toUpperCase();
-        // Map common positions to depth slots
-        const slotMap = {
-          QB: "QB", RB: "RB", FB: "FB", TE: "TE",
-          WR: "WR_L", WRL: "WR_L", WRR: "WR_R",
-          LWR: "WR_L", RWR: "WR_R", SB: "SB",
-          LT: "LT", LG: "LG", C: "C", RG: "RG", RT: "RT",
-        };
-        const slot = slotMap[pos];
-        if (slot && depth[slot]) {
-          depth[slot].push({
-            number:    String(p.number || p.Number || p.NR || ""),
-            firstname: String(p.firstname || p.FirstName || p.FIRST || p.Vorname || ""),
-            lastname:  String(p.lastname  || p.LastName  || p.LAST  || p.Nachname || ""),
-            nationality: String(p.nationality || p.NAT || ""),
-            position: pos,
-            dcPos: i + 1,
-            markColor: null,
-          });
-        }
-      });
-      persist(prev => ({ ...prev, depth }));
+      parsed = JSON.parse(selectedGame.rosterData);
     } catch (e) {
-      alert("Could not parse roster data: " + e.message);
+      alert("Could not read roster data — the file may be corrupted.\n" + e.message);
+      return;
+    }
+
+    try {
+      const depth = Object.fromEntries(POSITIONS.map(p => [p.key, []]));
+      const players = Array.isArray(parsed) ? parsed : (Array.isArray(parsed?.players) ? parsed.players : []);
+
+      if (players.length === 0) {
+        alert("No player rows found in the roster file.\nCheck that your file has player data in the first sheet.");
+        return;
+      }
+
+      const slotMap = {
+        QB: "QB", RB: "RB", FB: "FB", TE: "TE",
+        WR: "WR_L", WRL: "WR_L", WRR: "WR_R",
+        LWR: "WR_L", RWR: "WR_R", SB: "SB",
+        LT: "LT", LG: "LG", C: "C", RG: "RG", RT: "RT",
+      };
+
+      let imported = 0;
+      players.forEach((p, i) => {
+        if (!p || typeof p !== "object") return;
+        const pos  = String(p.position || p.Position || p.POS || p.Pos || "").toUpperCase().trim();
+        const slot = slotMap[pos];
+        if (!slot) return;
+        depth[slot].push({
+          number:      String(p.number    || p.Number    || p.NR   || p["#"]    || ""),
+          firstname:   String(p.firstname || p.FirstName || p.FIRST || p.Vorname || p.First || ""),
+          lastname:    String(p.lastname  || p.LastName  || p.LAST  || p.Nachname || p.Last  || ""),
+          nationality: String(p.nationality || p.Nationality || p.NAT || p.Nat || ""),
+          position:    pos,
+          dcPos:       p.dcPos != null ? parseInt(p.dcPos) : (i + 1),
+          markColor:   null,
+        });
+        imported++;
+      });
+
+      persist(prev => ({ ...prev, depth }));
+      if (imported === 0) {
+        alert(`Imported 0 players.\n\nMake sure the "Position" column uses known values:\nQB, RB, FB, TE, WR, SB, LT, LG, C, RG, RT`);
+      }
+    } catch (e) {
+      alert("Error building depth chart: " + e.message);
     }
   }
 

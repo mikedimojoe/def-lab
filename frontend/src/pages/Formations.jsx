@@ -91,9 +91,8 @@ export default function Formations() {
           <>
             <label style={{ ...btnStyle, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
               📁 {imgLoading ? "Uploading…" : "Upload Images"}
-              <input type="file" multiple accept="image/*"
-                // @ts-ignore
-                webkitdirectory="" directory=""
+              <input type="file" multiple
+                accept="image/jpeg,image/png,image/webp,image/gif,image/bmp"
                 onChange={handleFolderUpload}
                 style={{ display: "none" }} />
             </label>

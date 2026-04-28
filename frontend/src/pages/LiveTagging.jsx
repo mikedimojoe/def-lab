@@ -131,6 +131,18 @@ export default function LiveTagging() {
   const gridRef    = useRef(null);
   const prevGameId = useRef(selectedGame?.id);
 
+  // Live refs — always reflect the latest state inside handleGridKey (no stale closures)
+  const selRef         = useRef(sel);
+  const editCellRef    = useRef(editCell);
+  const editValRef     = useRef(editVal);
+  const rowsRef        = useRef(rows);
+  const clipboardRef   = useRef(clipboard);
+  selRef.current       = sel;
+  editCellRef.current  = editCell;
+  editValRef.current   = editVal;
+  rowsRef.current      = rows;
+  clipboardRef.current = clipboard;
+
   // Sync rows when game changes
   if (selectedGame?.id !== prevGameId.current) {
     prevGameId.current = selectedGame?.id;
@@ -205,14 +217,18 @@ export default function LiveTagging() {
     else if (e.key === "Tab")   { e.preventDefault(); commitEdit({ r: ri, c: e.shiftKey ? Math.max(ci - 1, 0) : Math.min(ci + 1, numCols - 1) }); }
   }, [cancelEdit, commitEdit, rows.length, numCols]);
 
-  // Grid keyboard handler
+  // Grid keyboard handler — reads from refs to avoid any stale-closure issues
   function handleGridKey(e) {
-    if (!canEdit || !sel) return;
-    const { r, c } = sel;
+    const curSel      = selRef.current;
+    const curEditCell = editCellRef.current;
+    const curRows     = rowsRef.current;
+    const curClip     = clipboardRef.current;
+    if (!canEdit || !curSel) return;
+    const { r, c } = curSel;
 
-    if (editCell) {
+    if (curEditCell) {
       if (e.key === "Escape") { e.preventDefault(); cancelEdit(); return; }
-      if (e.key === "Enter")  { e.preventDefault(); commitEdit({ r: Math.min(r + 1, rows.length - 1), c }); return; }
+      if (e.key === "Enter")  { e.preventDefault(); commitEdit({ r: Math.min(r + 1, curRows.length - 1), c }); return; }
       if (e.key === "Tab")    { e.preventDefault(); commitEdit({ r, c: e.shiftKey ? Math.max(c - 1, 0) : Math.min(c + 1, numCols - 1) }); return; }
       return;
     }
@@ -222,7 +238,7 @@ export default function LiveTagging() {
     } else if (e.key === "ArrowLeft" || (e.key === "Tab" && e.shiftKey)) {
       e.preventDefault(); setSel({ r, c: Math.max(c - 1, 0) });
     } else if (e.key === "ArrowDown") {
-      e.preventDefault(); setSel({ r: Math.min(r + 1, rows.length - 1), c });
+      e.preventDefault(); setSel({ r: Math.min(r + 1, curRows.length - 1), c });
     } else if (e.key === "ArrowUp") {
       e.preventDefault(); setSel({ r: Math.max(r - 1, 0), c });
     } else if (e.key === "Enter" || e.key === "F2") {
@@ -230,14 +246,14 @@ export default function LiveTagging() {
     } else if (e.key === "Delete" || e.key === "Backspace") {
       e.preventDefault();
       const col  = displayCols[c];
-      const next = rows.map((row, i) => i === r ? { ...row, [col]: "" } : row);
+      const next = curRows.map((row, i) => i === r ? { ...row, [col]: "" } : row);
       persist(next);
     } else if (e.key === "c" && (e.ctrlKey || e.metaKey)) {
-      setClipboard(rows[r]?.[displayCols[c]] ?? "");
+      setClipboard(curRows[r]?.[displayCols[c]] ?? "");
     } else if (e.key === "v" && (e.ctrlKey || e.metaKey)) {
       e.preventDefault();
       const col  = displayCols[c];
-      const next = rows.map((row, i) => i === r ? { ...row, [col]: clipboard } : row);
+      const next = curRows.map((row, i) => i === r ? { ...row, [col]: curClip } : row);
       persist(next);
     } else if (e.key === "Escape") {
       setSel(null);
@@ -257,6 +273,14 @@ export default function LiveTagging() {
     document.getElementById(`cell-${sel.r}-${sel.c}`)
       ?.scrollIntoView({ block: "nearest", inline: "nearest" });
   }, [sel]);
+
+  // Keep keyboard focus on the grid whenever a cell is selected (not editing)
+  // This ensures typing after a single click always triggers handleGridKey
+  useEffect(() => {
+    if (sel && !editCell) {
+      gridRef.current?.focus();
+    }
+  }, [sel?.r, sel?.c, editCell]);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh",
