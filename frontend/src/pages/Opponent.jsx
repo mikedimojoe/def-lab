@@ -1,8 +1,17 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useCallback } from "react";
 import { useApp } from "../contexts/AppContext";
 import { computeOpponentFormations } from "../lib/dataEngine";
 import { matchFormationImage } from "../lib/formationImages";
-import { apiGetImages } from "../lib/api";
+import { apiGetImages, apiUploadImage } from "../lib/api";
+
+function fileToDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => resolve(e.target.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
 
 const RUN_COLOR  = "#7B6EA0";
 const PASS_COLOR = "#4472C4";
@@ -72,8 +81,7 @@ function FormationCard({ data, gameId, images, onImageUpdate }) {
     input.onchange = async e => {
       const file = e.target.files?.[0];
       if (!file) return;
-      const dataUrl = await fileToDataUrl(file);
-      await saveFormationImage(gameId, key, dataUrl);
+      await apiUploadImage(gameId, file);
       onImageUpdate();
     };
     input.click();
@@ -140,11 +148,15 @@ export default function Opponent() {
     () => computeOpponentFormations(rows, topN),
     [rows, topN]);
 
+  const refreshImages = useCallback(() => {
+    if (!selectedGame) return;
+    apiGetImages(selectedGame.id).then(setImages).catch(() => {});
+  }, [selectedGame?.id]);
+
   // Load images from API
   useEffect(() => {
     setImages({});
-    if (!selectedGame) return;
-    apiGetImages(selectedGame.id).then(setImages).catch(() => {});
+    refreshImages();
   }, [selectedGame?.id]);
 
   const noData = !selectedGame || rows.length === 0;
