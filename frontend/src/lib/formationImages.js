@@ -111,16 +111,21 @@ export async function deleteAllFormationImages(gameId) {
   });
 }
 
-// Find a matching image in the loaded images map for a given formation name
-// Returns the data URL or null
-export function matchFormationImage(formationName, imagesMap) {
+// Find a matching image for a formation (+ optional backfield).
+// Tries "formation + backfield" first, falls back to formation alone.
+export function matchFormationImage(formationName, imagesMap, backfieldName = "") {
   if (!formationName || !imagesMap) return null;
+
+  if (backfieldName) {
+    const combinedNorm = normalizeName(formationName + " " + backfieldName);
+    if (imagesMap[combinedNorm]) return imagesMap[combinedNorm];
+    const hit = Object.entries(imagesMap).find(([k]) => k.includes(combinedNorm) || combinedNorm.includes(k));
+    if (hit) return hit[1];
+  }
+
   const norm = normalizeName(formationName);
   if (imagesMap[norm]) return imagesMap[norm];
-  // Fuzzy: image key contains formation name or vice versa
-  const entry = Object.entries(imagesMap).find(
-    ([k]) => k.includes(norm) || norm.includes(k)
-  );
+  const entry = Object.entries(imagesMap).find(([k]) => k.includes(norm) || norm.includes(k));
   return entry ? entry[1] : null;
 }
 

@@ -30,6 +30,7 @@ const ICONS = {
   callsheet:  "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M16 13H8M16 17H8M10 9H8",
   roster:     "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8z",
   admin:      "M12 1l3 6 6.5 1-5 4.5 1.5 6.5L12 16l-6 3.5 1.5-6.5L2.5 8.5 9 7.5z",
+  upload:     "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12",
   chevronL:   "M15 18l-6-6 6-6",
   chevronR:   "M9 18l6-6-6-6",
   chevronD:   "M6 9l6 6 6-6",
@@ -360,10 +361,13 @@ export default function Sidebar() {
 
   function handleLogout() { logout(); navigate("/"); }
 
-  const isAdmin  = user?.role === "Admin";
-  const navItems = isAdmin
-    ? [...NAV_ITEMS, { to: "/admin", label: "Admin", icon: "admin" }]
-    : NAV_ITEMS;
+  const isAdmin   = user?.role === "Admin";
+  const canUpload = user?.role === "Admin" || user?.role === "Coach";
+  const navItems  = [
+    ...NAV_ITEMS,
+    ...(canUpload ? [{ to: "/upload", label: "Upload", icon: "upload" }] : []),
+    ...(isAdmin   ? [{ to: "/admin",  label: "Admin",  icon: "admin"  }] : []),
+  ];
 
   // Sync sidebarOpen with width
   const effectiveOpen = !collapsed;

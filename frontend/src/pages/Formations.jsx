@@ -69,8 +69,8 @@ export default function Formations() {
   }, [teamId]);
 
   const matchedImage = useMemo(
-    () => selForm ? matchFormationImage(selForm, images) : null,
-    [selForm, images]);
+    () => selForm ? matchFormationImage(selForm, images, selBF) : null,
+    [selForm, selBF, images]);
 
   const noData = !selectedGame || rows.length === 0;
 

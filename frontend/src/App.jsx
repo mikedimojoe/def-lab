@@ -12,12 +12,14 @@ import Opponent    from "./pages/Opponent";
 import Callsheet   from "./pages/Callsheet";
 import Roster      from "./pages/Roster";
 import Admin       from "./pages/Admin";
+import Upload      from "./pages/Upload";
 
-function ProtectedRoute({ children, adminOnly = false }) {
+function ProtectedRoute({ children, adminOnly = false, noPlayer = false }) {
   const { user, loading } = useAuth();
   if (loading) return <div style={{ color: "#333", padding: 40 }}>…</div>;
   if (!user)   return <Navigate to="/" replace />;
   if (adminOnly && user.role !== "Admin") return <Navigate to="/overview" replace />;
+  if (noPlayer && user.role === "Player") return <Navigate to="/overview" replace />;
   return children;
 }
 
@@ -68,6 +70,11 @@ function AppRoutes() {
       <Route path="/roster" element={
         <ProtectedRoute>
           <AppProvider><Layout><Roster /></Layout></AppProvider>
+        </ProtectedRoute>
+      } />
+      <Route path="/upload" element={
+        <ProtectedRoute noPlayer>
+          <AppProvider><Layout><Upload /></Layout></AppProvider>
         </ProtectedRoute>
       } />
       <Route path="/admin" element={
