@@ -11,7 +11,8 @@ const ACCENT = "#5CBF8A";
 const GREEN  = "#154734";
 
 export default function Formations() {
-  const { selectedGame, mode, playRows, liveRows } = useApp();
+  const { selectedGame, selectedSeason, mode, playRows, liveRows } = useApp();
+  const teamId = selectedSeason?.team_id;
   const [selForm, setSelForm] = useState("");
   const [selBF,   setSelBF]   = useState("");
 
@@ -35,23 +36,23 @@ export default function Formations() {
     () => computeFormationStats(rows, selForm || undefined, selBF || undefined),
     [rows, selForm, selBF]);
 
-  // Load images from server
+  // Load images from server (team-based)
   useEffect(() => {
-    if (!selectedGame) { setImages({}); return; }
-    apiGetImages(selectedGame.id).then(setImages).catch(() => setImages({}));
-  }, [selectedGame?.id]);
+    if (!teamId) { setImages({}); return; }
+    apiGetImages(teamId).then(setImages).catch(() => setImages({}));
+  }, [teamId]);
 
   // Upload images to server
   const handleFolderUpload = useCallback(async e => {
     const files = Array.from(e.target.files || []);
-    if (!files.length || !selectedGame) return;
+    if (!files.length || !teamId) return;
     setImgLoading(true);
     try {
       for (const file of files) {
         if (!file.type.startsWith("image/")) continue;
-        await apiUploadImage(selectedGame.id, file);
+        await apiUploadImage(teamId, file);
       }
-      const updated = await apiGetImages(selectedGame.id);
+      const updated = await apiGetImages(teamId);
       setImages(updated);
     } catch (err) {
       console.warn("Image upload error:", err);
@@ -59,13 +60,13 @@ export default function Formations() {
       setImgLoading(false);
       e.target.value = "";
     }
-  }, [selectedGame?.id]);
+  }, [teamId]);
 
   const handleDeleteImage = useCallback(async normName => {
-    if (!selectedGame) return;
-    await apiDeleteImage(selectedGame.id, normName);
+    if (!teamId) return;
+    await apiDeleteImage(teamId, normName);
     setImages(prev => { const n = { ...prev }; delete n[normName]; return n; });
-  }, [selectedGame?.id]);
+  }, [teamId]);
 
   const matchedImage = useMemo(
     () => selForm ? matchFormationImage(selForm, images) : null,

@@ -68,7 +68,7 @@ function ConceptBox({ title, items, color, bg }) {
 }
 
 // ── Single formation card ──────────────────────────────────────────────────────
-function FormationCard({ data, gameId, images, onImageUpdate }) {
+function FormationCard({ data, teamId, images, onImageUpdate }) {
   const { key, form, bf, total, runN, runPct, passN, passPct,
           topRuns, topConcepts, topFRoutes, topBRoutes } = data;
 
@@ -81,7 +81,7 @@ function FormationCard({ data, gameId, images, onImageUpdate }) {
     input.onchange = async e => {
       const file = e.target.files?.[0];
       if (!file) return;
-      await apiUploadImage(gameId, file);
+      await apiUploadImage(teamId, file);
       onImageUpdate();
     };
     input.click();
@@ -138,26 +138,27 @@ function FormationCard({ data, gameId, images, onImageUpdate }) {
 
 // ── Main Opponent page ────────────────────────────────────────────────────────
 export default function Opponent() {
-  const { selectedGame, mode, playRows, liveRows } = useApp();
+  const { selectedGame, selectedSeason, mode, playRows, liveRows } = useApp();
   const [topN, setTopN] = useState(5);
   const [images, setImages] = useState({});
 
   const rows = mode === "live" ? liveRows : playRows;
+  const teamId = selectedSeason?.team_id;
 
   const formations = useMemo(
     () => computeOpponentFormations(rows, topN),
     [rows, topN]);
 
   const refreshImages = useCallback(() => {
-    if (!selectedGame) return;
-    apiGetImages(selectedGame.id).then(setImages).catch(() => {});
-  }, [selectedGame?.id]);
+    if (!teamId) return;
+    apiGetImages(teamId).then(setImages).catch(() => {});
+  }, [teamId]);
 
-  // Load images from API
+  // Load images from API whenever team changes
   useEffect(() => {
     setImages({});
     refreshImages();
-  }, [selectedGame?.id]);
+  }, [teamId]);
 
   const noData = !selectedGame || rows.length === 0;
 
@@ -212,7 +213,7 @@ export default function Opponent() {
             <FormationCard
               key={f.key}
               data={f}
-              gameId={selectedGame.id}
+              teamId={teamId}
               images={images}
               onImageUpdate={refreshImages}
             />

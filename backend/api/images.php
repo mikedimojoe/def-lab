@@ -2,8 +2,8 @@
 require_once __DIR__ . '/config.php';
 $u = require_auth();
 $method = $_SERVER['REQUEST_METHOD'];
-$gameId = $_GET['game_id'] ?? null;
-if (!$gameId) json_err('game_id required');
+$teamId = $_GET['team_id'] ?? null;
+if (!$teamId) json_err('team_id required');
 
 define('IMG_DIR', __DIR__ . '/../uploads/formations/');
 
@@ -12,17 +12,17 @@ function norm_name(string $name): string {
     return preg_replace('/[^a-z0-9]+/', '_', $name);
 }
 
-function img_url(string $gameId, string $filename): string {
-    return '/uploads/formations/' . $gameId . '/' . rawurlencode($filename);
+function img_url(string $teamId, string $filename): string {
+    return '/uploads/formations/' . $teamId . '/' . rawurlencode($filename);
 }
 
-// GET — list all images for a game { normName: url }
+// GET — list all images for a team { normName: url }
 if ($method === 'GET') {
-    $stmt = db()->prepare("SELECT norm_name, filename FROM formation_images WHERE game_id=?");
-    $stmt->execute([$gameId]);
+    $stmt = db()->prepare("SELECT norm_name, filename FROM formation_images WHERE team_id=?");
+    $stmt->execute([$teamId]);
     $map = [];
     foreach ($stmt->fetchAll() as $row) {
-        $map[$row['norm_name']] = img_url($gameId, $row['filename']);
+        $map[$row['norm_name']] = img_url($teamId, $row['filename']);
     }
     json_ok($map);
 }
@@ -36,7 +36,7 @@ if ($method === 'POST') {
     if (!in_array($file['type'], $allowed)) json_err('Invalid file type');
     if ($file['size'] > 5 * 1024 * 1024) json_err('File too large (max 5MB)');
 
-    $dir = IMG_DIR . $gameId . '/';
+    $dir = IMG_DIR . $teamId . '/';
     if (!is_dir($dir)) mkdir($dir, 0755, true);
 
     $ext      = pathinfo($file['name'], PATHINFO_EXTENSION);
@@ -46,25 +46,25 @@ if ($method === 'POST') {
 
     if (!move_uploaded_file($file['tmp_name'], $dest)) json_err('Upload failed');
 
-    db()->prepare("INSERT INTO formation_images (game_id,norm_name,filename,mime_type) VALUES (?,?,?,?)
-                   ON DUPLICATE KEY UPDATE filename=VALUES(filename), mime_type=VALUES(mime_type)")
-       ->execute([$gameId, $normName, $filename, $file['type']]);
+    db()->prepare("INSERT INTO formation_images (team_id,norm_name,filename) VALUES (?,?,?)
+                   ON DUPLICATE KEY UPDATE filename=VALUES(filename)")
+       ->execute([$teamId, $normName, $filename]);
 
-    json_ok(['norm_name' => $normName, 'url' => img_url($gameId, $filename)]);
+    json_ok(['norm_name' => $normName, 'url' => img_url($teamId, $filename)]);
 }
 
 // DELETE — remove one image
 if ($method === 'DELETE') {
     if ($u['role'] === 'Player') json_err('Not allowed', 403);
     $normName = $_GET['norm_name'] ?? json_err('norm_name required');
-    $stmt = db()->prepare("SELECT filename FROM formation_images WHERE game_id=? AND norm_name=?");
-    $stmt->execute([$gameId, $normName]);
+    $stmt = db()->prepare("SELECT filename FROM formation_images WHERE team_id=? AND norm_name=?");
+    $stmt->execute([$teamId, $normName]);
     $row = $stmt->fetch();
     if ($row) {
-        $path = IMG_DIR . $gameId . '/' . $row['filename'];
+        $path = IMG_DIR . $teamId . '/' . $row['filename'];
         if (file_exists($path)) unlink($path);
-        db()->prepare("DELETE FROM formation_images WHERE game_id=? AND norm_name=?")
-           ->execute([$gameId, $normName]);
+        db()->prepare("DELETE FROM formation_images WHERE team_id=? AND norm_name=?")
+           ->execute([$teamId, $normName]);
     }
     json_ok(['deleted' => $normName]);
 }

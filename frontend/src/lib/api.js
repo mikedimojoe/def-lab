@@ -77,16 +77,16 @@ export const apiGetRoster   = (game_id)        => req('/roster.php?game_id=' + g
 export const apiSaveRoster  = (game_id, data)  =>
   req('/roster.php?game_id=' + game_id, { method: 'POST', body: data });
 
-// ── Formation Images ──────────────────────────────────────────────────────────
-export const apiGetImages    = (game_id)       => req('/images.php?game_id=' + game_id);
-export const apiDeleteImage  = (game_id, norm_name) =>
-  req('/images.php?game_id=' + game_id + '&norm_name=' + encodeURIComponent(norm_name),
+// ── Formation Images (team-based) ─────────────────────────────────────────────
+export const apiGetImages   = (team_id) => req('/images.php?team_id=' + team_id);
+export const apiDeleteImage = (team_id, norm_name) =>
+  req('/images.php?team_id=' + team_id + '&norm_name=' + encodeURIComponent(norm_name),
     { method: 'DELETE' });
 
-export async function apiUploadImage(game_id, file) {
+export async function apiUploadImage(team_id, file) {
   const form = new FormData();
   form.append('image', file);
-  const res = await fetch(BASE + '/images.php?game_id=' + game_id, {
+  const res = await fetch(BASE + '/images.php?team_id=' + team_id, {
     credentials: 'include',
     method: 'POST',
     body: form,
