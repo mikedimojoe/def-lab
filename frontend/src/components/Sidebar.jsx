@@ -91,7 +91,8 @@ function FileExplorer() {
           selectedGame, setSelectedGame, refreshGames,
           gamesBySeason, loadGamesForSeason } = useApp();
   const { user } = useAuth();
-  const isAdmin  = user?.role === "Admin";
+  const isAdmin   = user?.role === "Admin";
+  const canManage = user?.role === "Admin" || user?.role === "Coach";
 
   const [openSeasons,    setOpenSeasons]    = useState({});
   const [addingSeason,   setAddingSeason]   = useState(false);
@@ -204,7 +205,7 @@ function FileExplorer() {
                         background: isActive ? "rgba(92,191,138,.1)" : "transparent",
                         borderLeft: isActive ? `2px solid ${ACCENT}` : "2px solid transparent",
                       }}
-                      onClick={() => { setSelectedGame(game); selectSeason(season); }}>
+                      onClick={() => setSelectedGame(game)}>
                       <span style={{ color: isActive ? ACCENT : "var(--text3)", flexShrink: 0 }}>
                         <Icon d={ICONS.file} size={12} />
                       </span>
@@ -244,7 +245,7 @@ function FileExplorer() {
                   );
                 })}
 
-                {isAdmin && addingGame !== season.id && (
+                {canManage && addingGame !== season.id && (
                   <button onClick={() => { setAddingGame(season.id); setAddingGameStep(1); setGameWeek(""); }}
                     style={{ display: "flex", alignItems: "center", gap: 4,
                       padding: "3px 8px 3px 22px", background: "none", border: "none",
@@ -254,7 +255,7 @@ function FileExplorer() {
                   </button>
                 )}
 
-                {isAdmin && addingGame === season.id && addingGameStep === 1 && (
+                {canManage && addingGame === season.id && addingGameStep === 1 && (
                   <InlineForm placeholder="Week # (e.g. 1)"
                     onCommit={week => { setGameWeek(week); setAddingGameStep(2); }}
                     onCancel={() => { setAddingGame(null); setAddingGameStep(1); }} />
