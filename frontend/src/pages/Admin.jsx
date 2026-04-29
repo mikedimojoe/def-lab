@@ -1,11 +1,11 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useApp }  from "../contexts/AppContext";
 import { useAuth } from "../contexts/AuthContext";
 import {
-  getUsers, createUser, deleteUser, updateUser, updateUserPassword,
-  getTeams, createTeam, updateTeam, deleteTeam,
-  saveGameData,
-} from "../lib/storage";
+  apiGetUsers, apiCreateUser, apiDeleteUser, apiUpdateUser,
+  apiGetTeams, apiCreateTeam, apiUpdateTeam, apiDeleteTeam,
+  apiSavePlays, apiSaveRoster, apiGetRoster,
+} from "../lib/api";
 import { parsePlaylistData } from "../lib/xlsxParser";
 
 const ACCENT = "#5CBF8A";
@@ -84,24 +84,26 @@ function buildInviteLink(userId, tempPassword) {
 
 // ── Teams section ─────────────────────────────────────────────────────────────
 function TeamsSection() {
-  const [teams,  setTeams]  = useState(getTeams);
+  const [teams,  setTeams]  = useState([]);
   const [modal,  setModal]  = useState(null);
   const [target, setTarget] = useState(null);
   const [form,   setForm]   = useState({});
 
-  function refresh() { setTeams(getTeams()); }
+  useEffect(() => { apiGetTeams().then(setTeams).catch(() => {}); }, []);
+
+  function refresh() { apiGetTeams().then(setTeams).catch(() => {}); }
   function f(k) { return v => setForm(p => ({ ...p, [k]: typeof v === "string" ? v : v.target.value })); }
 
-  function handleCreate(e) {
+  async function handleCreate(e) {
     e.preventDefault();
     if (!form.name?.trim()) return;
-    createTeam(form.name.trim(), form.color1 || "#154734", form.color2 || "#5CBF8A");
+    await apiCreateTeam(form.name.trim(), form.color1 || "#154734", form.color2 || "#5CBF8A");
     refresh(); setModal(null);
   }
 
-  function handleEdit(e) {
+  async function handleEdit(e) {
     e.preventDefault();
-    updateTeam(target.id, { name: form.name, color1: form.color1, color2: form.color2 });
+    await apiUpdateTeam(target.id, { name: form.name, color1: form.color1, color2: form.color2 });
     refresh(); setModal(null);
   }
 
@@ -147,7 +149,7 @@ function TeamsSection() {
                   </td>
                   <td style={{ ...td, textAlign: "right" }}>
                     <Btn onClick={() => open("edit", t)} style={{ marginRight: 6 }}>Edit</Btn>
-                    <Btn variant="danger" onClick={() => { deleteTeam(t.id); refresh(); }}>Delete</Btn>
+                    <Btn variant="danger" onClick={() => apiDeleteTeam(t.id).then(refresh)}>Delete</Btn>
                   </td>
                 </tr>
               ))}
@@ -191,15 +193,23 @@ function TeamsSection() {
 // ── Users section ─────────────────────────────────────────────────────────────
 function UsersSection() {
   const { user: me, refreshUser } = useAuth();
-  const [users,  setUsers]  = useState(getUsers);
-  const [teams,  setTeams]  = useState(getTeams);
+  const [users,  setUsers]  = useState([]);
+  const [teams,  setTeams]  = useState([]);
   const [modal,  setModal]  = useState(null);
   const [target, setTarget] = useState(null);
   const [form,   setForm]   = useState({});
   const [err,    setErr]    = useState("");
   const [inviteLink, setInviteLink] = useState("");
 
-  function refresh() { setUsers(getUsers()); setTeams(getTeams()); }
+  useEffect(() => {
+    apiGetUsers().then(setUsers).catch(() => {});
+    apiGetTeams().then(setTeams).catch(() => {});
+  }, []);
+
+  function refresh() {
+    apiGetUsers().then(setUsers).catch(() => {});
+    apiGetTeams().then(setTeams).catch(() => {});
+  }
   function f(k) { return e => setForm(p => ({ ...p, [k]: e.target.value })); }
 
   async function handleCreate(e) {
@@ -207,7 +217,7 @@ function UsersSection() {
     if (!form.username?.trim()) { setErr("Username required"); return; }
     if (!form.password?.trim()) { setErr("Password required"); return; }
     try {
-      const u = await createUser(
+      const u = await apiCreateUser(
         form.username.trim(), form.password.trim(),
         form.role || "Player",
         form.displayName?.trim() || form.username.trim(),
@@ -222,25 +232,31 @@ function UsersSection() {
     e.preventDefault(); setErr("");
     if (!form.pw1) { setErr("Enter a new password"); return; }
     if (form.pw1 !== form.pw2) { setErr("Passwords do not match"); return; }
-    await updateUserPassword(target.id, form.pw1);
+    await apiUpdateUser(target.id, { password: form.pw1 });
     if (target.id === me?.id) refreshUser();
     setModal(null);
   }
 
-  function handleEdit(e) {
+  async function handleEdit(e) {
     e.preventDefault();
-    updateUser(target.id, { displayName: form.displayName, role: form.role, teamId: form.teamId || null });
+    await apiUpdateUser(target.id, {
+      display_name: form.displayName,
+      role: form.role,
+      team_id: form.teamId || null,
+    });
     refresh(); setModal(null);
   }
 
   function open(type, u) {
     setTarget(u || null);
-    setForm(u ? { displayName: u.displayName, role: u.role, teamId: u.teamId || "" } : {});
+    setForm(u ? { displayName: u.display_name, role: u.role, teamId: u.team_id || "" } : {});
     setErr(""); setInviteLink(""); setModal(type);
   }
+  // teamName uses team_id - alias for compat
+  const _ = teamName;
 
-  function teamName(teamId) {
-    return teams.find(t => t.id === teamId)?.name || "—";
+  function teamName(team_id) {
+    return teams.find(t => t.id === team_id)?.name || "—";
   }
 
   return (
@@ -262,10 +278,10 @@ function UsersSection() {
           {users.map(u => (
             <tr key={u.id} style={{ borderBottom: "1px solid var(--bg)" }}>
               <td style={td}>{u.username}</td>
-              <td style={td}>{u.displayName}</td>
+              <td style={td}>{u.display_name}</td>
               <td style={{ ...td, color: u.role === "Admin" ? ACCENT : "var(--text3)" }}>{u.role}</td>
               <td style={{ ...td, color: "var(--text3)", fontSize: 12 }}>
-                {u.teamId ? teamName(u.teamId) : <span style={{ color: "var(--text3)" }}>All Teams</span>}
+                {u.team_id ? teamName(u.team_id) : <span style={{ color: "var(--text3)" }}>All Teams</span>}
               </td>
               <td style={{ ...td, textAlign: "right" }}>
                 <Btn onClick={() => {
@@ -275,7 +291,7 @@ function UsersSection() {
                   style={{ marginRight: 4 }}>PW</Btn>
                 <Btn onClick={() => open("edit", u)} style={{ marginRight: 4 }}>Edit</Btn>
                 {u.id !== me?.id && (
-                  <Btn variant="danger" onClick={() => { deleteUser(u.id); refresh(); }}>✕</Btn>
+                  <Btn variant="danger" onClick={() => apiDeleteUser(u.id).then(refresh)}>✕</Btn>
                 )}
               </td>
             </tr>
@@ -403,19 +419,50 @@ function DataSection() {
   const [status, setStatus] = useState({});  // {field: message}
   const [loading, setLoading] = useState({});
 
-  async function handleUpload(field, file, parser) {
+  async function parseXlsx(file) {
+    const { default: XLSX } = await import("xlsx");
+    return new Promise((res, rej) => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const wb = XLSX.read(new Uint8Array(e.target.result), { type: "array" });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        res(XLSX.utils.sheet_to_json(ws, { defval: "" }));
+      };
+      reader.onerror = rej;
+      reader.readAsArrayBuffer(file);
+    });
+  }
+
+  async function handleUploadPlays(file) {
     if (!selectedGame) return;
-    setLoading(l => ({ ...l, [field]: true }));
-    setStatus(s => ({ ...s, [field]: "" }));
+    setLoading(l => ({ ...l, playdata: true }));
+    setStatus(s => ({ ...s, playdata: "" }));
     try {
-      const data = await parser(file);
-      saveGameData(selectedGame.id, field, JSON.stringify(data));
+      const rows = await parsePlaylistData(file);
+      await apiSavePlays(selectedGame.id, rows);
       refreshGames(selectedSeason?.id);
-      setStatus(s => ({ ...s, [field]: `✅ ${data.length} rows imported` }));
+      setStatus(s => ({ ...s, playdata: `✅ ${rows.length} rows imported` }));
     } catch (ex) {
-      setStatus(s => ({ ...s, [field]: `❌ ${ex.message}` }));
+      setStatus(s => ({ ...s, playdata: `❌ ${ex.message}` }));
     } finally {
-      setLoading(l => ({ ...l, [field]: false }));
+      setLoading(l => ({ ...l, playdata: false }));
+    }
+  }
+
+  async function handleUploadRoster(file) {
+    if (!selectedGame) return;
+    setLoading(l => ({ ...l, rosterData: true }));
+    setStatus(s => ({ ...s, rosterData: "" }));
+    try {
+      const rows = await parseXlsx(file);
+      // Merge into existing roster (keep depth chart, update importData)
+      const current = await apiGetRoster(selectedGame.id).catch(() => ({}));
+      await apiSaveRoster(selectedGame.id, { ...current, importData: rows });
+      setStatus(s => ({ ...s, rosterData: `✅ ${rows.length} rows imported` }));
+    } catch (ex) {
+      setStatus(s => ({ ...s, rosterData: `❌ ${ex.message}` }));
+    } finally {
+      setLoading(l => ({ ...l, rosterData: false }));
     }
   }
 
@@ -425,46 +472,14 @@ function DataSection() {
       label: "Play Data",
       description: "PlaylistData .xlsx — main play-by-play data",
       accept: ".xlsx",
-      parser: parsePlaylistData,
+      onUpload: handleUploadPlays,
     },
     {
       field: "rosterData",
       label: "Roster",
       description: "Roster file (CSV or .xlsx) — player information",
       accept: ".xlsx,.csv",
-      parser: async (file) => {
-        // Generic row parser — just read as JSON
-        const { default: XLSX } = await import("xlsx");
-        return new Promise((res, rej) => {
-          const reader = new FileReader();
-          reader.onload = e => {
-            const wb = XLSX.read(new Uint8Array(e.target.result), { type: "array" });
-            const ws = wb.Sheets[wb.SheetNames[0]];
-            res(XLSX.utils.sheet_to_json(ws, { defval: "" }));
-          };
-          reader.onerror = rej;
-          reader.readAsArrayBuffer(file);
-        });
-      },
-    },
-    {
-      field: "formationData",
-      label: "Formation Data",
-      description: "Formation reference file (.xlsx)",
-      accept: ".xlsx",
-      parser: async (file) => {
-        const { default: XLSX } = await import("xlsx");
-        return new Promise((res, rej) => {
-          const reader = new FileReader();
-          reader.onload = e => {
-            const wb = XLSX.read(new Uint8Array(e.target.result), { type: "array" });
-            const ws = wb.Sheets[wb.SheetNames[0]];
-            res(XLSX.utils.sheet_to_json(ws, { defval: "" }));
-          };
-          reader.onerror = rej;
-          reader.readAsArrayBuffer(file);
-        });
-      },
+      onUpload: handleUploadRoster,
     },
   ];
 
@@ -479,11 +494,10 @@ function DataSection() {
     );
   }
 
-  let playdataCount = 0, rosterCount = 0, formationCount = 0;
-  try { if (selectedGame.playdata)     playdataCount  = JSON.parse(selectedGame.playdata).length; } catch {}
-  try { if (selectedGame.rosterData)   rosterCount    = JSON.parse(selectedGame.rosterData).length; } catch {}
-  try { if (selectedGame.formationData) formationCount = JSON.parse(selectedGame.formationData).length; } catch {}
-  const counts = { playdata: playdataCount, rosterData: rosterCount, formationData: formationCount };
+  const counts = {
+    playdata:   selectedGame.play_count  ? Number(selectedGame.play_count)  : 0,
+    rosterData: 0,
+  };
 
   return (
     <section style={sec}>
@@ -493,7 +507,7 @@ function DataSection() {
       </p>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        {DATA_TYPES.map(({ field, label, description, accept, parser }) => (
+        {DATA_TYPES.map(({ field, label, description, accept, onUpload }) => (
           <div key={field} style={{
             background: "var(--bg)", border: "1px solid var(--border)",
             borderRadius: 8, padding: "14px 16px",
@@ -522,7 +536,7 @@ function DataSection() {
               }}>
                 {loading[field] ? "Uploading…" : "Upload"}
                 <input type="file" accept={accept} style={{ display: "none" }}
-                  onChange={e => { if (e.target.files[0]) handleUpload(field, e.target.files[0], parser); e.target.value = ""; }}
+                  onChange={e => { if (e.target.files[0]) onUpload(e.target.files[0]); e.target.value = ""; }}
                 />
               </label>
             </div>

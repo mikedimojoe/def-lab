@@ -1,54 +1,41 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import { seedAdmin, login as storageLogin, getUsers } from "../lib/storage";
+import { apiLogin, apiLogout, apiMe, apiChangePassword } from "../lib/api";
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser]       = useState(null);
+  const [user,    setUser]    = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Restore PHP session on page load
   useEffect(() => {
-    seedAdmin()
-      .catch(err => console.warn("seedAdmin error:", err))
-      .finally(() => {
-        // Restore session regardless of whether seedAdmin succeeded
-        const saved = sessionStorage.getItem("dl_session");
-        if (saved) {
-          try {
-            const u     = JSON.parse(saved);
-            const users = getUsers();
-            const fresh = users.find(x => x.id === u.id);
-            if (fresh) setUser(fresh);
-          } catch { /* ignore */ }
-        }
-        setLoading(false);
-      });
+    apiMe()
+      .then(u => setUser(u))
+      .catch(() => setUser(null))
+      .finally(() => setLoading(false));
   }, []);
 
   async function login(username, password) {
-    const u = await storageLogin(username, password);
-    if (!u) throw new Error("Invalid username or password");
-    sessionStorage.setItem("dl_session", JSON.stringify(u));
+    const u = await apiLogin(username, password);
     setUser(u);
     return u;
   }
 
-  function logout() {
-    sessionStorage.removeItem("dl_session");
+  async function logout() {
+    try { await apiLogout(); } catch {}
     setUser(null);
   }
 
-  function refreshUser() {
-    const users = getUsers();
-    const fresh = users.find(x => x.id === user?.id);
-    if (fresh) {
-      setUser(fresh);
-      sessionStorage.setItem("dl_session", JSON.stringify(fresh));
-    }
+  async function refreshUser() {
+    try { setUser(await apiMe()); } catch {}
+  }
+
+  async function changePassword(password) {
+    await apiChangePassword(password);
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, refreshUser }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, refreshUser, changePassword }}>
       {children}
     </AuthContext.Provider>
   );

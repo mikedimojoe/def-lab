@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import { getUsers, updateUserPassword } from "../lib/storage";
+import { apiChangePassword } from "../lib/api";
 
 const GREEN  = "#154734";
 const ACCENT = "#5CBF8A";
@@ -25,17 +25,12 @@ export default function Login() {
   const [inviteMode, setIM]   = useState(false);
   const [inviteUser, setIU]   = useState(null);
 
-  // Detect invitation link
+  // Detect invitation link — just pre-fill credentials
   useEffect(() => {
     if (!inviteUserId || !inviteToken) return;
-    const users = getUsers();
-    const u = users.find(x => x.id === inviteUserId);
-    if (!u) { setError("Invalid invitation link."); return; }
-    setIU(u);
-    setU(u.username);
     setP(inviteToken);
     setIM(true);
-    setInfo(`Welcome, ${u.displayName || u.username}! Please set a new password to activate your account.`);
+    setInfo("Welcome! Please set a new password to activate your account.");
   }, [inviteUserId, inviteToken]);
 
   async function handleLogin(e) {
@@ -58,12 +53,9 @@ export default function Login() {
     if (newPw.length < 4) { setError("Password must be at least 4 characters"); return; }
     setL(true);
     try {
-      // First verify the invite token works as current password
-      await login(username, inviteToken);
-      // Then update to new password
-      await updateUserPassword(inviteUser.id, newPw);
-      // Re-login with new password
-      await login(username, newPw);
+      // Log in with temp password, then change to new password
+      await login(username, password);
+      await apiChangePassword(newPw);
       navigate("/overview");
     } catch {
       setError("Invitation link is invalid or expired.");

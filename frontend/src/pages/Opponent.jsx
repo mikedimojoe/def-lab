@@ -1,11 +1,8 @@
 import { useMemo, useState, useEffect } from "react";
 import { useApp } from "../contexts/AppContext";
-import { getLiveRows } from "../lib/storage";
 import { computeOpponentFormations } from "../lib/dataEngine";
-import {
-  getAllFormationImages, saveFormationImage, matchFormationImage,
-  fileToDataUrl,
-} from "../lib/formationImages";
+import { matchFormationImage } from "../lib/formationImages";
+import { apiGetImages } from "../lib/api";
 
 const RUN_COLOR  = "#7B6EA0";
 const PASS_COLOR = "#4472C4";
@@ -133,29 +130,21 @@ function FormationCard({ data, gameId, images, onImageUpdate }) {
 
 // ── Main Opponent page ────────────────────────────────────────────────────────
 export default function Opponent() {
-  const { selectedGame, mode } = useApp();
+  const { selectedGame, mode, playRows, liveRows } = useApp();
   const [topN, setTopN] = useState(5);
   const [images, setImages] = useState({});
 
-  const rows = useMemo(() => {
-    if (!selectedGame) return [];
-    if (mode === "live") return getLiveRows(selectedGame.id);
-    try { return selectedGame.playdata ? JSON.parse(selectedGame.playdata) : []; }
-    catch { return []; }
-  }, [selectedGame, mode]);
+  const rows = mode === "live" ? liveRows : playRows;
 
   const formations = useMemo(
     () => computeOpponentFormations(rows, topN),
     [rows, topN]);
 
-  // Load images
-  function refreshImages() {
-    if (!selectedGame) return;
-    getAllFormationImages(selectedGame.id).then(setImages).catch(() => {});
-  }
+  // Load images from API
   useEffect(() => {
     setImages({});
-    refreshImages();
+    if (!selectedGame) return;
+    apiGetImages(selectedGame.id).then(setImages).catch(() => {});
   }, [selectedGame?.id]);
 
   const noData = !selectedGame || rows.length === 0;

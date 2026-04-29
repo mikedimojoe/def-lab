@@ -1,8 +1,8 @@
 import { useState, useRef, useCallback, useEffect, memo } from "react";
 import { useApp }  from "../contexts/AppContext";
 import { useAuth } from "../contexts/AuthContext";
+import { apiSaveLiveRows } from "../lib/api";
 import {
-  getLiveRows, saveLiveRows,
   getVisibleColumns, saveVisibleColumns,
   ALL_COLUMNS,
 } from "../lib/storage";
@@ -116,12 +116,21 @@ const TableRow = memo(function TableRow({
 });
 
 // ── Main component ────────────────────────────────────────────────────────────
+// Debounce helper
+function useDebounce(fn, delay) {
+  const timer = useRef(null);
+  return useCallback((...args) => {
+    clearTimeout(timer.current);
+    timer.current = setTimeout(() => fn(...args), delay);
+  }, [fn, delay]);
+}
+
 export default function LiveTagging() {
-  const { selectedGame }        = useApp();
-  const { user }                = useAuth();
+  const { selectedGame, liveRows }  = useApp();
+  const { user }                    = useAuth();
   const canEdit = user?.role === "Admin" || user?.role === "Coach";
 
-  const [rows,       setRows]      = useState(() => selectedGame ? getLiveRows(selectedGame.id) : []);
+  const [rows,       setRows]      = useState([]);
   const [visCols,    setVisCols]   = useState(getVisibleColumns);
   const [showColMgr, setColMgr]   = useState(false);
   const [sel,        setSel]       = useState(null);  // {r, c}
@@ -143,20 +152,25 @@ export default function LiveTagging() {
   rowsRef.current      = rows;
   clipboardRef.current = clipboard;
 
-  // Sync rows when game changes
-  if (selectedGame?.id !== prevGameId.current) {
+  // Sync rows when liveRows from context changes (game switch or refresh)
+  useEffect(() => {
     prevGameId.current = selectedGame?.id;
-    setRows(selectedGame ? getLiveRows(selectedGame.id) : []);
+    setRows(liveRows);
     setSel(null); setEditCell(null);
-  }
+  }, [selectedGame?.id, liveRows]);
 
   const displayCols = ALL_COLUMNS.filter(c => visCols.includes(c));
   const numCols     = displayCols.length;
 
+  const saveToServer = useCallback((gameId, data) => {
+    apiSaveLiveRows(gameId, data).catch(e => console.warn('saveLiveRows failed:', e));
+  }, []);
+  const debouncedSave = useDebounce(saveToServer, 800);
+
   const persist = useCallback((next) => {
     setRows(next);
-    if (selectedGame) saveLiveRows(selectedGame.id, next);
-  }, [selectedGame?.id]);
+    if (selectedGame) debouncedSave(selectedGame.id, next);
+  }, [selectedGame?.id, debouncedSave]);
 
   const addRow = useCallback(() => {
     const next = [...rows, newRow(rows.length + 1)];
@@ -184,13 +198,13 @@ export default function LiveTagging() {
       setRows(prevRows => {
         const next = prevRows.map((row, i) =>
           i === prev.r ? { ...row, [col]: editVal } : row);
-        if (selectedGame) saveLiveRows(selectedGame.id, next);
+        if (selectedGame) debouncedSave(selectedGame.id, next);
         return next;
       });
       if (nextSel) setSel(nextSel);
       return null;
     });
-  }, [displayCols, editVal, selectedGame?.id]);
+  }, [displayCols, editVal, selectedGame?.id, debouncedSave]);
 
   const cancelEdit = useCallback(() => setEditCell(null), []);
 

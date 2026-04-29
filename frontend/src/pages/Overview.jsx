@@ -1,6 +1,5 @@
 import { useMemo } from "react";
 import { useApp } from "../contexts/AppContext";
-import { getLiveRows } from "../lib/storage";
 import { computePlaytypeStats } from "../lib/dataEngine";
 import DDTable from "../components/DDTable";
 import RunPassBar from "../components/RunPassBar";
@@ -26,14 +25,8 @@ function StatCard({ label, value, sub, color }) {
 }
 
 export default function Overview() {
-  const { selectedGame, mode } = useApp();
-
-  const rows = useMemo(() => {
-    if (!selectedGame) return [];
-    if (mode === "live") return getLiveRows(selectedGame.id);
-    try { return selectedGame.playdata ? JSON.parse(selectedGame.playdata) : []; }
-    catch { return []; }
-  }, [selectedGame, mode]);
+  const { selectedGame, mode, playRows, liveRows } = useApp();
+  const rows = mode === "live" ? liveRows : playRows;
 
   const stats = useMemo(() => computePlaytypeStats(rows), [rows]);
 

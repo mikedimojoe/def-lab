@@ -1,11 +1,8 @@
 import { useMemo, useState, useEffect, useCallback } from "react";
 import { useApp }  from "../contexts/AppContext";
-import { getLiveRows } from "../lib/storage";
 import { computeFormationStats, uniqueValuesByFreq } from "../lib/dataEngine";
-import {
-  getAllFormationImages, saveFormationImage, deleteFormationImage,
-  matchFormationImage, fileToDataUrl,
-} from "../lib/formationImages";
+import { matchFormationImage } from "../lib/formationImages";
+import { apiGetImages, apiUploadImage, apiDeleteImage } from "../lib/api";
 import DDTable   from "../components/DDTable";
 import RunPassBar from "../components/RunPassBar";
 import Top3Card  from "../components/Top3Card";
@@ -14,21 +11,16 @@ const ACCENT = "#5CBF8A";
 const GREEN  = "#154734";
 
 export default function Formations() {
-  const { selectedGame, mode } = useApp();
+  const { selectedGame, mode, playRows, liveRows } = useApp();
   const [selForm, setSelForm] = useState("");
   const [selBF,   setSelBF]   = useState("");
 
-  // Formation images
-  const [images,      setImages]      = useState({});    // { normName: dataUrl }
+  // Formation images (served from server)
+  const [images,      setImages]      = useState({});    // { normName: url }
   const [imgLoading,  setImgLoading]  = useState(false);
   const [showImgMgr,  setShowImgMgr] = useState(false);
 
-  const rows = useMemo(() => {
-    if (!selectedGame) return [];
-    if (mode === "live") return getLiveRows(selectedGame.id);
-    try { return selectedGame.playdata ? JSON.parse(selectedGame.playdata) : []; }
-    catch { return []; }
-  }, [selectedGame, mode]);
+  const rows = mode === "live" ? liveRows : playRows;
 
   const offRows = useMemo(() => rows.filter(r => r["ODK"] === "O"), [rows]);
 
@@ -43,13 +35,13 @@ export default function Formations() {
     () => computeFormationStats(rows, selForm || undefined, selBF || undefined),
     [rows, selForm, selBF]);
 
-  // Load images for this game
+  // Load images from server
   useEffect(() => {
     if (!selectedGame) { setImages({}); return; }
-    getAllFormationImages(selectedGame.id).then(setImages).catch(() => setImages({}));
+    apiGetImages(selectedGame.id).then(setImages).catch(() => setImages({}));
   }, [selectedGame?.id]);
 
-  // Upload a folder of images
+  // Upload images to server
   const handleFolderUpload = useCallback(async e => {
     const files = Array.from(e.target.files || []);
     if (!files.length || !selectedGame) return;
@@ -57,10 +49,9 @@ export default function Formations() {
     try {
       for (const file of files) {
         if (!file.type.startsWith("image/")) continue;
-        const dataUrl = await fileToDataUrl(file);
-        await saveFormationImage(selectedGame.id, file.name, dataUrl);
+        await apiUploadImage(selectedGame.id, file);
       }
-      const updated = await getAllFormationImages(selectedGame.id);
+      const updated = await apiGetImages(selectedGame.id);
       setImages(updated);
     } catch (err) {
       console.warn("Image upload error:", err);
@@ -72,7 +63,7 @@ export default function Formations() {
 
   const handleDeleteImage = useCallback(async normName => {
     if (!selectedGame) return;
-    await deleteFormationImage(selectedGame.id, normName);
+    await apiDeleteImage(selectedGame.id, normName);
     setImages(prev => { const n = { ...prev }; delete n[normName]; return n; });
   }, [selectedGame?.id]);
 

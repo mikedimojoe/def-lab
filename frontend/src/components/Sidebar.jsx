@@ -4,9 +4,8 @@ import { useAuth }  from "../contexts/AuthContext";
 import { useApp }   from "../contexts/AppContext";
 import { useTheme } from "../contexts/ThemeContext";
 import {
-  createSeason, createGame, deleteGame, deleteSeason,
-  getGames,
-} from "../lib/storage";
+  apiCreateSeason, apiCreateGame, apiDeleteGame, apiDeleteSeason,
+} from "../lib/api";
 
 const GREEN  = "#154734";
 const ACCENT = "#5CBF8A";
@@ -89,7 +88,8 @@ function InlineForm({ placeholder, onCommit, onCancel }) {
 // ── File Explorer tree ────────────────────────────────────────────────────────
 function FileExplorer() {
   const { seasons, selectedSeason, selectSeason, refreshSeasons,
-          selectedGame, setSelectedGame, refreshGames } = useApp();
+          selectedGame, setSelectedGame, refreshGames,
+          gamesBySeason, loadGamesForSeason } = useApp();
   const { user } = useAuth();
   const isAdmin  = user?.role === "Admin";
 
@@ -101,25 +101,29 @@ function FileExplorer() {
 
   function toggleSeason(id) { setOpenSeasons(o => ({ ...o, [id]: !o[id] })); }
 
-  function handleAddSeason(name) {
+  async function handleAddSeason(name) {
     const yearMatch = name.match(/\d{4}/);
     const year = yearMatch ? yearMatch[0] : String(new Date().getFullYear());
-    const s = createSeason(year, name);
-    refreshSeasons(s.id);
-    setOpenSeasons(o => ({ ...o, [s.id]: true }));
+    try {
+      const s = await apiCreateSeason(year, name, null);
+      await refreshSeasons(s.id);
+      setOpenSeasons(o => ({ ...o, [s.id]: true }));
+    } catch (e) { alert('Could not create season: ' + e.message); }
     setAddingSeason(false);
   }
 
-  function handleAddGame(seasonId, week, opponent) {
-    const g = createGame(seasonId, week, opponent, "");
-    refreshGames(seasonId, g.id);
-    setAddingGame(null); setAddingGameStep(1); setGameWeek("");
-    setOpenSeasons(o => ({ ...o, [seasonId]: true }));
-    setSelectedGame(g);
-    if (selectedSeason?.id !== seasonId) {
-      const s = seasons.find(x => x.id === seasonId);
-      if (s) selectSeason(s);
-    }
+  async function handleAddGame(seasonId, week, opponent) {
+    try {
+      const g = await apiCreateGame(seasonId, week, opponent, '');
+      await refreshGames(seasonId, g.id);
+      setAddingGame(null); setAddingGameStep(1); setGameWeek('');
+      setOpenSeasons(o => ({ ...o, [seasonId]: true }));
+      setSelectedGame(g);
+      if (selectedSeason?.id !== seasonId) {
+        const s = seasons.find(x => x.id === seasonId);
+        if (s) selectSeason(s);
+      }
+    } catch (e) { alert('Could not create game: ' + e.message); }
   }
 
   return (
@@ -143,7 +147,7 @@ function FileExplorer() {
       )}
 
       {seasons.map(season => {
-        const games  = getGames(season.id);
+        const games  = gamesBySeason[season.id] || [];
         const isOpen = !!openSeasons[season.id];
         return (
           <div key={season.id}>
@@ -152,7 +156,11 @@ function FileExplorer() {
               padding: "5px 8px", cursor: "pointer", borderRadius: 4, margin: "0 4px",
               background: selectedSeason?.id === season.id ? "rgba(92,191,138,.07)" : "transparent",
             }}
-              onClick={() => { toggleSeason(season.id); selectSeason(season); }}>
+              onClick={() => {
+                toggleSeason(season.id);
+                selectSeason(season);
+                if (!gamesBySeason[season.id]) loadGamesForSeason(season.id);
+              }}>
               <span style={{ color: "var(--text3)", flexShrink: 0 }}>
                 <Icon d={isOpen ? ICONS.chevronD : ICONS.chevronR} size={12} />
               </span>
@@ -167,7 +175,7 @@ function FileExplorer() {
                 <button onClick={e => {
                     e.stopPropagation();
                     if (confirm(`Delete season "${season.name}"?`)) {
-                      deleteSeason(season.id); refreshSeasons();
+                      apiDeleteSeason(season.id).then(() => refreshSeasons()).catch(e => alert(e.message));
                     }
                   }}
                   title="Delete season"
@@ -215,9 +223,12 @@ function FileExplorer() {
                         <button onClick={e => {
                             e.stopPropagation();
                             if (confirm(`Delete W${game.week} vs ${game.opponent}?`)) {
-                              deleteGame(game.id);
-                              if (selectedGame?.id === game.id) setSelectedGame(null);
-                              refreshGames(season.id);
+                              apiDeleteGame(game.id)
+                                .then(() => {
+                                  if (selectedGame?.id === game.id) setSelectedGame(null);
+                                  refreshGames(season.id);
+                                })
+                                .catch(e => alert(e.message));
                             }
                           }}
                           title="Delete game"

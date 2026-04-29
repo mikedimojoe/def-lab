@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useApp } from "../contexts/AppContext";
 import { useAuth } from "../contexts/AuthContext";
+import { apiGetRoster, apiSaveRoster } from "../lib/api";
 
 const GREEN  = "#154734";
 const ACCENT = "#5CBF8A";
@@ -40,20 +41,11 @@ function natBadgeStyle(code) {
   return c || { bg: "#333", fg: "#aaa" };
 }
 
-// ── Storage helpers ───────────────────────────────────────────────────────────
-function rosterKey(gameId) { return `dl_roster_${gameId}`; }
-
-function loadRoster(gameId) {
-  try {
-    const raw = localStorage.getItem(rosterKey(gameId));
-    if (raw) return JSON.parse(raw);
-  } catch {}
-  return { opponent: "", depth: Object.fromEntries(POSITIONS.map(p => [p.key, []])) };
-}
-
-function saveRoster(gameId, data) {
-  localStorage.setItem(rosterKey(gameId), JSON.stringify(data));
-}
+const EMPTY_ROSTER = () => ({
+  opponent: "",
+  depth: Object.fromEntries(POSITIONS.map(p => [p.key, []])),
+  importData: null,
+});
 
 // ── Player add/edit dialog ────────────────────────────────────────────────────
 function PlayerDialog({ posKey, player, onSave, onClose }) {
@@ -219,20 +211,34 @@ export default function Roster() {
   const { user }         = useAuth();
   const canEdit          = user?.role === "Admin" || user?.role === "Coach";
 
-  const [roster, setRoster] = useState({ opponent: "", depth: {} });
+  const [roster, setRoster] = useState(EMPTY_ROSTER());
   const [locked,  setLocked]  = useState(false);
   const [dialog,  setDialog]  = useState(null); // { posKey, player, idx }
+  const saveTimer = useRef(null);
 
-  // Load roster when game changes
+  // Load roster from API when game changes
   useEffect(() => {
-    if (!selectedGame) { setRoster({ opponent: "", depth: {} }); return; }
-    setRoster(loadRoster(selectedGame.id));
+    if (!selectedGame) { setRoster(EMPTY_ROSTER()); return; }
+    apiGetRoster(selectedGame.id)
+      .then(data => {
+        if (data && (data.depth || data.opponent !== undefined)) {
+          setRoster({ ...EMPTY_ROSTER(), ...data });
+        } else {
+          setRoster(EMPTY_ROSTER());
+        }
+      })
+      .catch(() => setRoster(EMPTY_ROSTER()));
   }, [selectedGame?.id]);
 
   function persist(updater) {
     setRoster(prev => {
       const next = typeof updater === "function" ? updater(prev) : updater;
-      if (selectedGame) saveRoster(selectedGame.id, next);
+      if (selectedGame) {
+        clearTimeout(saveTimer.current);
+        saveTimer.current = setTimeout(() => {
+          apiSaveRoster(selectedGame.id, next).catch(e => console.warn('saveRoster:', e));
+        }, 800);
+      }
       return next;
     });
   }
@@ -301,20 +307,13 @@ export default function Roster() {
     persist({ opponent: "", depth: Object.fromEntries(POSITIONS.map(p => [p.key, []])) });
   }
 
-  // Parse from uploaded rosterData
+  // Parse from uploaded importData
   function handleImportFromGame() {
-    if (!selectedGame?.rosterData) {
+    const parsed = roster.importData;
+    if (!parsed || (Array.isArray(parsed) && parsed.length === 0)) {
       alert("No roster data uploaded for this game.\nGo to Admin → Upload Roster to upload a roster file.");
       return;
     }
-    let parsed;
-    try {
-      parsed = JSON.parse(selectedGame.rosterData);
-    } catch (e) {
-      alert("Could not read roster data — the file may be corrupted.\n" + e.message);
-      return;
-    }
-
     try {
       const depth = Object.fromEntries(POSITIONS.map(p => [p.key, []]));
       const players = Array.isArray(parsed) ? parsed : (Array.isArray(parsed?.players) ? parsed.players : []);

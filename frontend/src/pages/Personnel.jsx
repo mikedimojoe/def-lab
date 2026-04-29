@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react";
 import { useApp } from "../contexts/AppContext";
-import { getLiveRows } from "../lib/storage";
 import { computePersonnelStats } from "../lib/dataEngine";
 import DDTable   from "../components/DDTable";
 import RunPassBar from "../components/RunPassBar";
@@ -36,15 +35,9 @@ function PieChart({ items = [] }) {
 }
 
 export default function Personnel() {
-  const { selectedGame, mode } = useApp();
+  const { selectedGame, mode, playRows, liveRows } = useApp();
   const [selP, setSelP] = useState("");
-
-  const rows = useMemo(() => {
-    if (!selectedGame) return [];
-    if (mode === "live") return getLiveRows(selectedGame.id);
-    try { return selectedGame.playdata ? JSON.parse(selectedGame.playdata) : []; }
-    catch { return []; }
-  }, [selectedGame, mode]);
+  const rows = mode === "live" ? liveRows : playRows;
 
   const { allPersonnel, detail } = useMemo(
     () => computePersonnelStats(rows, selP || undefined), [rows, selP]);

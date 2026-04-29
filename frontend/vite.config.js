@@ -6,13 +6,14 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "http://localhost:8000",
+        target: "https://def-lab.de",
         changeOrigin: true,
-        // Serve static .json files from public/ directly, don't proxy them
-        bypass(req) {
-          if (req.url && req.url.endsWith(".json")) return req.url;
-          return null;
-        },
+        secure: false,
+      },
+      "/uploads": {
+        target: "https://def-lab.de",
+        changeOrigin: true,
+        secure: false,
       },
     },
   },

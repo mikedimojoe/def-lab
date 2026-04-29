@@ -1,6 +1,5 @@
 import { useMemo } from "react";
 import { useApp } from "../contexts/AppContext";
-import { getLiveRows } from "../lib/storage";
 import { computeCallsheetData } from "../lib/dataEngine";
 
 const RUN_COLOR  = "#7B6EA0";
@@ -152,15 +151,8 @@ function TileRow({ tiles, emptyMsg = "No data." }) {
 
 // ── Main Callsheet page ───────────────────────────────────────────────────────
 export default function Callsheet() {
-  const { selectedGame, mode } = useApp();
-
-  const rows = useMemo(() => {
-    if (!selectedGame) return [];
-    if (mode === "live") return getLiveRows(selectedGame.id);
-    try { return selectedGame.playdata ? JSON.parse(selectedGame.playdata) : []; }
-    catch { return []; }
-  }, [selectedGame, mode]);
-
+  const { selectedGame, mode, playRows, liveRows } = useApp();
+  const rows = mode === "live" ? liveRows : playRows;
   const data = useMemo(() => computeCallsheetData(rows), [rows]);
 
   const noData = !selectedGame || rows.length === 0;
