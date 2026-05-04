@@ -21,15 +21,6 @@ function newRow(n) {
   return r;
 }
 
-// ── Debounce helper ───────────────────────────────────────────────────────────
-function useDebounce(fn, delay) {
-  const timer = useRef(null);
-  return useCallback((...args) => {
-    clearTimeout(timer.current);
-    timer.current = setTimeout(() => fn(...args), delay);
-  }, [fn, delay]);
-}
-
 // ── Memoized cell component ───────────────────────────────────────────────────
 const Cell = memo(function Cell({
   id, col, isSelected, isEditing, value, editVal, subValue,
@@ -273,25 +264,24 @@ export default function LiveTagging() {
   const saveToServer = useCallback((gameId, data) => {
     apiSaveLiveRows(gameId, data).catch(e => console.warn('saveLiveRows failed:', e));
   }, []);
-  const debouncedSave = useDebounce(saveToServer, 800);
 
+  // Persist immediately — no debounce so every committed cell/row is saved right away
   const persist = useCallback((next) => {
-    localChanges.current = true;  // mark local changes
+    localChanges.current = true;
     setRows(next);
-    if (selectedGame) debouncedSave(selectedGame.id, next);
-  }, [selectedGame?.id, debouncedSave]);
+    if (selectedGame) saveToServer(selectedGame.id, next);
+  }, [selectedGame?.id, saveToServer]);
 
   const addRow = useCallback(() => {
-    // Use functional updater to avoid stale closure
     setRows(prevRows => {
       const next = [...prevRows, newRow(prevRows.length + 1)];
       localChanges.current = true;
-      if (selectedGame) debouncedSave(selectedGame.id, next);
+      if (selectedGame) saveToServer(selectedGame.id, next);
       setSel({ r: next.length - 1, c: 0 });
       setTimeout(() => gridRef.current?.focus(), 0);
       return next;
     });
-  }, [selectedGame?.id, debouncedSave]);
+  }, [selectedGame?.id, saveToServer]);
 
   const deleteRow = useCallback((ri) => {
     persist(rowsRef.current.filter((_, i) => i !== ri));
@@ -309,6 +299,8 @@ export default function LiveTagging() {
     const curEdit = editCellRef.current;
     const curVal  = editValRef.current;
     if (!curEdit) { if (nextSel) setSel(nextSel); return; }
+    // Clear ref immediately so blur (which fires after arrow keys) doesn't double-commit
+    editCellRef.current = null;
     const col = displayCols[curEdit.c];
     setRows(prevRows => {
       const next = prevRows.map((row, i) => {
@@ -321,13 +313,13 @@ export default function LiveTagging() {
         }
         return updated;
       });
-      if (selectedGame) debouncedSave(selectedGame.id, next);
+      if (selectedGame) saveToServer(selectedGame.id, next);
       localChanges.current = true;
       return next;
     });
     setEditCell(null);
     if (nextSel) setSel(nextSel);
-  }, [displayCols, selectedGame?.id, debouncedSave]);
+  }, [displayCols, selectedGame?.id, saveToServer]);
 
   const cancelEdit = useCallback(() => setEditCell(null), []);
 
