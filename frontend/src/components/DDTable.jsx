@@ -2,8 +2,8 @@ import { Fragment } from "react";
 // ── Down & Distance table component ──────────────────────────────────────────
 // Supports detailed DOWN_GROUP_ORDER with group header rows.
 
-const RUN_COLOR  = "#7B6EA0";
-const PASS_COLOR = "#4472C4";
+const RUN_COLOR  = "var(--run-color)";
+const PASS_COLOR = "var(--pass-color)";
 const THRESH     = 65;
 
 export default function DDTable({ rows = [], showTotal = true }) {

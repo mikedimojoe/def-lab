@@ -79,6 +79,10 @@ export const apiGetRoster   = (game_id)        => req('/roster.php?game_id=' + g
 export const apiSaveRoster  = (game_id, data)  =>
   req('/roster.php?game_id=' + game_id, { method: 'POST', body: data });
 
+// ── Global settings (admin-controlled, server-persisted) ─────────────────────
+export const apiGetSettings  = ()     => req('/settings.php');
+export const apiSaveSettings = (data) => req('/settings.php', { method: 'POST', body: data });
+
 // ── Formation Images (team-based) ─────────────────────────────────────────────
 export const apiGetImages   = (team_id) => req('/images.php?team_id=' + team_id);
 export const apiDeleteImage = (team_id, norm_name) =>

@@ -2,8 +2,10 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { AppProvider }           from "./contexts/AppContext";
 import { ThemeProvider }         from "./contexts/ThemeContext";
+import { AppearanceProvider }    from "./contexts/AppearanceContext";
 import Layout      from "./components/Layout";
 import Login       from "./pages/Login";
+import Home        from "./pages/Home";
 import Overview    from "./pages/Overview";
 import Formations  from "./pages/Formations";
 import Personnel   from "./pages/Personnel";
@@ -17,7 +19,7 @@ import Upload      from "./pages/Upload";
 function ProtectedRoute({ children, adminOnly = false, noPlayer = false }) {
   const { user, loading } = useAuth();
   if (loading) return <div style={{ color: "#333", padding: 40 }}>…</div>;
-  if (!user)   return <Navigate to="/" replace />;
+  if (!user)   return <Navigate to="/login" replace />;
   if (adminOnly && user.role !== "Admin") return <Navigate to="/overview" replace />;
   if (noPlayer && user.role === "Player") return <Navigate to="/overview" replace />;
   return children;
@@ -42,7 +44,8 @@ function AppRoutes() {
     <AppProvider>
       <Layout>
         <Routes>
-          <Route path="/"          element={<Navigate to="/overview" replace />} />
+          <Route path="/"          element={<ProtectedRoute><Home /></ProtectedRoute>} />
+          <Route path="/login"     element={<Navigate to="/" replace />} />
           <Route path="/overview"  element={<ProtectedRoute><Overview /></ProtectedRoute>} />
           <Route path="/formations"element={<ProtectedRoute><Formations /></ProtectedRoute>} />
           <Route path="/personnel" element={<ProtectedRoute><Personnel /></ProtectedRoute>} />
@@ -52,7 +55,7 @@ function AppRoutes() {
           <Route path="/roster"    element={<ProtectedRoute><Roster /></ProtectedRoute>} />
           <Route path="/upload"    element={<ProtectedRoute noPlayer><Upload /></ProtectedRoute>} />
           <Route path="/admin"     element={<ProtectedRoute adminOnly><Admin /></ProtectedRoute>} />
-          <Route path="*"          element={<Navigate to="/overview" replace />} />
+          <Route path="*"          element={<Navigate to="/" replace />} />
         </Routes>
       </Layout>
     </AppProvider>
@@ -63,9 +66,11 @@ export default function App() {
   return (
     <BrowserRouter>
       <ThemeProvider>
-        <AuthProvider>
-          <AppRoutes />
-        </AuthProvider>
+        <AppearanceProvider>
+          <AuthProvider>
+            <AppRoutes />
+          </AuthProvider>
+        </AppearanceProvider>
       </ThemeProvider>
     </BrowserRouter>
   );

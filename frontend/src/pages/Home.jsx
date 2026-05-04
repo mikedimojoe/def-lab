@@ -1,229 +1,83 @@
-import { Link } from "react-router-dom";
-import { useFetch } from "../hooks/useFetch";
+import { useNavigate } from "react-router-dom";
+import { useAppearance } from "../contexts/AppearanceContext";
+import { useApp } from "../contexts/AppContext";
 
-/* ─── Hero ─────────────────────────────────────────────────────── */
-function Hero() {
-  return (
-    <section className="hero">
-      <div className="hero-bg" aria-hidden="true">
-        <div className="hero-glow hero-glow-1" />
-        <div className="hero-glow hero-glow-2" />
-        <div className="hero-grid" />
-      </div>
-      <div className="hero-content">
-        <span className="hero-badge">Football Analytics · GFL 2025</span>
-        <h1 className="hero-title">
-          Analyse.<br />
-          <span className="hero-title-accent">Verstehen.</span><br />
-          Gewinnen.
-        </h1>
-        <p className="hero-sub">
-          def-lab liefert tiefe Einblicke in Offense & Defense —
-          Play-by-Play, EPA, Trends und Live-Ergebnisse für den deutschen Football.
-        </p>
-        <div className="hero-cta">
-          <Link to="/matches" className="btn btn-primary">Spiele ansehen</Link>
-          <Link to="/analytics" className="btn btn-ghost">Analytics öffnen</Link>
-        </div>
-      </div>
-    </section>
-  );
-}
+/* global __BUILD_DATE__ */
+const BUILD_DATE = typeof __BUILD_DATE__ !== "undefined"
+  ? new Date(__BUILD_DATE__).toLocaleDateString("de-DE", { day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit" })
+  : "—";
 
-/* ─── Stats Strip ───────────────────────────────────────────────── */
-function StatsStrip() {
-  const { data: teams }   = useFetch("/api/teams/");
-  const { data: matches } = useFetch("/api/matches/");
+const VERSION = "1.0.0";
 
-  const played  = matches ? matches.filter(m => m.home_score !== null).length : "—";
-  const teamCnt = teams ? teams.length : "—";
-  const upcoming = matches ? matches.filter(m => m.home_score === null).length : "—";
-  const weeks   = matches ? Math.max(...matches.map(m => m.week)) : "—";
+export default function Home() {
+  const { logo } = useAppearance();
+  const { selectedGame } = useApp();
+  const navigate = useNavigate();
 
   return (
-    <section className="stats-strip">
-      {[
-        { value: teamCnt, label: "Teams" },
-        { value: played,  label: "Spiele gespielt" },
-        { value: upcoming, label: "Anstehend" },
-        { value: `Wk ${weeks}`, label: "Aktuelle Woche" },
-      ].map(({ value, label }) => (
-        <div key={label} className="stat-item">
-          <span className="stat-value">{value}</span>
-          <span className="stat-label">{label}</span>
+    <div style={{
+      display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+      minHeight: "100vh", padding: "40px 24px", gap: 32,
+    }}>
+      {/* Logo */}
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
+        {logo ? (
+          <img src={logo} alt="Logo" style={{ width: 100, height: 100, objectFit: "contain", borderRadius: 16 }} />
+        ) : (
+          <div style={{
+            width: 100, height: 100, borderRadius: 16,
+            background: "var(--team-primary, #154734)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            <span style={{ color: "var(--team-secondary, #5CBF8A)", fontWeight: 900, fontSize: 28, letterSpacing: 2 }}>DL</span>
+          </div>
+        )}
+        <div style={{ textAlign: "center" }}>
+          <h1 style={{ color: "var(--text)", fontSize: 32, fontWeight: 900, letterSpacing: 3, margin: 0 }}>
+            DEF LAB
+          </h1>
+          <p style={{ color: "var(--text3)", fontSize: 13, margin: "6px 0 0" }}>
+            Football Analytics Platform
+          </p>
         </div>
-      ))}
-    </section>
-  );
-}
-
-/* ─── Recent Matches ────────────────────────────────────────────── */
-function ScoreBoard({ match }) {
-  const hasScore = match.home_score !== null && match.away_score !== null;
-  const homeWon  = hasScore && match.home_score > match.away_score;
-  const awayWon  = hasScore && match.away_score > match.home_score;
-  return (
-    <div className="scoreboard">
-      <div className="scoreboard-date">{match.date} · Woche {match.week} · {match.location}</div>
-      <div className="scoreboard-row">
-        <span className={`team-name ${homeWon ? "winner" : ""}`}>{match.home_team}</span>
-        <div className="scores">
-          {hasScore ? (
-            <>
-              <span className={`score ${homeWon ? "score-win" : ""}`}>{match.home_score}</span>
-              <span className="score-sep">:</span>
-              <span className={`score ${awayWon ? "score-win" : ""}`}>{match.away_score}</span>
-            </>
-          ) : <span className="score-tbd">TBD</span>}
-        </div>
-        <span className={`team-name team-name-right ${awayWon ? "winner" : ""}`}>{match.away_team}</span>
       </div>
+
+      {/* Info card */}
+      <div style={{
+        background: "var(--surface)", border: "1px solid var(--border)",
+        borderRadius: 12, padding: "24px 32px", maxWidth: 400, width: "100%",
+        display: "flex", flexDirection: "column", gap: 12,
+      }}>
+        <InfoRow label="Version" value={`v${VERSION}`} />
+        <InfoRow label="Deployed" value={BUILD_DATE} />
+        <InfoRow label="Environment" value="Production" />
+        {selectedGame && (
+          <InfoRow label="Active Game" value={`W${selectedGame.week} — ${selectedGame.opponent}`} accent />
+        )}
+      </div>
+
+      {/* Quick nav */}
+      <button
+        onClick={() => navigate("/overview")}
+        style={{
+          background: "var(--team-primary, #154734)", color: "var(--team-secondary, #5CBF8A)",
+          border: "none", borderRadius: 8, padding: "12px 32px",
+          fontSize: 14, fontWeight: 700, cursor: "pointer", letterSpacing: 1,
+        }}>
+        Go to Overview →
+      </button>
     </div>
   );
 }
 
-function RecentMatches() {
-  const { data, loading, error } = useFetch("/api/matches/");
-  const recent = data
-    ? [...data].filter(m => m.home_score !== null).slice(-3).reverse()
-    : [];
-  const upcoming = data
-    ? data.filter(m => m.home_score === null).slice(0, 2)
-    : [];
-
+function InfoRow({ label, value, accent }) {
   return (
-    <section className="section">
-      <div className="section-header">
-        <h2 className="section-title">Letzte Spiele</h2>
-        <Link to="/matches" className="section-link">Alle Spiele →</Link>
-      </div>
-      {loading && <div className="skeleton-list">{[1,2,3].map(i=><div key={i} className="skeleton" style={{height:88}}/>)}</div>}
-      {error && <p className="error-msg">Spiele konnten nicht geladen werden.</p>}
-      {!loading && recent.length > 0 && (
-        <div className="scoreboard-list">
-          {recent.map(m => <ScoreBoard key={m.id} match={m} />)}
-        </div>
-      )}
-      {!loading && upcoming.length > 0 && (
-        <>
-          <h3 className="upcoming-title">Nächste Spiele</h3>
-          <div className="scoreboard-list">
-            {upcoming.map(m => <ScoreBoard key={m.id} match={m} />)}
-          </div>
-        </>
-      )}
-    </section>
-  );
-}
-
-/* ─── Standings Preview ─────────────────────────────────────────── */
-function StandingsPreview() {
-  const { data, loading } = useFetch("/api/stats/standings");
-  const top = data ? data.slice(0, 4) : [];
-
-  return (
-    <section className="section">
-      <div className="section-header">
-        <h2 className="section-title">Tabelle</h2>
-        <Link to="/standings" className="section-link">Alle →</Link>
-      </div>
-      {loading && <div className="skeleton-list">{[1,2,3,4].map(i=><div key={i} className="skeleton" style={{height:48}}/>)}</div>}
-      {!loading && top.length > 0 && (
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Team</th>
-              <th style={{textAlign:"center"}}>S</th>
-              <th style={{textAlign:"center"}}>N</th>
-              <th style={{textAlign:"center"}}>PCT</th>
-              <th style={{textAlign:"center"}}>DIFF</th>
-            </tr>
-          </thead>
-          <tbody>
-            {top.map((t, i) => (
-              <tr key={t.id}>
-                <td className="td-muted">{i + 1}</td>
-                <td>
-                  <div style={{display:"flex",alignItems:"center",gap:"0.6rem"}}>
-                    <div className="table-avatar" style={{"--c": t.color}}>{t.short}</div>
-                    <Link to={`/teams/${t.id}`} className="td-name" style={{color:"inherit"}}>{t.name}</Link>
-                  </div>
-                </td>
-                <td style={{textAlign:"center"}} className="td-name">{t.wins}</td>
-                <td style={{textAlign:"center"}} className="td-muted">{t.losses}</td>
-                <td style={{textAlign:"center"}}><span className="badge">{t.pct.toFixed(3)}</span></td>
-                <td style={{textAlign:"center"}}>
-                  <span className={t.diff > 0 ? "diff-pos" : t.diff < 0 ? "diff-neg" : ""}>
-                    {t.diff > 0 ? `+${t.diff}` : t.diff}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-    </section>
-  );
-}
-
-/* ─── Features ──────────────────────────────────────────────────── */
-const FEATURES = [
-  { icon: "📊", title: "Analytics",     desc: "Scoring-Trends, Point Differential, Team-Radar.",   soon: false, to: "/analytics" },
-  { icon: "📋", title: "Tabelle",        desc: "Aktuelle Standings beider Divisionen.",              soon: false, to: "/standings" },
-  { icon: "🏈", title: "Play-by-Play",  desc: "Jede Action eines Spiels — filtern & vergleichen.", soon: true,  to: null },
-  { icon: "🎯", title: "EPA",            desc: "Expected Points Added pro Drive & Formation.",      soon: true,  to: null },
-];
-
-function Features() {
-  return (
-    <section className="section">
-      <div className="section-header">
-        <h2 className="section-title">Was def-lab kann</h2>
-      </div>
-      <div className="features-grid">
-        {FEATURES.map(({ icon, title, desc, soon, to }) => (
-          <div key={title} className={`feature-card ${soon ? "feature-soon" : ""}`}>
-            <span className="feature-icon">{icon}</span>
-            <h3 className="feature-title">{title}</h3>
-            <p className="feature-desc">{desc}</p>
-            {soon
-              ? <span className="badge-soon">Coming soon</span>
-              : <Link to={to} className="feature-link">Öffnen →</Link>
-            }
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-/* ─── CTA Banner ────────────────────────────────────────────────── */
-function CtaBanner() {
-  return (
-    <section className="cta-banner">
-      <h2>Bereit für echte Einblicke?</h2>
-      <p>Analysiere Teams und Spiele — kostenlos und ohne Login.</p>
-      <div className="hero-cta">
-        <Link to="/analytics" className="btn btn-primary">Analytics öffnen</Link>
-        <Link to="/standings" className="btn btn-ghost">Tabelle ansehen</Link>
-      </div>
-    </section>
-  );
-}
-
-/* ─── Page ──────────────────────────────────────────────────────── */
-export default function Home() {
-  return (
-    <>
-      <Hero />
-      <div className="page-content">
-        <StatsStrip />
-        <RecentMatches />
-        <StandingsPreview />
-        <Features />
-        <CtaBanner />
-      </div>
-    </>
+    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center",
+      padding: "8px 0", borderBottom: "1px solid var(--border)" }}>
+      <span style={{ color: "var(--text3)", fontSize: 12 }}>{label}</span>
+      <span style={{ color: accent ? "var(--accent)" : "var(--text2)", fontSize: 13, fontWeight: 600 }}>
+        {value}
+      </span>
+    </div>
   );
 }

@@ -41,11 +41,46 @@ function natBadgeStyle(code) {
   return c || { bg: "#333", fg: "#aaa" };
 }
 
+const EMPTY_DEPTH = () => Object.fromEntries(POSITIONS.map(p => [p.key, []]));
+
 const EMPTY_ROSTER = () => ({
-  opponent: "",
-  depth: Object.fromEntries(POSITIONS.map(p => [p.key, []])),
+  depth: EMPTY_DEPTH(),
   importData: null,
 });
+
+const SLOT_MAP = {
+  QB: "QB", RB: "RB", FB: "FB", TE: "TE",
+  WR: "WR_L", WRL: "WR_L", WRR: "WR_R",
+  LWR: "WR_L", RWR: "WR_R", SB: "SB",
+  LT: "LT", LG: "LG", C: "C", RG: "RG", RT: "RT",
+};
+
+function parseImportData(rawData) {
+  const depth = EMPTY_DEPTH();
+  const players = Array.isArray(rawData)
+    ? rawData
+    : (Array.isArray(rawData?.players) ? rawData.players : []);
+  if (!players.length) return null;
+
+  let imported = 0;
+  players.forEach((p, i) => {
+    if (!p || typeof p !== "object") return;
+    const pos  = String(p.position || p.Position || p.POS || p.Pos || "").toUpperCase().trim();
+    const slot = SLOT_MAP[pos];
+    if (!slot) return;
+    depth[slot].push({
+      number:      String(p.number    || p.Number    || p.NR    || p["#"]     || ""),
+      firstname:   String(p.firstname || p.FirstName || p.FIRST || p.Vorname  || p.First || ""),
+      lastname:    String(p.lastname  || p.LastName  || p.LAST  || p.Nachname || p.Last  || ""),
+      nationality: String(p.nationality || p.Nationality || p.NAT || p.Nat   || ""),
+      position:    pos,
+      dcPos:       p.dcPos != null ? parseInt(p.dcPos) : (i + 1),
+      markColor:   null,
+    });
+    imported++;
+  });
+  return imported > 0 ? depth : null;
+}
 
 // ── Player add/edit dialog ────────────────────────────────────────────────────
 function PlayerDialog({ posKey, player, onSave, onClose }) {
@@ -216,16 +251,21 @@ export default function Roster() {
   const [dialog,  setDialog]  = useState(null); // { posKey, player, idx }
   const saveTimer = useRef(null);
 
-  // Load roster from API when game changes
+  // Load roster from API when game changes; auto-import if depth is empty
   useEffect(() => {
     if (!selectedGame) { setRoster(EMPTY_ROSTER()); return; }
     apiGetRoster(selectedGame.id)
       .then(data => {
-        if (data && (data.depth || data.opponent !== undefined)) {
-          setRoster({ ...EMPTY_ROSTER(), ...data });
-        } else {
-          setRoster(EMPTY_ROSTER());
+        if (!data) { setRoster(EMPTY_ROSTER()); return; }
+        const base = { ...EMPTY_ROSTER(), ...data };
+        // Auto-populate depth chart from importData if depth is still empty
+        const depthIsEmpty = !data.depth ||
+          Object.values(data.depth).every(arr => !arr?.length);
+        if (depthIsEmpty && data.importData) {
+          const parsed = parseImportData(data.importData);
+          if (parsed) base.depth = parsed;
         }
+        setRoster(base);
       })
       .catch(() => setRoster(EMPTY_ROSTER()));
   }, [selectedGame?.id]);
@@ -304,57 +344,21 @@ export default function Roster() {
 
   function handleClearRoster() {
     if (!confirm("Clear all roster data?")) return;
-    persist({ opponent: "", depth: Object.fromEntries(POSITIONS.map(p => [p.key, []])) });
+    persist(prev => ({ ...prev, depth: EMPTY_DEPTH() }));
   }
 
-  // Parse from uploaded importData
+  // Re-import from uploaded importData (manual trigger)
   function handleImportFromGame() {
-    const parsed = roster.importData;
-    if (!parsed || (Array.isArray(parsed) && parsed.length === 0)) {
-      alert("No roster data uploaded for this game.\nGo to Admin → Upload Roster to upload a roster file.");
+    if (!roster.importData) {
+      alert("Kein Roster-Upload für dieses Spiel.\nGehe zu Admin → Roster hochladen.");
       return;
     }
-    try {
-      const depth = Object.fromEntries(POSITIONS.map(p => [p.key, []]));
-      const players = Array.isArray(parsed) ? parsed : (Array.isArray(parsed?.players) ? parsed.players : []);
-
-      if (players.length === 0) {
-        alert("No player rows found in the roster file.\nCheck that your file has player data in the first sheet.");
-        return;
-      }
-
-      const slotMap = {
-        QB: "QB", RB: "RB", FB: "FB", TE: "TE",
-        WR: "WR_L", WRL: "WR_L", WRR: "WR_R",
-        LWR: "WR_L", RWR: "WR_R", SB: "SB",
-        LT: "LT", LG: "LG", C: "C", RG: "RG", RT: "RT",
-      };
-
-      let imported = 0;
-      players.forEach((p, i) => {
-        if (!p || typeof p !== "object") return;
-        const pos  = String(p.position || p.Position || p.POS || p.Pos || "").toUpperCase().trim();
-        const slot = slotMap[pos];
-        if (!slot) return;
-        depth[slot].push({
-          number:      String(p.number    || p.Number    || p.NR   || p["#"]    || ""),
-          firstname:   String(p.firstname || p.FirstName || p.FIRST || p.Vorname || p.First || ""),
-          lastname:    String(p.lastname  || p.LastName  || p.LAST  || p.Nachname || p.Last  || ""),
-          nationality: String(p.nationality || p.Nationality || p.NAT || p.Nat || ""),
-          position:    pos,
-          dcPos:       p.dcPos != null ? parseInt(p.dcPos) : (i + 1),
-          markColor:   null,
-        });
-        imported++;
-      });
-
-      persist(prev => ({ ...prev, depth }));
-      if (imported === 0) {
-        alert(`Imported 0 players.\n\nMake sure the "Position" column uses known values:\nQB, RB, FB, TE, WR, SB, LT, LG, C, RG, RT`);
-      }
-    } catch (e) {
-      alert("Error building depth chart: " + e.message);
+    const depth = parseImportData(roster.importData);
+    if (!depth) {
+      alert(`0 Spieler importiert.\n\nStelle sicher, dass die Spalte "Position" bekannte Werte enthält:\nQB, RB, FB, TE, WR, SB, LT, LG, C, RG, RT`);
+      return;
     }
+    persist(prev => ({ ...prev, depth }));
   }
 
   // Build grid layout (7 cols)
@@ -375,6 +379,12 @@ export default function Roster() {
         <span style={{ flex: 1 }} />
         {canEdit && selectedGame && (
           <>
+            {roster.importData && (
+              <button onClick={handleImportFromGame}
+                style={{ ...btnStyle }}>
+                ↻ Re-Import Upload
+              </button>
+            )}
             <button onClick={handleClearRoster}
               style={{ ...btnStyle, background: "#5a1a1a", color: "#ffaaaa", borderColor: "#8b2222" }}>
               🗑 Clear
@@ -388,21 +398,6 @@ export default function Roster() {
           </>
         )}
       </div>
-
-      {/* Opponent name */}
-      {selectedGame && (
-        <div style={{ marginBottom: 20, display: "flex", alignItems: "center", gap: 8 }}>
-          <label style={{ color: "var(--text3)", fontSize: 12 }}>Opponent:</label>
-          <input
-            value={roster.opponent || ""}
-            onChange={e => persist(p => ({ ...p, opponent: e.target.value }))}
-            placeholder="Team name…"
-            disabled={locked || !canEdit}
-            style={{ background: "var(--surface2)", color: "var(--text)",
-              border: "1px solid var(--border)", borderRadius: 4,
-              padding: "5px 10px", fontSize: 12, outline: "none", width: 200 }} />
-        </div>
-      )}
 
       {!selectedGame ? (
         <div style={{ background: "var(--surface)", border: "1px solid var(--border)",

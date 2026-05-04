@@ -213,3 +213,35 @@ export function saveVisibleColumns(cols) {
   const { order } = getColumnConfig();
   saveColumnConfig({ visible: cols, order });
 }
+
+// ── Field position grouping ───────────────────────────────────────────────────
+export const FP_ZONES = [
+  "HIGH REDZONE",
+  "LOW REDZONE",
+  "PLUS TERRITORY",
+  "MINUS TERRITORY",
+  "BACKED UP",
+];
+
+export function fpGroupFromYardLine(yardLn) {
+  const y = parseInt(String(yardLn).replace(/[^\d\-]/g, ""));
+  if (isNaN(y)) return "";
+  if (y >= 1   && y <= 10)  return "HIGH REDZONE";
+  if (y >= 11  && y <= 20)  return "LOW REDZONE";
+  if (y >= 21  && y <= 50)  return "PLUS TERRITORY";
+  if (y >= -49 && y <= -11) return "MINUS TERRITORY";
+  if (y >= -10 && y <= -1)  return "BACKED UP";
+  return "";
+}
+
+// ── Run/Pass colors ───────────────────────────────────────────────────────────
+export function getRunPassColors() {
+  return {
+    run:  localStorage.getItem("dl_run_color")  || "#7B6EA0",
+    pass: localStorage.getItem("dl_pass_color") || "#4472C4",
+  };
+}
+
+// ── Logo ──────────────────────────────────────────────────────────────────────
+export function getLogo() { return localStorage.getItem("dl_logo") || null; }
+export function saveLogo(dataUrl) { localStorage.setItem("dl_logo", dataUrl); }

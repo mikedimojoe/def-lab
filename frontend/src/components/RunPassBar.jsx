@@ -1,12 +1,10 @@
 // ── Run/Pass grouped bar chart (SVG) ─────────────────────────────────────────
-// Uses CSS variables for colors so it adapts to light/dark theme.
-const RUN_COLOR  = "#7B6EA0";
-const PASS_COLOR = "#4472C4";
+// Uses CSS variables so colors always match the user's Run/Pass color settings.
+// NOTE: SVG fill= attribute does NOT resolve CSS custom properties —
+//       we use style={{ fill: "var(--run-color)" }} instead.
 
 export default function RunPassBar({ rows = [] }) {
   if (!rows.length) return null;
-  // Accept both aggregated simple rows and detailed rows
-  // If rows have a 'parent' property they're detailed — aggregate first
   const filtered = rows.filter(r => r.total > 0);
   if (!filtered.length) return null;
 
@@ -39,26 +37,25 @@ export default function RunPassBar({ rows = [] }) {
         const runH  = (r.runPct  / maxPct) * chartH;
         const passH = (r.passPct / maxPct) * chartH;
         const y0    = PAD.top + chartH;
-        // Label: strip "Down" suffix for simple downs, keep short otherwise
         const label = String(r.downGroup || "").replace(/ Down$/, "").replace("& 10 (+)", "& 10+");
         return (
           <g key={r.downGroup || i}>
             {/* Run bar */}
             <rect x={gx - barW - 2} y={y0 - runH} width={barW} height={runH}
-              fill={RUN_COLOR} rx={2} />
+              style={{ fill: "var(--run-color)" }} rx={2} />
             {r.runPct > 5 && (
               <text x={gx - barW / 2 - 2} y={y0 - runH - 3}
-                textAnchor="middle" fill={RUN_COLOR} fontSize="8" fontWeight="600">
+                textAnchor="middle" style={{ fill: "var(--run-color)" }} fontSize="8" fontWeight="600">
                 {r.runPct}%
               </text>
             )}
 
             {/* Pass bar */}
             <rect x={gx + 2} y={y0 - passH} width={barW} height={passH}
-              fill={PASS_COLOR} rx={2} />
+              style={{ fill: "var(--pass-color)" }} rx={2} />
             {r.passPct > 5 && (
               <text x={gx + barW / 2 + 2} y={y0 - passH - 3}
-                textAnchor="middle" fill={PASS_COLOR} fontSize="8" fontWeight="600">
+                textAnchor="middle" style={{ fill: "var(--pass-color)" }} fontSize="8" fontWeight="600">
                 {r.passPct}%
               </text>
             )}
@@ -72,9 +69,9 @@ export default function RunPassBar({ rows = [] }) {
       })}
 
       {/* Legend */}
-      <rect x={PAD.left} y={3} width={8} height={8} fill={RUN_COLOR} rx={1} />
+      <rect x={PAD.left} y={3} width={8} height={8} style={{ fill: "var(--run-color)" }} rx={1} />
       <text x={PAD.left + 12} y={11} fill="var(--text3)" fontSize="9">Run</text>
-      <rect x={PAD.left + 46} y={3} width={8} height={8} fill={PASS_COLOR} rx={1} />
+      <rect x={PAD.left + 46} y={3} width={8} height={8} style={{ fill: "var(--pass-color)" }} rx={1} />
       <text x={PAD.left + 58} y={11} fill="var(--text3)" fontSize="9">Pass</text>
     </svg>
   );

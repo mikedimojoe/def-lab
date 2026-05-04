@@ -4,53 +4,58 @@ import {
   computePlaytypeStats, computeDrives, DRIVE_START_LABELS,
   rowDownGroup, DOWN_GROUP_PARENT,
 } from "../lib/dataEngine";
+import { FP_ZONES } from "../lib/storage";
 import { apiGetLiveRows } from "../lib/api";
 import DDTable from "../components/DDTable";
 import RunPassBar from "../components/RunPassBar";
 
-const RUN_COLOR  = "#7B6EA0";
-const PASS_COLOR = "#4472C4";
+const RUN_COLOR  = "var(--run-color)";
+const PASS_COLOR = "var(--pass-color)";
 const DOWN_SIMPLE = ["1st", "2nd", "3rd", "4th"];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function pctInt(n, total) { return total ? Math.round(n / total * 100) : 0; }
+
+const RPO_COLOR = "#D4782A";
 
 function addStats(acc, row) {
   acc.total++;
   const pt = String(row["PLAY TYPE"] || "").trim().toLowerCase();
   if (pt === "run")  acc.run++;
   if (pt === "pass") acc.pass++;
+  if (pt === "rpo")  acc.rpo++;
 }
 
 function resolveDown(row) {
   return DOWN_GROUP_PARENT[rowDownGroup(row)] || null;
 }
 
-function emptyStats() { return { total: 0, run: 0, pass: 0, downs: {} }; }
+function emptyStats() { return { total: 0, run: 0, pass: 0, rpo: 0, downs: {} }; }
 
 // Card background tint: blue = pass-heavy, purple = run-heavy
 function tendencyBg(run, pass, total) {
   if (!total) return "var(--bg)";
   const rp = pctInt(run, total);
   const pp = pctInt(pass, total);
-  if (pp >= 65) return "rgba(68,114,196,.10)";
-  if (rp >= 65) return "rgba(123,110,160,.10)";
-  if (pp >= 55) return "rgba(68,114,196,.06)";
-  if (rp >= 55) return "rgba(123,110,160,.06)";
+  if (pp >= 65) return "rgba(var(--pass-rgb),.10)";
+  if (rp >= 65) return "rgba(var(--run-rgb),.10)";
+  if (pp >= 55) return "rgba(var(--pass-rgb),.06)";
+  if (rp >= 55) return "rgba(var(--run-rgb),.06)";
   return "var(--bg)";
 }
 
 // ── Tendency kachel ───────────────────────────────────────────────────────────
-function TendencyCard({ label, sub, total, run, pass, downs }) {
+function TendencyCard({ label, sub, total, run, pass, rpo = 0, downs }) {
   const [activeDown, setActiveDown] = useState(null);
 
   const display = activeDown && downs[activeDown]
     ? downs[activeDown]
-    : { total, run, pass };
+    : { total, run, pass, rpo };
 
-  const rPct = pctInt(display.run, display.total);
-  const pPct = pctInt(display.pass, display.total);
-  const unknown = display.total - display.run - display.pass;
+  const rPct   = pctInt(display.run,  display.total);
+  const pPct   = pctInt(display.pass, display.total);
+  const rpoPct = pctInt(display.rpo || 0, display.total);
+  const unknown = display.total - display.run - display.pass - (display.rpo || 0);
   const unknownPct = pctInt(unknown, display.total);
 
   const availableDowns = DOWN_SIMPLE.filter(d => downs[d]?.total > 0);
@@ -80,7 +85,7 @@ function TendencyCard({ label, sub, total, run, pass, downs }) {
       {/* Big Pass / Run numbers */}
       <div style={{ display: "flex", gap: 0, borderRadius: 8, overflow: "hidden",
         border: "1px solid var(--border)" }}>
-        <div style={{ flex: 1, background: `rgba(68,114,196,${pPct > 50 ? .2 : .08})`,
+        <div style={{ flex: 1, background: `rgba(var(--pass-rgb),${pPct > 50 ? .2 : .08})`,
           padding: "8px 0", textAlign: "center" }}>
           <div style={{ color: PASS_COLOR, fontSize: 22, fontWeight: 800,
             lineHeight: 1 }}>{pPct}%</div>
@@ -88,18 +93,29 @@ function TendencyCard({ label, sub, total, run, pass, downs }) {
             textTransform: "uppercase", letterSpacing: .5 }}>Pass</div>
         </div>
         <div style={{ width: 1, background: "var(--border)" }} />
-        <div style={{ flex: 1, background: `rgba(123,110,160,${rPct > 50 ? .2 : .08})`,
+        <div style={{ flex: 1, background: `rgba(var(--run-rgb),${rPct > 50 ? .2 : .08})`,
           padding: "8px 0", textAlign: "center" }}>
           <div style={{ color: RUN_COLOR, fontSize: 22, fontWeight: 800,
             lineHeight: 1 }}>{rPct}%</div>
           <div style={{ color: "var(--text3)", fontSize: 9, marginTop: 3,
             textTransform: "uppercase", letterSpacing: .5 }}>Run</div>
         </div>
+        {rpoPct > 0 && <>
+          <div style={{ width: 1, background: "var(--border)" }} />
+          <div style={{ flex: 1, background: `rgba(212,120,42,${rpoPct > 50 ? .2 : .08})`,
+            padding: "8px 0", textAlign: "center" }}>
+            <div style={{ color: RPO_COLOR, fontSize: 22, fontWeight: 800,
+              lineHeight: 1 }}>{rpoPct}%</div>
+            <div style={{ color: "var(--text3)", fontSize: 9, marginTop: 3,
+              textTransform: "uppercase", letterSpacing: .5 }}>RPO</div>
+          </div>
+        </>}
       </div>
 
       {/* Stacked bar */}
       <div style={{ display: "flex", height: 6, borderRadius: 3, overflow: "hidden", gap: 1 }}>
         <div style={{ flex: pPct, background: PASS_COLOR, minWidth: pPct > 0 ? 2 : 0 }} />
+        {rpoPct > 0 && <div style={{ flex: rpoPct, background: RPO_COLOR, minWidth: 2 }} />}
         {unknownPct > 0 && (
           <div style={{ flex: unknownPct, background: "var(--border)", minWidth: 2 }} />
         )}
@@ -325,7 +341,7 @@ function LiveAnalyticsPanel({ rows, driveLabel }) {
                 {personnelData.slice(0, 12).map((e, i) => (
                   <TendencyCard key={i}
                     label={e.pers}
-                    total={e.total} run={e.run} pass={e.pass} downs={e.downs}
+                    total={e.total} run={e.run} pass={e.pass} rpo={e.rpo || 0} downs={e.downs}
                   />
                 ))}
               </div>
@@ -335,13 +351,16 @@ function LiveAnalyticsPanel({ rows, driveLabel }) {
           formBackData.length === 0
             ? <EmptyMsg>Keine Formation/Backfield-Daten.</EmptyMsg>
             : <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
-                {formBackData.slice(0, 12).map((e, i) => (
-                  <TendencyCard key={i}
-                    label={e.form}
-                    sub={`Backfield: ${e.back}`}
-                    total={e.total} run={e.run} pass={e.pass} downs={e.downs}
-                  />
-                ))}
+                {formBackData.slice(0, 12).map((e, i) => {
+                  const parts = [e.form, e.back].filter(x => x && x !== "—");
+                  const label = `${parts.join(" ")} (${e.total} plays)`;
+                  return (
+                    <TendencyCard key={i}
+                      label={label}
+                      total={e.total} run={e.run} pass={e.pass} rpo={e.rpo || 0} downs={e.downs}
+                    />
+                  );
+                })}
               </div>
         )}
 
@@ -454,6 +473,7 @@ export default function Overview() {
   }, [mode, selectedGame?.id]);
 
   const [selDrive, setSelDrive] = useState("All");
+  const [selFP,    setSelFP]    = useState("All");
 
   const driveOptions = useMemo(() => {
     if (mode !== "live") return [];
@@ -462,10 +482,20 @@ export default function Overview() {
     return [...seen].sort((a, b) => Number(a) - Number(b) || a.localeCompare(b));
   }, [rows, mode]);
 
+  const fpOptions = useMemo(() => {
+    if (mode !== "live") return [];
+    const seen = new Set(rows.map(r => String(r["FP GROUP"] || "").trim()).filter(Boolean));
+    return FP_ZONES.filter(z => seen.has(z));
+  }, [rows, mode]);
+
   const filteredRows = useMemo(() => {
-    if (mode !== "live" || selDrive === "All") return rows;
-    return rows.filter(r => String(r["DRIVE"] || "").trim() === selDrive);
-  }, [rows, mode, selDrive]);
+    if (mode !== "live") return rows;
+    return rows.filter(r => {
+      if (selDrive !== "All" && String(r["DRIVE"] || "").trim() !== selDrive) return false;
+      if (selFP    !== "All" && String(r["FP GROUP"] || "").trim() !== selFP) return false;
+      return true;
+    });
+  }, [rows, mode, selDrive, selFP]);
 
   const stats      = useMemo(() => computePlaytypeStats(filteredRows), [filteredRows]);
   const drives     = useMemo(() => computeDrives(rows), [rows]);
@@ -496,20 +526,40 @@ export default function Overview() {
           )}
         </div>
 
-        {mode === "live" && driveOptions.length > 0 && (
-          <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ color: "var(--text3)", fontSize: 12 }}>Drive</span>
-            <select value={selDrive} onChange={e => setSelDrive(e.target.value)}
-              style={{
-                background: "var(--surface)", color: "var(--text2)",
-                border: "1px solid var(--border)", borderRadius: 6,
-                padding: "6px 10px", fontSize: 13, outline: "none", cursor: "pointer",
-              }}>
-              <option value="All">All</option>
-              {driveOptions.map(d => (
-                <option key={d} value={d}>Drive {d}</option>
-              ))}
-            </select>
+        {mode === "live" && (driveOptions.length > 0 || fpOptions.length > 0) && (
+          <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
+            {driveOptions.length > 0 && (
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ color: "var(--text3)", fontSize: 12 }}>Drive</span>
+                <select value={selDrive} onChange={e => setSelDrive(e.target.value)}
+                  style={{
+                    background: "var(--surface)", color: "var(--text2)",
+                    border: "1px solid var(--border)", borderRadius: 6,
+                    padding: "6px 10px", fontSize: 13, outline: "none", cursor: "pointer",
+                  }}>
+                  <option value="All">All</option>
+                  {driveOptions.map(d => (
+                    <option key={d} value={d}>Drive {d}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+            {fpOptions.length > 0 && (
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ color: "var(--text3)", fontSize: 12 }}>Field Position</span>
+                <select value={selFP} onChange={e => setSelFP(e.target.value)}
+                  style={{
+                    background: "var(--surface)", color: "var(--text2)",
+                    border: "1px solid var(--border)", borderRadius: 6,
+                    padding: "6px 10px", fontSize: 13, outline: "none", cursor: "pointer",
+                  }}>
+                  <option value="All">All</option>
+                  {fpOptions.map(z => (
+                    <option key={z} value={z}>{z}</option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -529,6 +579,9 @@ export default function Overview() {
             <StatCard label="Offense Plays" value={stats.total} />
             <StatCard label="Run"  value={stats.run}  sub={`${stats.runPct}%`}  color={RUN_COLOR} />
             <StatCard label="Pass" value={stats.pass} sub={`${stats.passPct}%`} color={PASS_COLOR} />
+            {stats.rpo > 0 && (
+              <StatCard label="RPO" value={stats.rpo} sub={`${stats.rpoPct}%`} color={RPO_COLOR} />
+            )}
             <StatCard label="Total Plays" value={filteredRows.length} />
             {driveCount > 0 && <StatCard label="Drives" value={driveCount} />}
           </div>

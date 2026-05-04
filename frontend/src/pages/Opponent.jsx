@@ -13,8 +13,8 @@ function fileToDataUrl(file) {
   });
 }
 
-const RUN_COLOR  = "#7B6EA0";
-const PASS_COLOR = "#4472C4";
+const RUN_COLOR  = "var(--run-color)";
+const PASS_COLOR = "var(--pass-color)";
 const GREEN      = "#154734";
 
 const TOP_N_OPTIONS = [3, 5, 10];
@@ -23,7 +23,7 @@ const TOP_N_OPTIONS = [3, 5, 10];
 function TendencyBanner({ runPct, passPct }) {
   if (passPct >= 70) {
     return (
-      <div style={{ background: "#1a2a44", color: PASS_COLOR, fontSize: 12,
+      <div style={{ background: "rgba(var(--pass-rgb),.15)", color: PASS_COLOR, fontSize: 12,
         fontWeight: 700, padding: "4px 12px", letterSpacing: .5 }}>
         PASS {passPct}%
       </div>
@@ -31,7 +31,7 @@ function TendencyBanner({ runPct, passPct }) {
   }
   if (runPct >= 70) {
     return (
-      <div style={{ background: "#1e1a2e", color: RUN_COLOR, fontSize: 12,
+      <div style={{ background: "rgba(var(--run-rgb),.15)", color: RUN_COLOR, fontSize: 12,
         fontWeight: 700, padding: "4px 12px", letterSpacing: .5 }}>
         RUN {runPct}%
       </div>
@@ -128,7 +128,7 @@ function FormationCard({ data, teamId, images, onImageUpdate }) {
       {/* Concept boxes */}
       <div style={{ display: "flex", gap: 6, padding: "10px 10px 12px" }}>
         <ConceptBox title="F Routes"     items={topFRoutes}  color="#D84315" bg="rgba(216,67,21,.06)"  />
-        <ConceptBox title="Runs"         items={topRuns}     color={PASS_COLOR} bg="rgba(68,114,196,.06)" />
+        <ConceptBox title="Runs"         items={topRuns}     color={RUN_COLOR}  bg="rgba(var(--run-rgb),.06)" />
         <ConceptBox title="Route Concept"items={topConcepts} color="#7B1FA2" bg="rgba(123,31,162,.06)" />
         <ConceptBox title="B Routes"     items={topBRoutes}  color="#2E7D32" bg="rgba(46,125,50,.06)"  />
       </div>

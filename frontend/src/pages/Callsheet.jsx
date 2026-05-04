@@ -2,8 +2,8 @@ import { useMemo } from "react";
 import { useApp } from "../contexts/AppContext";
 import { computeCallsheetData } from "../lib/dataEngine";
 
-const RUN_COLOR  = "#7B6EA0";
-const PASS_COLOR = "#4472C4";
+const RUN_COLOR  = "var(--run-color)";
+const PASS_COLOR = "var(--pass-color)";
 
 // ── Run/Pass mini bar ─────────────────────────────────────────────────────────
 function RunPassBar2({ run, pass, n, height = 28, fontSize = 11 }) {

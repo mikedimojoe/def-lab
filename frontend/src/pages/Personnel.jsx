@@ -77,8 +77,8 @@ export default function Personnel() {
                 <h3 style={panelTitle}>D&amp;D — {selP || "All"}</h3>
                 <div style={{ display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
                   {[["Plays", detail.total, "var(--text)"],
-                    ["Run",   `${detail.run} (${detail.runPct}%)`,  "#7B6EA0"],
-                    ["Pass",  `${detail.pass} (${detail.passPct}%)`, "#4472C4"],
+                    ["Run",   `${detail.run} (${detail.runPct}%)`,  "var(--run-color)"],
+                    ["Pass",  `${detail.pass} (${detail.passPct}%)`, "var(--pass-color)"],
                   ].map(([l, v, c]) => (
                     <div key={l} style={{ background: "var(--surface2)", borderRadius: 6, padding: "6px 12px" }}>
                       <div style={{ color: "var(--text3)", fontSize: 10, textTransform: "uppercase" }}>{l}</div>
@@ -112,8 +112,8 @@ export default function Personnel() {
                         background: "#154734", borderRadius: 2 }} />
                     </div>
                     <div style={{ display: "flex", gap: 8, marginTop: 2 }}>
-                      <span style={{ fontSize: 10, color: "#7B6EA0" }}>Run {f.run}</span>
-                      <span style={{ fontSize: 10, color: "#4472C4" }}>Pass {f.pass}</span>
+                      <span style={{ fontSize: 10, color: "var(--run-color)" }}>Run {f.run}</span>
+                      <span style={{ fontSize: 10, color: "var(--pass-color)" }}>Pass {f.pass}</span>
                     </div>
                   </div>
                 ))}

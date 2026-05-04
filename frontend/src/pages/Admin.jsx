@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useApp }  from "../contexts/AppContext";
 import { useAuth } from "../contexts/AuthContext";
+import { useAppearance } from "../contexts/AppearanceContext";
 import {
   apiGetUsers, apiCreateUser, apiDeleteUser, apiUpdateUser,
   apiGetTeams, apiCreateTeam, apiUpdateTeam, apiDeleteTeam,
@@ -80,6 +81,87 @@ function ColorInput({ label, value, onChange }) {
 
 function buildInviteLink(userId, tempPassword) {
   return `${window.location.origin}/?invite=${userId}&pw=${encodeURIComponent(tempPassword)}`;
+}
+
+// ── Appearance section ────────────────────────────────────────────────────────
+function AppearanceSection() {
+  const { runColor, passColor, logo, saveLogo: ctxSaveLogo, saveRunPassColors } = useAppearance();
+  const [run,  setRun]  = useState(runColor);
+  const [pass, setPass] = useState(passColor);
+  const [msg,  setMsg]  = useState("");
+
+  function handleLogoUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    e.target.value = "";
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const img = new Image();
+      img.onload = () => {
+        // Resize to max 256px — keeps localStorage usage < 100 KB
+        const MAX = 256;
+        const scale = Math.min(MAX / img.width, MAX / img.height, 1);
+        const canvas = document.createElement("canvas");
+        canvas.width  = Math.round(img.width  * scale);
+        canvas.height = Math.round(img.height * scale);
+        canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+        try {
+          ctxSaveLogo(canvas.toDataURL("image/png"));
+        } catch (err) {
+          setMsg("❌ Logo zu groß – bitte kleinere Datei verwenden");
+        }
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function handleSaveColors() {
+    saveRunPassColors(run, pass);
+    setMsg("Saved!");
+    setTimeout(() => setMsg(""), 2000);
+  }
+
+  return (
+    <section style={sec}>
+      <h3 style={{ ...secH, marginBottom: 14 }}>Appearance</h3>
+
+      {/* Logo */}
+      <div style={{ marginBottom: 18 }}>
+        <div style={{ color: "var(--text3)", fontSize: 11, marginBottom: 8 }}>
+          Team Logo <span style={{ opacity: .6 }}>(shown in sidebar + used as browser favicon)</span>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          {logo && (
+            <img src={logo} alt="logo"
+              style={{ width: 48, height: 48, objectFit: "contain",
+                border: "1px solid var(--border)", borderRadius: 6 }} />
+          )}
+          <label style={{
+            background: GREEN, color: "#fff", border: "none", borderRadius: 6,
+            padding: "7px 14px", fontSize: 12, fontWeight: 600, cursor: "pointer",
+          }}>
+            {logo ? "Change Logo" : "Upload Logo"}
+            <input type="file" accept="image/*" style={{ display: "none" }}
+              onChange={handleLogoUpload} />
+          </label>
+          {logo && (
+            <Btn variant="danger" onClick={() => ctxSaveLogo(null)}>Remove</Btn>
+          )}
+        </div>
+      </div>
+
+      {/* Run/Pass colors */}
+      <div style={{ display: "flex", gap: 24, flexWrap: "wrap", alignItems: "flex-end" }}>
+        <ColorInput label="Run Color" value={run} onChange={setRun} />
+        <ColorInput label="Pass Color" value={pass} onChange={setPass} />
+        <div style={{ marginBottom: 10 }}>
+          <Btn variant="primary" onClick={handleSaveColors}>Apply Colors</Btn>
+          {msg && <span style={{ color: ACCENT, fontSize: 12, marginLeft: 10 }}>{msg}</span>}
+        </div>
+      </div>
+    </section>
+  );
 }
 
 // ── Teams section ─────────────────────────────────────────────────────────────
@@ -559,6 +641,7 @@ export default function Admin() {
       <h2 style={{ color: "var(--text)", margin: "0 0 24px", fontSize: 20, fontWeight: 700 }}>
         Admin
       </h2>
+      <AppearanceSection />
       <TeamsSection />
       <UsersSection />
       <DataSection />

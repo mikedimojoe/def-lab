@@ -170,8 +170,8 @@ export default function Formations() {
           <div style={{ display: "flex", gap: 10, marginBottom: 18, flexWrap: "wrap" }}>
             {[
               ["Plays", stats.total, "var(--text)"],
-              ["Run",   `${stats.run} (${stats.runPct}%)`,  "#7B6EA0"],
-              ["Pass",  `${stats.pass} (${stats.passPct}%)`, "#4472C4"],
+              ["Run",   `${stats.run} (${stats.runPct}%)`,  "var(--run-color)"],
+              ["Pass",  `${stats.pass} (${stats.passPct}%)`, "var(--pass-color)"],
             ].map(([l, v, c]) => (
               <div key={l} style={{ background: "var(--surface)", border: "1px solid var(--border)",
                 borderRadius: 8, padding: "10px 18px" }}>

@@ -48,6 +48,18 @@ export function buildDownGroup(dn, dist) {
   return "";
 }
 
+// Compute FP GROUP from YARD LN value
+export function fpGroupFromYardLine(yardLn) {
+  const y = parseInt(String(yardLn || "").replace(/[^\d\-]/g, ""));
+  if (isNaN(y)) return "";
+  if (y >= 1   && y <= 10)  return "HIGH REDZONE";
+  if (y >= 11  && y <= 20)  return "LOW REDZONE";
+  if (y >= 21  && y <= 50)  return "PLUS TERRITORY";
+  if (y >= -49 && y <= -11) return "MINUS TERRITORY";
+  if (y >= -10 && y <= -1)  return "BACKED UP";
+  return "";
+}
+
 // Resolve the down group for a single row
 export function rowDownGroup(row) {
   return (row["DOWN GROUP"] && String(row["DOWN GROUP"]).trim())
@@ -72,6 +84,7 @@ function playType(row) {
   const pt = String(row["PLAY TYPE"] || "").trim().toLowerCase();
   if (pt === "run")  return "Run";
   if (pt === "pass") return "Pass";
+  if (pt === "rpo")  return "RPO";
   return String(row["PLAY TYPE"] || "").trim();
 }
 
@@ -167,12 +180,13 @@ export function computePlaytypeStats(rows, filterDown = "All") {
   const total = filtered.length;
   const run   = filtered.filter(r => playType(r) === "Run").length;
   const pass  = filtered.filter(r => playType(r) === "Pass").length;
+  const rpo   = filtered.filter(r => playType(r) === "RPO").length;
 
   const tableRows = buildDDRows(filtered);
   const chartRows = aggregateByDown(tableRows);
 
-  return { total, run, pass,
-           runPct: pct(run, total), passPct: pct(pass, total),
+  return { total, run, pass, rpo,
+           runPct: pct(run, total), passPct: pct(pass, total), rpoPct: pct(rpo, total),
            tableRows, chartRows };
 }
 

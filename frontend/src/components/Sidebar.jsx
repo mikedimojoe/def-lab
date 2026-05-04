@@ -1,10 +1,11 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth }  from "../contexts/AuthContext";
 import { useApp }   from "../contexts/AppContext";
 import { useTheme } from "../contexts/ThemeContext";
+import { useAppearance } from "../contexts/AppearanceContext";
 import {
-  apiCreateSeason, apiCreateGame, apiDeleteGame, apiDeleteSeason,
+  apiCreateSeason, apiCreateGame, apiDeleteGame, apiDeleteSeason, apiGetTeams,
 } from "../lib/api";
 
 const GREEN  = "#154734";
@@ -42,11 +43,10 @@ const ICONS = {
   trash:      "M3 6h18M19 6l-1 14H6L5 6M10 11v6M14 11v6M9 6V4h6v2",
 };
 
-const NAV_ITEMS = [
+const TOP_NAV = [
   { to: "/overview",   label: "Overview",    icon: "overview"   },
   { to: "/formations", label: "Formations",  icon: "formations" },
   { to: "/personnel",  label: "Personnel",   icon: "personnel"  },
-  { to: "/live",       label: "Live Tagging",icon: "live"       },
   { to: "/opponent",   label: "Opponent",    icon: "opponent"   },
   { to: "/callsheet",  label: "Callsheet",   icon: "callsheet"  },
   { to: "/roster",     label: "Roster",      icon: "roster"     },
@@ -323,8 +323,20 @@ function SettingsPanel({ onClose }) {
 export default function Sidebar() {
   const { user, logout }                               = useAuth();
   const { mode, setMode, sidebarOpen, setSidebarOpen } = useApp();
+  const { logo, applyTeamColors }                      = useAppearance();
   const navigate = useNavigate();
   const [showSettings, setShowSettings] = useState(false);
+
+  // Apply team colors when user changes
+  useEffect(() => {
+    if (!user) return;
+    apiGetTeams().then(teams => {
+      const team = user.team_id
+        ? teams.find(t => t.id === user.team_id)
+        : teams[0];
+      if (team) applyTeamColors(team.color1, team.color2);
+    }).catch(() => {});
+  }, [user?.id]);
 
   // Resizable width
   const [width,   setWidth]   = useState(() => {
@@ -363,8 +375,8 @@ export default function Sidebar() {
 
   const isAdmin   = user?.role === "Admin";
   const canUpload = user?.role === "Admin" || user?.role === "Coach";
-  const navItems  = [
-    ...NAV_ITEMS,
+  const bottomNav = [
+    { to: "/live",   label: "Live Tagging", icon: "live"   },
     ...(canUpload ? [{ to: "/upload", label: "Upload", icon: "upload" }] : []),
     ...(isAdmin   ? [{ to: "/admin",  label: "Admin",  icon: "admin"  }] : []),
   ];
@@ -394,12 +406,23 @@ export default function Sidebar() {
         borderBottom: "1px solid var(--border)", minHeight: 48,
       }}>
         {!collapsed && (
-          <span style={{
-            color: "#154734", fontWeight: 800, fontSize: 14, letterSpacing: 2,
-            background: "#5CBF8A", padding: "2px 8px", borderRadius: 4,
-          }}>
-            DEF LAB
-          </span>
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            {logo && (
+              <img src={logo} alt="logo"
+                style={{ width: 22, height: 22, objectFit: "contain", borderRadius: 3, flexShrink: 0 }} />
+            )}
+            <button onClick={() => navigate("/")} style={{
+              background: "none", border: "none", cursor: "pointer", padding: 0,
+            }}>
+              <span style={{
+                color: "var(--team-secondary, #5CBF8A)", fontWeight: 800, fontSize: 14, letterSpacing: 2,
+                background: "var(--team-primary, #154734)", padding: "2px 8px", borderRadius: 4,
+                display: "inline-block",
+              }}>
+                DEF LAB
+              </span>
+            </button>
+          </div>
         )}
         <button onClick={() => {
           const newW = collapsed ? DEF_W : MIN_W;
@@ -427,22 +450,28 @@ export default function Sidebar() {
 
         {!collapsed && (
           <div style={{ padding: "0 10px 10px", display: "flex", gap: 4 }}>
-            {["prep","live"].map(m => (
-              <button key={m} onClick={() => setMode(m)} style={{
-                flex: 1, padding: "5px 0", borderRadius: 4, border: "none",
-                background: mode === m ? GREEN : "var(--surface2)",
-                color: mode === m ? "#fff" : "var(--text3)",
-                fontSize: 11, fontWeight: 700, cursor: "pointer",
-                textTransform: "uppercase", letterSpacing: .5,
-              }}>{m}</button>
-            ))}
+            <button onClick={() => setMode("prep")} style={{
+              flex: 1, padding: "5px 0", borderRadius: 4, border: "none",
+              background: mode === "prep" ? "var(--team-primary, #154734)" : "var(--surface2)",
+              color:      mode === "prep" ? "var(--team-secondary, #5CBF8A)" : "var(--text3)",
+              fontSize: 11, fontWeight: 700, cursor: "pointer",
+              textTransform: "uppercase", letterSpacing: .5,
+            }}>PREP</button>
+            <button onClick={() => setMode("live")} style={{
+              flex: 1, padding: "5px 0", borderRadius: 4, border: "none",
+              background: mode === "live" ? "#cc0000" : "var(--surface2)",
+              color:      mode === "live" ? "#000000" : "var(--text3)",
+              fontSize: 11, fontWeight: mode === "live" ? 800 : 700,
+              cursor: "pointer", textTransform: "uppercase", letterSpacing: .5,
+            }}>LIVE</button>
           </div>
         )}
 
         <div style={{ borderTop: "1px solid var(--border)", marginBottom: 2 }} />
 
-        <nav style={{ padding: "4px 0" }}>
-          {navItems.map(({ to, label, icon }) => (
+        {/* Top nav */}
+        <nav style={{ padding: "4px 0", flex: 1 }}>
+          {TOP_NAV.map(({ to, label, icon }) => (
             <NavLink key={to} to={to} style={({ isActive }) => ({
               display: "flex", alignItems: "center",
               gap: !collapsed ? 10 : 0,
@@ -465,6 +494,32 @@ export default function Sidebar() {
             </NavLink>
           ))}
         </nav>
+
+        {/* Pinned bottom nav: Live, Upload, Admin */}
+        <div style={{ borderTop: "1px solid var(--border)", paddingTop: 2 }}>
+          {bottomNav.map(({ to, label, icon }) => (
+            <NavLink key={to} to={to} style={({ isActive }) => ({
+              display: "flex", alignItems: "center",
+              gap: !collapsed ? 10 : 0,
+              justifyContent: !collapsed ? "flex-start" : "center",
+              padding: !collapsed ? "8px 12px" : "8px 0",
+              color: isActive ? (to === "/live" ? "#cc0000" : ACCENT) : "var(--text3)",
+              background: isActive ? (to === "/live" ? "rgba(204,0,0,.08)" : "rgba(92,191,138,.07)") : "transparent",
+              textDecoration: "none", fontSize: 12, fontWeight: isActive ? 600 : 400,
+              borderLeft: isActive ? `2px solid ${to === "/live" ? "#cc0000" : ACCENT}` : "2px solid transparent",
+              transition: "background .15s",
+            })}>
+              <span style={{ flexShrink: 0 }}>
+                <Icon d={ICONS[icon]} size={16} />
+              </span>
+              {!collapsed && (
+                <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                  {label}
+                </span>
+              )}
+            </NavLink>
+          ))}
+        </div>
       </div>
 
       {/* Bottom: settings + user + logout */}

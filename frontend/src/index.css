@@ -1,21 +1,24 @@
-/* ── Import Inter font ─────────────────────────────────────────────────────── */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
-/* ── Dark mode (default) ───────────────────────────────────────────────────── */
 :root {
-  --bg:       #111111;
-  --bg2:      #0d0d0d;
-  --surface:  #1a1a1a;
-  --surface2: #222222;
-  --border:   #242424;
-  --text:     #e8e8e8;
-  --text2:    #aaaaaa;
-  --text3:    #555555;
-  --accent:   #5CBF8A;
-  --green:    #154734;
+  --bg:               #111111;
+  --bg2:              #0d0d0d;
+  --surface:          #1a1a1a;
+  --surface2:         #222222;
+  --border:           #242424;
+  --text:             #e8e8e8;
+  --text2:            #aaaaaa;
+  --text3:            #555555;
+  --accent:           #5CBF8A;
+  --green:            #154734;
+  --run-color:        #7B6EA0;
+  --pass-color:       #4472C4;
+  --run-rgb:          123,110,160;
+  --pass-rgb:         68,114,196;
+  --team-primary:     #154734;
+  --team-secondary:   #5CBF8A;
 }
 
-/* ── Light mode ────────────────────────────────────────────────────────────── */
 [data-theme="light"] {
   --bg:       #f0f2f5;
   --bg2:      #e8eaed;
@@ -29,7 +32,6 @@
   --green:    #154734;
 }
 
-/* ── Reset ─────────────────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body, #root {
@@ -42,7 +44,6 @@ html, body, #root {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ── Scrollbar ─────────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar       { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
