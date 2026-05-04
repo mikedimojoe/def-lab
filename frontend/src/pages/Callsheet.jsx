@@ -150,10 +150,22 @@ function TileRow({ tiles, emptyMsg = "No data." }) {
 }
 
 // ── Main Callsheet page ───────────────────────────────────────────────────────
+// Group flat d2Tiles array into per-bucket rows so each bucket is always on its own line
+function groupD2Tiles(tiles) {
+  const groups = [];
+  tiles.forEach(t => {
+    const last = groups[groups.length - 1];
+    if (last && last.title === t.title) last.tiles.push(t);
+    else groups.push({ title: t.title, tiles: [t] });
+  });
+  return groups;
+}
+
 export default function Callsheet() {
   const { selectedGame, mode, playRows, liveRows } = useApp();
   const rows = mode === "live" ? liveRows : playRows;
-  const data = useMemo(() => computeCallsheetData(rows), [rows]);
+  const data    = useMemo(() => computeCallsheetData(rows), [rows]);
+  const d2Groups = useMemo(() => groupD2Tiles(data.d2Tiles), [data.d2Tiles]);
 
   const noData = !selectedGame || rows.length === 0;
 
@@ -181,28 +193,21 @@ export default function Callsheet() {
             emptyMsg="No P&10 data found. Make sure the P&10 column is filled in." />
 
           <SectionHeader title="2nd Down & Distance" />
-          {data.d2Tiles.length === 0 ? (
+          {d2Groups.length === 0 ? (
             <p style={{ color: "var(--text3)", fontSize: 13, margin: "0 0 16px" }}>No 2nd down data found.</p>
-          ) : (() => {
-            // Group tiles by title so each bucket stays on its own row
-            const groups = [];
-            data.d2Tiles.forEach(t => {
-              const last = groups[groups.length - 1];
-              if (last && last.title === t.title) { last.tiles.push(t); }
-              else { groups.push({ title: t.title, tiles: [t] }); }
-            });
-            return groups.map(g => (
-              <div key={g.title} style={{ marginBottom: 10 }}>
-                <div style={{ color: "var(--text3)", fontSize: 10, fontWeight: 700,
-                  textTransform: "uppercase", letterSpacing: .6, marginBottom: 5 }}>
-                  {g.title}
-                </div>
-                <div style={{ display: "flex", gap: 10 }}>
-                  {g.tiles.map((t, i) => <TendencyTile key={i} {...t} />)}
-                </div>
+          ) : d2Groups.map(g => (
+            <div key={g.title} style={{ marginBottom: 12 }}>
+              <div style={{ color: "var(--text3)", fontSize: 10, fontWeight: 700,
+                textTransform: "uppercase", letterSpacing: .6, marginBottom: 6 }}>
+                {g.title}
               </div>
-            ));
-          })()}
+              <div style={{ display: "flex", gap: 10 }}>
+                {g.tiles.map((t, i) => (
+                  <TendencyTile key={i} {...t} />
+                ))}
+              </div>
+            </div>
+          ))}
 
           <SectionHeader title="3rd Down Groups" />
           <TileRow tiles={data.d3Tiles}

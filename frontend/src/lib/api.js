@@ -1,8 +1,10 @@
 // ── DEF LAB API Client ────────────────────────────────────────────────────────
 // Centralised fetch wrapper for the PHP backend.
+// VITE_API_URL: absolute base of the PHP server (e.g. https://def-lab.de).
+// Omit for local dev — Vite proxy forwards /api to the backend automatically.
 // Session cookie sent automatically via credentials: 'include'.
 
-const BASE = '/api';
+const BASE = (import.meta.env.VITE_API_URL ?? '') + '/api';
 
 async function req(path, options = {}) {
   const { body, ...rest } = options;
