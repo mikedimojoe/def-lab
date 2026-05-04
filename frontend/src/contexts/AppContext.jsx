@@ -105,7 +105,7 @@ export function AppProvider({ children }) {
       seasons, selectedSeason, selectSeason, refreshSeasons,
       games, gamesBySeason, loadGamesForSeason,
       selectedGame, setSelectedGame, refreshGames,
-      playRows, liveRows, refreshPlayRows, refreshLiveRows,
+      playRows, liveRows, setLiveRows, refreshPlayRows, refreshLiveRows,
       mode, setMode,
       sidebarOpen, setSidebarOpen,
     }}>

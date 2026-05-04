@@ -32,58 +32,30 @@ function AppRoutes() {
     </div>
   );
 
-  return (
+  if (!user) return (
     <Routes>
-      <Route path="/"
-        element={user ? <Navigate to="/overview" replace /> : <Login />}
-      />
-      <Route path="/overview" element={
-        <ProtectedRoute>
-          <AppProvider><Layout><Overview /></Layout></AppProvider>
-        </ProtectedRoute>
-      } />
-      <Route path="/formations" element={
-        <ProtectedRoute>
-          <AppProvider><Layout><Formations /></Layout></AppProvider>
-        </ProtectedRoute>
-      } />
-      <Route path="/personnel" element={
-        <ProtectedRoute>
-          <AppProvider><Layout><Personnel /></Layout></AppProvider>
-        </ProtectedRoute>
-      } />
-      <Route path="/live" element={
-        <ProtectedRoute>
-          <AppProvider><Layout><LiveTagging /></Layout></AppProvider>
-        </ProtectedRoute>
-      } />
-      <Route path="/opponent" element={
-        <ProtectedRoute>
-          <AppProvider><Layout><Opponent /></Layout></AppProvider>
-        </ProtectedRoute>
-      } />
-      <Route path="/callsheet" element={
-        <ProtectedRoute>
-          <AppProvider><Layout><Callsheet /></Layout></AppProvider>
-        </ProtectedRoute>
-      } />
-      <Route path="/roster" element={
-        <ProtectedRoute>
-          <AppProvider><Layout><Roster /></Layout></AppProvider>
-        </ProtectedRoute>
-      } />
-      <Route path="/upload" element={
-        <ProtectedRoute noPlayer>
-          <AppProvider><Layout><Upload /></Layout></AppProvider>
-        </ProtectedRoute>
-      } />
-      <Route path="/admin" element={
-        <ProtectedRoute adminOnly>
-          <AppProvider><Layout><Admin /></Layout></AppProvider>
-        </ProtectedRoute>
-      } />
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<Login />} />
     </Routes>
+  );
+
+  return (
+    <AppProvider>
+      <Layout>
+        <Routes>
+          <Route path="/"          element={<Navigate to="/overview" replace />} />
+          <Route path="/overview"  element={<ProtectedRoute><Overview /></ProtectedRoute>} />
+          <Route path="/formations"element={<ProtectedRoute><Formations /></ProtectedRoute>} />
+          <Route path="/personnel" element={<ProtectedRoute><Personnel /></ProtectedRoute>} />
+          <Route path="/live"      element={<ProtectedRoute><LiveTagging /></ProtectedRoute>} />
+          <Route path="/opponent"  element={<ProtectedRoute><Opponent /></ProtectedRoute>} />
+          <Route path="/callsheet" element={<ProtectedRoute><Callsheet /></ProtectedRoute>} />
+          <Route path="/roster"    element={<ProtectedRoute><Roster /></ProtectedRoute>} />
+          <Route path="/upload"    element={<ProtectedRoute noPlayer><Upload /></ProtectedRoute>} />
+          <Route path="/admin"     element={<ProtectedRoute adminOnly><Admin /></ProtectedRoute>} />
+          <Route path="*"          element={<Navigate to="/overview" replace />} />
+        </Routes>
+      </Layout>
+    </AppProvider>
   );
 }
 

@@ -67,12 +67,12 @@ function top3(arr, limit = 3) {
     .map(([name, count]) => ({ name, count }));
 }
 
-// Canonical play type
+// Canonical play type — case-insensitive so RUN/Run/run all work
 function playType(row) {
-  const pt = String(row["PLAY TYPE"] || "").trim();
-  if (pt === "Run") return "Run";
-  if (pt === "Pass") return "Pass";
-  return pt;
+  const pt = String(row["PLAY TYPE"] || "").trim().toLowerCase();
+  if (pt === "run")  return "Run";
+  if (pt === "pass") return "Pass";
+  return String(row["PLAY TYPE"] || "").trim();
 }
 
 // ── Filter helpers ────────────────────────────────────────────────────────────

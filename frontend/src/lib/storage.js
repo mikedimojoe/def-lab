@@ -175,7 +175,7 @@ export function saveLiveRows(gameId, rows) {
 
 // ── Column visibility + order ─────────────────────────────────────────────────
 export const ALL_COLUMNS = [
-  "PLAY #","ODK","QTR","DOWN GROUP","P&10","DN","DIST","HASH","YARD LN",
+  "PLAY #","DRIVE","ODK","QTR","DOWN GROUP","P&10","DN","DIST","HASH","YARD LN",
   "FP GROUP","RESULT","GN/LS","PLAY TYPE","PLAY TYPE CALLED","PERSONNEL",
   "MOTION","OFF FORM","F FORM VAR","B FORM VAR","Y VAR","BACKFIELD",
   "OFF PLAY","ROUTE CONCEPT","F ROUTES","B ROUTES","* LOC","PROTECTION",
@@ -184,7 +184,7 @@ export const ALL_COLUMNS = [
 ];
 
 export const DEFAULT_VISIBLE_COLUMNS = [
-  "PLAY #","ODK","QTR","DN","DIST","PLAY TYPE","PERSONNEL",
+  "PLAY #","DRIVE","ODK","QTR","DN","DIST","PLAY TYPE","PERSONNEL",
   "OFF FORM","BACKFIELD","OFF PLAY","ROUTE CONCEPT","F ROUTES","B ROUTES",
   "RESULT","COMMENT",
 ];

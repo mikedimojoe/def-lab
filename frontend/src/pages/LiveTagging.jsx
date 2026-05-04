@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect, memo } from "react";
+import { useState, useRef, useCallback, useEffect, memo, Fragment } from "react";
 import { useApp }  from "../contexts/AppContext";
 import { useAuth } from "../contexts/AuthContext";
 import { apiSaveLiveRows } from "../lib/api";
@@ -11,19 +11,19 @@ import {
 const ACCENT = "#5CBF8A";
 const GREEN  = "#154734";
 
-// Columns where we also show the formation as a subtitle
-const FORM_HINT_COLS = new Set(["DN", "DIST", "DOWN GROUP"]);
+// (Formation hint removed from cells — shown in Overview instead)
 
 function newRow(n) {
   const r = {};
   ALL_COLUMNS.forEach(c => { r[c] = ""; });
   r["PLAY #"] = String(n);
+  r["ODK"]    = "O";
   return r;
 }
 
 // ── Memoized cell component ───────────────────────────────────────────────────
 const Cell = memo(function Cell({
-  id, col, isSelected, isEditing, value, editVal, subValue,
+  id, col, isAnchor, isInRange, isEditing, value, editVal,
   canEdit, onClick, onDoubleClick,
   onEditChange, onEditBlur, onEditKeyDown,
 }) {
@@ -32,11 +32,10 @@ const Cell = memo(function Cell({
       id={id}
       style={{
         padding: "4px 8px", whiteSpace: "nowrap", verticalAlign: "middle",
-        userSelect: "none",
-        minWidth: 60, maxWidth: 160,
-        background: isSelected && !isEditing ? "rgba(92,191,138,.15)" : undefined,
-        outline: isSelected ? `2px solid ${ACCENT}` : undefined,
-        outlineOffset: -2,
+        userSelect: "none", minWidth: 60, maxWidth: 160,
+        background: isInRange && !isEditing ? "rgba(92,191,138,.13)" : undefined,
+        outline: isAnchor ? `2px solid ${ACCENT}` : isInRange ? `1px solid rgba(92,191,138,.35)` : undefined,
+        outlineOffset: -1,
         position: "relative",
       }}
       onClick={onClick}
@@ -61,11 +60,6 @@ const Cell = memo(function Cell({
       ) : (
         <span style={{ color: value ? "var(--text2)" : "var(--text3)" }}>
           {value || "—"}
-          {subValue && (
-            <span style={{ color: "var(--text3)", fontSize: 10, marginLeft: 4, fontStyle: "italic" }}>
-              {subValue}
-            </span>
-          )}
         </span>
       )}
     </td>
@@ -75,11 +69,17 @@ const Cell = memo(function Cell({
 // ── Memoized row component ────────────────────────────────────────────────────
 const TableRow = memo(function TableRow({
   row, ri, displayCols, numCols, canEdit,
-  selR, selC, editR, editC, editVal,
+  anchorR, anchorC, endR, endC,
+  editR, editC, editVal,
   onCellClick, onCellDoubleClick,
   onEditChange, onEditBlur, onEditKeyDown,
   onDeleteRow,
 }) {
+  const r1 = Math.min(anchorR ?? ri, endR ?? anchorR ?? ri);
+  const r2 = Math.max(anchorR ?? ri, endR ?? anchorR ?? ri);
+  const c1 = Math.min(anchorC ?? 0, endC ?? anchorC ?? 0);
+  const c2 = Math.max(anchorC ?? 0, endC ?? anchorC ?? 0);
+
   return (
     <tr style={{
       background: ri % 2 === 0 ? "var(--bg)" : "var(--surface)",
@@ -91,24 +91,21 @@ const TableRow = memo(function TableRow({
       </td>
 
       {displayCols.map((col, ci) => {
-        const isSelected = selR === ri && selC === ci;
-        const isEditing  = editR === ri && editC === ci;
-        // Show formation as hint in DN/DIST/DOWN GROUP cells
-        const subValue = FORM_HINT_COLS.has(col) && row["OFF FORM"]
-          ? row["OFF FORM"]
-          : undefined;
+        const isInRange = anchorR != null && ri >= r1 && ri <= r2 && ci >= c1 && ci <= c2;
+        const isAnchor  = ri === anchorR && ci === anchorC;
+        const isEditing = editR === ri && editC === ci;
         return (
           <Cell
             key={col}
             id={`cell-${ri}-${ci}`}
             col={col}
-            isSelected={isSelected}
+            isAnchor={isAnchor}
+            isInRange={isInRange}
             isEditing={isEditing}
             value={row[col]}
             editVal={isEditing ? editVal : ""}
-            subValue={subValue}
             canEdit={canEdit}
-            onClick={() => onCellClick(ri, ci)}
+            onClick={e => onCellClick(ri, ci, e.shiftKey)}
             onDoubleClick={() => canEdit && onCellDoubleClick(ri, ci)}
             onEditChange={onEditChange}
             onEditBlur={onEditBlur}
@@ -130,9 +127,11 @@ const TableRow = memo(function TableRow({
   );
 });
 
-// ── Column manager modal ──────────────────────────────────────────────────────
+// ── Column manager modal (drag-and-drop reorder) ──────────────────────────────
 function ColumnManager({ config, onChange, onClose }) {
-  const [local, setLocal] = useState(() => ({ ...config }));
+  const [local,    setLocal]    = useState(() => ({ ...config }));
+  const [dragIdx,  setDragIdx]  = useState(null);
+  const [overIdx,  setOverIdx]  = useState(null);
 
   function toggleCol(col) {
     const vis = local.visible.includes(col)
@@ -141,19 +140,34 @@ function ColumnManager({ config, onChange, onClose }) {
     setLocal(l => ({ ...l, visible: vis }));
   }
 
-  function moveCol(col, dir) {
-    const order = [...local.order];
-    const idx = order.indexOf(col);
-    const target = idx + dir;
-    if (target < 0 || target >= order.length) return;
-    [order[idx], order[target]] = [order[target], order[idx]];
-    setLocal(l => ({ ...l, order }));
+  function handleDragStart(e, idx) {
+    setDragIdx(idx);
+    e.dataTransfer.effectAllowed = "move";
   }
 
-  function apply() {
-    onChange(local);
-    onClose();
+  function handleDragOver(e, idx) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    setOverIdx(idx);
   }
+
+  function handleDrop(e, idx) {
+    e.preventDefault();
+    if (dragIdx === null || dragIdx === idx) return;
+    const order = [...local.order];
+    const [moved] = order.splice(dragIdx, 1);
+    order.splice(idx, 0, moved);
+    setLocal(l => ({ ...l, order }));
+    setDragIdx(null);
+    setOverIdx(null);
+  }
+
+  function handleDragEnd() {
+    setDragIdx(null);
+    setOverIdx(null);
+  }
+
+  function apply() { onChange(local); onClose(); }
 
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.75)",
@@ -173,38 +187,45 @@ function ColumnManager({ config, onChange, onClose }) {
         </div>
 
         <p style={{ color: "var(--text3)", fontSize: 11, margin: "0 0 10px", flexShrink: 0 }}>
-          Check/uncheck to show · ↑↓ to reorder
+          Check/uncheck to show · Drag ☰ to reorder
         </p>
 
         <div style={{ overflowY: "auto", flex: 1 }}>
           {local.order.map((col, idx) => (
-            <div key={col} style={{
-              display: "flex", alignItems: "center", gap: 8,
-              padding: "5px 8px", borderRadius: 4, marginBottom: 2,
-              background: local.visible.includes(col)
-                ? "rgba(92,191,138,.08)" : "transparent",
-            }}>
+            <div key={col}
+              draggable
+              onDragStart={e => handleDragStart(e, idx)}
+              onDragOver={e => handleDragOver(e, idx)}
+              onDrop={e => handleDrop(e, idx)}
+              onDragEnd={handleDragEnd}
+              style={{
+                display: "flex", alignItems: "center", gap: 8,
+                padding: "6px 8px", borderRadius: 4, marginBottom: 2,
+                background: overIdx === idx && dragIdx !== idx
+                  ? "rgba(92,191,138,.18)"
+                  : local.visible.includes(col)
+                    ? "rgba(92,191,138,.08)" : "transparent",
+                opacity: dragIdx === idx ? 0.4 : 1,
+                cursor: "grab",
+                borderTop: overIdx === idx && dragIdx !== idx
+                  ? `2px solid ${ACCENT}` : "2px solid transparent",
+                transition: "background .1s",
+              }}>
+              <span style={{ color: "var(--text3)", fontSize: 14, cursor: "grab",
+                userSelect: "none", flexShrink: 0 }}>☰</span>
               <input type="checkbox" checked={local.visible.includes(col)}
                 onChange={() => toggleCol(col)}
-                style={{ accentColor: ACCENT, flexShrink: 0 }} />
-              <span style={{ color: "var(--text2)", fontSize: 12, flex: 1 }}>{col}</span>
-              <button onClick={() => moveCol(col, -1)} disabled={idx === 0}
-                style={{ background: "none", border: "none", color: "var(--text3)",
-                  cursor: idx === 0 ? "default" : "pointer", fontSize: 12, padding: "0 4px",
-                  opacity: idx === 0 ? 0.3 : 1 }}>↑</button>
-              <button onClick={() => moveCol(col, 1)} disabled={idx === local.order.length - 1}
-                style={{ background: "none", border: "none", color: "var(--text3)",
-                  cursor: idx === local.order.length - 1 ? "default" : "pointer",
-                  fontSize: 12, padding: "0 4px",
-                  opacity: idx === local.order.length - 1 ? 0.3 : 1 }}>↓</button>
+                onClick={e => e.stopPropagation()}
+                style={{ accentColor: ACCENT, flexShrink: 0, cursor: "pointer" }} />
+              <span style={{ color: "var(--text2)", fontSize: 12, flex: 1,
+                userSelect: "none" }}>{col}</span>
             </div>
           ))}
         </div>
 
         <div style={{ display: "flex", justifyContent: "flex-end", gap: 8,
           marginTop: 12, flexShrink: 0 }}>
-          <button onClick={onClose}
-            style={{ ...btnStyle }}>Cancel</button>
+          <button onClick={onClose} style={{ ...btnStyle }}>Cancel</button>
           <button onClick={apply}
             style={{ ...btnStyle, background: GREEN, color: "#fff", borderColor: GREEN }}>
             Apply
@@ -217,15 +238,16 @@ function ColumnManager({ config, onChange, onClose }) {
 
 // ── Main component ────────────────────────────────────────────────────────────
 export default function LiveTagging() {
-  const { selectedGame, liveRows }  = useApp();
+  const { selectedGame, liveRows, setLiveRows } = useApp();
   const { user }                    = useAuth();
   const canEdit = user?.role === "Admin" || user?.role === "Coach";
 
   const [rows,       setRows]      = useState([]);
   const [colConfig,  setColConfig] = useState(getColumnConfig);
   const [showColMgr, setColMgr]   = useState(false);
-  const [sel,        setSel]       = useState(null);  // {r, c}
-  const [editCell,   setEditCell]  = useState(null);  // {r, c}
+  const [sel,        setSel]       = useState(null);   // anchor {r, c}
+  const [selEnd,     setSelEnd]    = useState(null);   // range end {r, c}
+  const [editCell,   setEditCell]  = useState(null);   // {r, c}
   const [editVal,    setEditVal]   = useState("");
   const [clipboard,  setClipboard] = useState("");
   const gridRef    = useRef(null);
@@ -235,11 +257,13 @@ export default function LiveTagging() {
 
   // Live refs — always reflect latest state in handleGridKey (no stale closures)
   const selRef         = useRef(sel);
+  const selEndRef      = useRef(selEnd);
   const editCellRef    = useRef(editCell);
   const editValRef     = useRef(editVal);
   const rowsRef        = useRef(rows);
   const clipboardRef   = useRef(clipboard);
   selRef.current       = sel;
+  selEndRef.current    = selEnd;
   editCellRef.current  = editCell;
   editValRef.current   = editVal;
   rowsRef.current      = rows;
@@ -248,7 +272,7 @@ export default function LiveTagging() {
   // Reset local-changes flag when game changes
   useEffect(() => {
     localChanges.current = false;
-    setSel(null); setEditCell(null);
+    setSel(null); setSelEnd(null); setEditCell(null);
   }, [selectedGame?.id]);
 
   // Sync rows from context — only if no local changes have been made
@@ -265,35 +289,40 @@ export default function LiveTagging() {
     apiSaveLiveRows(gameId, data).catch(e => console.warn('saveLiveRows failed:', e));
   }, []);
 
-  // Persist immediately — no debounce so every committed cell/row is saved right away
+  // startEdit must be declared before addRow (dependency order)
+  const startEdit = useCallback((r, c, initialChar = null) => {
+    if (!canEdit) return;
+    setEditCell({ r, c });
+    setSel({ r, c });
+    setSelEnd(null);  // always clear range on explicit edit
+    setEditVal(initialChar !== null ? initialChar.toUpperCase() : (rowsRef.current[r]?.[displayCols[c]] ?? ""));
+  }, [canEdit, displayCols]);
+
+  // Persist immediately — saves to server AND syncs back to AppContext
   const persist = useCallback((next) => {
     localChanges.current = true;
     setRows(next);
-    if (selectedGame) saveToServer(selectedGame.id, next);
-  }, [selectedGame?.id, saveToServer]);
+    if (selectedGame) {
+      saveToServer(selectedGame.id, next);
+      setLiveRows(next);
+    }
+  }, [selectedGame?.id, saveToServer, setLiveRows]);
 
   const addRow = useCallback(() => {
-    setRows(prevRows => {
-      const next = [...prevRows, newRow(prevRows.length + 1)];
-      localChanges.current = true;
-      if (selectedGame) saveToServer(selectedGame.id, next);
-      setSel({ r: next.length - 1, c: 0 });
-      setTimeout(() => gridRef.current?.focus(), 0);
-      return next;
-    });
-  }, [selectedGame?.id, saveToServer]);
+    const next = [...rowsRef.current, newRow(rowsRef.current.length + 1)];
+    localChanges.current = true;
+    setRows(next);
+    if (selectedGame) {
+      saveToServer(selectedGame.id, next);
+      setLiveRows(next);
+    }
+    setTimeout(() => startEdit(next.length - 1, 0), 0);
+  }, [selectedGame?.id, saveToServer, setLiveRows, startEdit]);
 
   const deleteRow = useCallback((ri) => {
     persist(rowsRef.current.filter((_, i) => i !== ri));
     setSel(null); setEditCell(null);
   }, [persist]);
-
-  const startEdit = useCallback((r, c, initialChar = null) => {
-    if (!canEdit) return;
-    setEditCell({ r, c });
-    setSel({ r, c });
-    setEditVal(initialChar !== null ? initialChar : (rowsRef.current[r]?.[displayCols[c]] ?? ""));
-  }, [canEdit, displayCols]);
 
   const commitEdit = useCallback((nextSel) => {
     const curEdit = editCellRef.current;
@@ -301,39 +330,47 @@ export default function LiveTagging() {
     if (!curEdit) { if (nextSel) setSel(nextSel); return; }
     // Clear ref immediately so blur (which fires after arrow keys) doesn't double-commit
     editCellRef.current = null;
-    const col = displayCols[curEdit.c];
-    setRows(prevRows => {
-      const next = prevRows.map((row, i) => {
-        if (i !== curEdit.r) return row;
-        const updated = { ...row, [col]: curVal };
-        // Auto-fill DOWN GROUP when DN or DIST is edited
-        if ((col === "DN" || col === "DIST") && !updated["DOWN GROUP"]) {
-          const dg = buildDownGroup(updated["DN"], updated["DIST"]);
-          if (dg) updated["DOWN GROUP"] = dg;
-        }
-        return updated;
-      });
-      if (selectedGame) saveToServer(selectedGame.id, next);
-      localChanges.current = true;
-      return next;
+    const col  = displayCols[curEdit.c];
+    const next = rowsRef.current.map((row, i) => {
+      if (i !== curEdit.r) return row;
+      const updated = { ...row, [col]: curVal };
+      // Auto-fill DOWN GROUP when DN or DIST is edited
+      if ((col === "DN" || col === "DIST") && !updated["DOWN GROUP"]) {
+        const dg = buildDownGroup(updated["DN"], updated["DIST"]);
+        if (dg) updated["DOWN GROUP"] = dg;
+      }
+      return updated;
     });
+    localChanges.current = true;
+    setRows(next);
+    if (selectedGame) {
+      saveToServer(selectedGame.id, next);
+      setLiveRows(next);
+    }
     setEditCell(null);
     if (nextSel) setSel(nextSel);
-  }, [displayCols, selectedGame?.id, saveToServer]);
+  }, [displayCols, selectedGame?.id, saveToServer, setLiveRows]);
 
   const cancelEdit = useCallback(() => setEditCell(null), []);
 
-  const handleCellClick = useCallback((ri, ci) => {
+  const handleCellClick = useCallback((ri, ci, shiftKey) => {
     gridRef.current?.focus();
-    setSel({ r: ri, c: ci });
-    setEditCell(null);
-  }, []);
+    if (shiftKey && selRef.current) {
+      // Extend selection range without starting edit
+      commitEdit(null);
+      setSelEnd({ r: ri, c: ci });
+    } else {
+      // Normal click: select & edit, clear any range
+      setSelEnd(null);
+      startEdit(ri, ci);
+    }
+  }, [startEdit, commitEdit]);
 
   const handleCellDoubleClick = useCallback((ri, ci) => {
     startEdit(ri, ci);
   }, [startEdit]);
 
-  const handleEditChange = useCallback(e => setEditVal(e.target.value), []);
+  const handleEditChange = useCallback(e => setEditVal(e.target.value.toUpperCase()), []);
 
   const handleEditBlur = useCallback(() => {
     commitEdit(null);
@@ -342,21 +379,42 @@ export default function LiveTagging() {
   // Arrow keys while editing → commit and move (like Google Sheets)
   const handleEditKeyDown = useCallback((e, ri, ci) => {
     if (e.key === "Escape")      { e.preventDefault(); cancelEdit(); }
-    else if (e.key === "Enter")  { e.preventDefault(); commitEdit({ r: Math.min(ri + 1, rowsRef.current.length - 1), c: ci }); }
-    else if (e.key === "Tab")    { e.preventDefault(); commitEdit({ r: ri, c: e.shiftKey ? Math.max(ci - 1, 0) : Math.min(ci + 1, numCols - 1) }); }
-    else if (e.key === "ArrowRight") { e.preventDefault(); commitEdit({ r: ri, c: Math.min(ci + 1, numCols - 1) }); }
-    else if (e.key === "ArrowLeft")  { e.preventDefault(); commitEdit({ r: ri, c: Math.max(ci - 1, 0) }); }
-    else if (e.key === "ArrowDown")  { e.preventDefault(); commitEdit({ r: Math.min(ri + 1, rowsRef.current.length - 1), c: ci }); }
-    else if (e.key === "ArrowUp")    { e.preventDefault(); commitEdit({ r: Math.max(ri - 1, 0), c: ci }); }
+    else if (e.key === "Enter")  {
+      e.preventDefault();
+      const isLastRow = ri === rowsRef.current.length - 1;
+      if (isLastRow && canEdit) {
+        // commit current cell, add new row, open first cell of new row
+        commitEdit(null);
+        const next = [...rowsRef.current, newRow(rowsRef.current.length + 1)];
+        localChanges.current = true;
+        setRows(next);
+        if (selectedGame) { saveToServer(selectedGame.id, next); setLiveRows(next); }
+        setTimeout(() => startEdit(next.length - 1, 0), 0);
+      } else {
+        // commit and immediately open next row's same column
+        commitEdit(null);
+        setTimeout(() => startEdit(ri + 1, ci), 0);
+      }
+    }
+    else if (e.key === "Tab") {
+      e.preventDefault();
+      const nc = e.shiftKey ? Math.max(ci - 1, 0) : Math.min(ci + 1, numCols - 1);
+      commitEdit(null); setTimeout(() => startEdit(ri, nc), 0);
+    }
+    else if (e.key === "ArrowRight") { e.preventDefault(); commitEdit(null); setTimeout(() => startEdit(ri, Math.min(ci + 1, numCols - 1)), 0); }
+    else if (e.key === "ArrowLeft")  { e.preventDefault(); commitEdit(null); setTimeout(() => startEdit(ri, Math.max(ci - 1, 0)), 0); }
+    else if (e.key === "ArrowDown")  { e.preventDefault(); commitEdit(null); setTimeout(() => startEdit(Math.min(ri + 1, rowsRef.current.length - 1), ci), 0); }
+    else if (e.key === "ArrowUp")    { e.preventDefault(); commitEdit(null); setTimeout(() => startEdit(Math.max(ri - 1, 0), ci), 0); }
   }, [cancelEdit, commitEdit, numCols]);
 
   // Grid keyboard handler — reads from refs to avoid stale-closure issues
   function handleGridKey(e) {
     const curSel      = selRef.current;
+    const curSelEnd   = selEndRef.current;
     const curEditCell = editCellRef.current;
     const curRows     = rowsRef.current;
-    const curClip     = clipboardRef.current;
-    if (!canEdit || !curSel) return;
+
+    if (!curSel) return;
     const { r, c } = curSel;
 
     if (curEditCell) {
@@ -365,32 +423,103 @@ export default function LiveTagging() {
       return;
     }
 
+    // ── Shift+Arrow: extend selection range ───────────────────────────────────
+    if (e.shiftKey && ["ArrowRight","ArrowLeft","ArrowDown","ArrowUp"].includes(e.key)) {
+      e.preventDefault();
+      const base = curSelEnd ?? curSel;  // extend from selEnd if already ranging
+      let { r: er, c: ec } = base;
+      if (e.key === "ArrowRight") ec = Math.min(ec + 1, numCols - 1);
+      if (e.key === "ArrowLeft")  ec = Math.max(ec - 1, 0);
+      if (e.key === "ArrowDown")  er = Math.min(er + 1, curRows.length - 1);
+      if (e.key === "ArrowUp")    er = Math.max(er - 1, 0);
+      setSelEnd({ r: er, c: ec });
+      return;
+    }
+
+    // ── Plain Arrow / Tab: move anchor, clear range ───────────────────────────
     if (e.key === "ArrowRight" || (e.key === "Tab" && !e.shiftKey)) {
-      e.preventDefault(); setSel({ r, c: Math.min(c + 1, numCols - 1) });
+      e.preventDefault(); setSelEnd(null); setSel({ r, c: Math.min(c + 1, numCols - 1) });
     } else if (e.key === "ArrowLeft" || (e.key === "Tab" && e.shiftKey)) {
-      e.preventDefault(); setSel({ r, c: Math.max(c - 1, 0) });
+      e.preventDefault(); setSelEnd(null); setSel({ r, c: Math.max(c - 1, 0) });
     } else if (e.key === "ArrowDown") {
-      e.preventDefault(); setSel({ r: Math.min(r + 1, curRows.length - 1), c });
+      e.preventDefault(); setSelEnd(null); setSel({ r: Math.min(r + 1, curRows.length - 1), c });
     } else if (e.key === "ArrowUp") {
-      e.preventDefault(); setSel({ r: Math.max(r - 1, 0), c });
+      e.preventDefault(); setSelEnd(null); setSel({ r: Math.max(r - 1, 0), c });
+
     } else if (e.key === "Enter" || e.key === "F2") {
-      e.preventDefault(); startEdit(r, c);
+      e.preventDefault(); setSelEnd(null); startEdit(r, c);
+
+    // ── Delete / Backspace: clear all cells in range ──────────────────────────
     } else if (e.key === "Delete" || e.key === "Backspace") {
       e.preventDefault();
-      const col  = displayCols[c];
-      const next = curRows.map((row, i) => i === r ? { ...row, [col]: "" } : row);
-      persist(next);
+      if (curSelEnd) {
+        const r1 = Math.min(r, curSelEnd.r), r2 = Math.max(r, curSelEnd.r);
+        const c1 = Math.min(c, curSelEnd.c), c2 = Math.max(c, curSelEnd.c);
+        const next = curRows.map((row, ri) => {
+          if (ri < r1 || ri > r2) return row;
+          const upd = { ...row };
+          for (let ci = c1; ci <= c2; ci++) upd[displayCols[ci]] = "";
+          return upd;
+        });
+        persist(next);
+      } else {
+        const col  = displayCols[c];
+        const next = curRows.map((row, i) => i === r ? { ...row, [col]: "" } : row);
+        persist(next);
+      }
+
+    // ── Ctrl+C: copy range as TSV ─────────────────────────────────────────────
     } else if (e.key === "c" && (e.ctrlKey || e.metaKey)) {
-      setClipboard(curRows[r]?.[displayCols[c]] ?? "");
+      const r1 = curSelEnd ? Math.min(r, curSelEnd.r) : r;
+      const r2 = curSelEnd ? Math.max(r, curSelEnd.r) : r;
+      const c1 = curSelEnd ? Math.min(c, curSelEnd.c) : c;
+      const c2 = curSelEnd ? Math.max(c, curSelEnd.c) : c;
+      const tsv = curRows.slice(r1, r2 + 1).map(row =>
+        displayCols.slice(c1, c2 + 1).map(col => row[col] ?? "").join("\t")
+      ).join("\n");
+      setClipboard(tsv);
+      navigator.clipboard.writeText(tsv).catch(() => {});
+
+    // ── Ctrl+V: paste TSV starting at anchor ─────────────────────────────────
     } else if (e.key === "v" && (e.ctrlKey || e.metaKey)) {
       e.preventDefault();
-      const col  = displayCols[c];
-      const next = curRows.map((row, i) => i === r ? { ...row, [col]: curClip } : row);
-      persist(next);
+      navigator.clipboard.readText().then(text => {
+        const lines = text.replace(/\r\n/g, "\n").split("\n");
+        const next  = curRows.map((row, ri) => {
+          const lineIdx = ri - r;
+          if (lineIdx < 0 || lineIdx >= lines.length) return row;
+          const cells = lines[lineIdx].split("\t");
+          const upd   = { ...row };
+          cells.forEach((val, ci) => {
+            const col = displayCols[c + ci];
+            if (col !== undefined) upd[col] = val.toUpperCase();
+          });
+          return upd;
+        });
+        persist(next);
+      }).catch(() => {
+        // browser blocked clipboard access — fall back to internal clipboard
+        const tsv   = clipboardRef.current;
+        const lines = tsv.split("\n");
+        const next  = curRows.map((row, ri) => {
+          const lineIdx = ri - r;
+          if (lineIdx < 0 || lineIdx >= lines.length) return row;
+          const cells = lines[lineIdx].split("\t");
+          const upd   = { ...row };
+          cells.forEach((val, ci) => {
+            const col = displayCols[c + ci];
+            if (col !== undefined) upd[col] = val.toUpperCase();
+          });
+          return upd;
+        });
+        persist(next);
+      });
+
     } else if (e.key === "Escape") {
-      setSel(null);
+      if (curSelEnd) { setSelEnd(null); }
+      else           { setSel(null); }
     } else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
-      e.preventDefault(); startEdit(r, c, e.key);
+      e.preventDefault(); setSelEnd(null); startEdit(r, c, e.key);
     }
   }
 
@@ -491,8 +620,10 @@ export default function LiveTagging() {
                   displayCols={displayCols}
                   numCols={numCols}
                   canEdit={canEdit}
-                  selR={sel?.r}
-                  selC={sel?.c}
+                  anchorR={sel?.r}
+                  anchorC={sel?.c}
+                  endR={selEnd?.r}
+                  endC={selEnd?.c}
                   editR={editCell?.r}
                   editC={editCell?.c}
                   editVal={editVal}
@@ -513,8 +644,7 @@ export default function LiveTagging() {
         <div style={{ color: "var(--text3)", fontSize: 10, paddingTop: 6,
           textAlign: "right", flexShrink: 0 }}>
           {rows.length} play{rows.length !== 1 ? "s" : ""} ·
-          Click to select · Double-click or type to edit ·
-          Arrows/Tab/Enter to navigate · Del to clear · Ctrl+C/V to copy/paste
+          Click to edit · Shift+Click/Arrow to select range · Ctrl+C copy · Ctrl+V paste · Del to clear · Enter = next row
         </div>
       )}
     </div>
