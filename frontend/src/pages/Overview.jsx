@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useApp } from "../contexts/AppContext";
-import { computePlaytypeStats } from "../lib/dataEngine";
+import { computePlaytypeStats, computeDrives, DRIVE_START_LABELS } from "../lib/dataEngine";
 import DDTable from "../components/DDTable";
 import RunPassBar from "../components/RunPassBar";
 
@@ -24,11 +24,52 @@ function StatCard({ label, value, sub, color }) {
   );
 }
 
+function DriveRow({ drive }) {
+  const { number, startCode, total, run, pass, runPct, passPct } = drive;
+  const label = DRIVE_START_LABELS[startCode] || startCode;
+  return (
+    <div style={{
+      display: "flex", alignItems: "center", gap: 10,
+      padding: "7px 12px", borderBottom: "1px solid var(--border)",
+    }}>
+      <span style={{ color: "var(--text3)", fontSize: 11, width: 20, textAlign: "right", flexShrink: 0 }}>
+        {number}
+      </span>
+      <span style={{ color: "var(--text2)", fontSize: 12, width: 140, flexShrink: 0 }}>
+        {label}
+      </span>
+      <span style={{ color: "var(--text3)", fontSize: 11, width: 48, flexShrink: 0 }}>
+        {total} plays
+      </span>
+      {/* mini run/pass bar */}
+      <div style={{ flex: 1, display: "flex", height: 18, borderRadius: 3, overflow: "hidden", minWidth: 80 }}>
+        <div style={{ flex: Math.max(5, passPct), background: PASS_COLOR,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          color: "#fff", fontSize: 9, fontWeight: 700 }}>
+          {passPct > 15 ? `P ${passPct}%` : ""}
+        </div>
+        <div style={{ flex: Math.max(5, runPct), background: RUN_COLOR,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          color: "#fff", fontSize: 9, fontWeight: 700 }}>
+          {runPct > 15 ? `R ${runPct}%` : ""}
+        </div>
+      </div>
+      <span style={{ color: PASS_COLOR, fontSize: 11, width: 60, textAlign: "right", flexShrink: 0 }}>
+        Pass {passPct}%
+      </span>
+      <span style={{ color: RUN_COLOR, fontSize: 11, width: 56, textAlign: "right", flexShrink: 0 }}>
+        Run {runPct}%
+      </span>
+    </div>
+  );
+}
+
 export default function Overview() {
   const { selectedGame, mode, playRows, liveRows } = useApp();
   const rows = mode === "live" ? liveRows : playRows;
 
-  const stats = useMemo(() => computePlaytypeStats(rows), [rows]);
+  const stats  = useMemo(() => computePlaytypeStats(rows), [rows]);
+  const drives = useMemo(() => computeDrives(rows), [rows]);
 
   return (
     <div style={{ padding: "24px 28px", maxWidth: 900 }}>
@@ -79,6 +120,30 @@ export default function Overview() {
               <RunPassBar rows={stats.chartRows} />
             </div>
           </div>
+
+          {drives.length > 0 && (
+            <div style={{ marginTop: 20, background: "var(--surface)",
+              border: "1px solid var(--border)", borderRadius: 8, overflow: "hidden" }}>
+              <div style={{ padding: "12px 16px", borderBottom: "1px solid var(--border)",
+                display: "flex", alignItems: "center", gap: 10 }}>
+                <h3 style={{ ...panelTitle, margin: 0 }}>Drive Breakdown</h3>
+                <span style={{ color: "var(--text3)", fontSize: 11 }}>
+                  {drives.length} drive{drives.length !== 1 ? "s" : ""}
+                </span>
+              </div>
+              {/* column header */}
+              <div style={{ display: "flex", alignItems: "center", gap: 10,
+                padding: "5px 12px", background: "var(--surface2)" }}>
+                <span style={{ color: "var(--text3)", fontSize: 10, width: 20, textAlign: "right", flexShrink: 0 }}>#</span>
+                <span style={{ color: "var(--text3)", fontSize: 10, width: 140, flexShrink: 0 }}>Start situation</span>
+                <span style={{ color: "var(--text3)", fontSize: 10, width: 48, flexShrink: 0 }}>Plays</span>
+                <span style={{ color: "var(--text3)", fontSize: 10, flex: 1 }}>Run / Pass</span>
+                <span style={{ color: "var(--text3)", fontSize: 10, width: 60, textAlign: "right", flexShrink: 0 }}>Pass%</span>
+                <span style={{ color: "var(--text3)", fontSize: 10, width: 56, textAlign: "right", flexShrink: 0 }}>Run%</span>
+              </div>
+              {drives.map(d => <DriveRow key={d.number} drive={d} />)}
+            </div>
+          )}
         </>
       )}
     </div>

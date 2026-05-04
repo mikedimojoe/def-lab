@@ -173,7 +173,7 @@ export function saveLiveRows(gameId, rows) {
   set(KEYS.liverows, all);
 }
 
-// ── Column visibility ────────────────────────────────────────────────────────
+// ── Column visibility + order ─────────────────────────────────────────────────
 export const ALL_COLUMNS = [
   "PLAY #","ODK","QTR","DOWN GROUP","P&10","DN","DIST","HASH","YARD LN",
   "FP GROUP","RESULT","GN/LS","PLAY TYPE","PLAY TYPE CALLED","PERSONNEL",
@@ -189,11 +189,27 @@ export const DEFAULT_VISIBLE_COLUMNS = [
   "RESULT","COMMENT",
 ];
 
-export function getVisibleColumns() {
+// Returns { visible: string[], order: string[] }
+export function getColumnConfig() {
   const saved = getObj(KEYS.colvis);
-  return saved.visible || DEFAULT_VISIBLE_COLUMNS;
+  const visible = Array.isArray(saved.visible) ? saved.visible : DEFAULT_VISIBLE_COLUMNS;
+  // order: persisted order, or fall back to ALL_COLUMNS order
+  const order = Array.isArray(saved.order)
+    ? [
+        ...saved.order.filter(c => ALL_COLUMNS.includes(c)),
+        ...ALL_COLUMNS.filter(c => !saved.order.includes(c)),
+      ]
+    : [...ALL_COLUMNS];
+  return { visible, order };
 }
 
+export function saveColumnConfig({ visible, order }) {
+  set(KEYS.colvis, { visible, order });
+}
+
+// Backwards-compat shims
+export function getVisibleColumns() { return getColumnConfig().visible; }
 export function saveVisibleColumns(cols) {
-  set(KEYS.colvis, { visible: cols });
+  const { order } = getColumnConfig();
+  saveColumnConfig({ visible: cols, order });
 }

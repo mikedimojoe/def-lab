@@ -375,9 +375,6 @@ export default function Roster() {
         <span style={{ flex: 1 }} />
         {canEdit && selectedGame && (
           <>
-            <button onClick={handleImportFromGame} style={btnStyle}>
-              📥 Import from Data
-            </button>
             <button onClick={handleClearRoster}
               style={{ ...btnStyle, background: "#5a1a1a", color: "#ffaaaa", borderColor: "#8b2222" }}>
               🗑 Clear

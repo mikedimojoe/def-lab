@@ -3,20 +3,24 @@ import { useApp }  from "../contexts/AppContext";
 import { apiSavePlays, apiSaveRoster, apiGetRoster, apiUploadImage, apiGetImages, apiDeleteImage } from "../lib/api";
 import { parsePlaylistData } from "../lib/xlsxParser";
 import { normalizeName } from "../lib/formationImages";
+import * as XLSX from "xlsx";
 
 const ACCENT = "#5CBF8A";
 const GREEN  = "#154734";
 
-async function parseXlsx(file) {
-  const { default: XLSX } = await import("xlsx");
+function parseXlsx(file) {
   return new Promise((res, rej) => {
     const reader = new FileReader();
     reader.onload = e => {
-      const wb = XLSX.read(new Uint8Array(e.target.result), { type: "array" });
-      const ws = wb.Sheets[wb.SheetNames[0]];
-      res(XLSX.utils.sheet_to_json(ws, { defval: "" }));
+      try {
+        const wb = XLSX.read(new Uint8Array(e.target.result), { type: "array" });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        res(XLSX.utils.sheet_to_json(ws, { defval: "" }));
+      } catch (err) {
+        rej(err);
+      }
     };
-    reader.onerror = rej;
+    reader.onerror = () => rej(new Error("File could not be read"));
     reader.readAsArrayBuffer(file);
   });
 }
@@ -189,13 +193,40 @@ export default function Upload() {
     setStatus(s => ({ ...s, roster: "" }));
     try {
       const rows = await parseXlsx(files[0]);
-      const current = await apiGetRoster(selectedGame.id).catch(() => ({}));
+      // Fetch current roster to preserve depth chart, timeout after 8s
+      let current = {};
+      try {
+        const res = await Promise.race([
+          apiGetRoster(selectedGame.id),
+          new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), 8000)),
+        ]);
+        if (res && typeof res === "object") current = res;
+      } catch { /* ignore — proceed with empty base */ }
       await apiSaveRoster(selectedGame.id, { ...current, importData: rows });
       setStatus(s => ({ ...s, roster: `✅ ${rows.length} rows imported` }));
     } catch (ex) {
-      setStatus(s => ({ ...s, roster: `❌ ${ex.message}` }));
+      setStatus(s => ({ ...s, roster: `❌ ${ex.message || "Upload failed"}` }));
     } finally {
       setLoading(l => ({ ...l, roster: false }));
+    }
+  }
+
+  async function handleClearRoster() {
+    if (!selectedGame) return;
+    setLoading(l => ({ ...l, rosterClear: true }));
+    setStatus(s => ({ ...s, roster: "" }));
+    try {
+      let current = {};
+      try {
+        const res = await apiGetRoster(selectedGame.id);
+        if (res && typeof res === "object") current = res;
+      } catch { /* ignore */ }
+      await apiSaveRoster(selectedGame.id, { ...current, importData: null });
+      setStatus(s => ({ ...s, roster: "✅ Roster data cleared" }));
+    } catch (ex) {
+      setStatus(s => ({ ...s, roster: `❌ ${ex.message || "Clear failed"}` }));
+    } finally {
+      setLoading(l => ({ ...l, rosterClear: false }));
     }
   }
 
@@ -239,6 +270,28 @@ export default function Upload() {
             loading={loading.roster}
             onUpload={handleUploadRoster}
           />
+          <div style={{
+            background: "var(--surface)", border: "1px solid var(--border)",
+            borderRadius: 10, padding: "12px 20px",
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+          }}>
+            <div style={{ color: "var(--text3)", fontSize: 12 }}>
+              Clear the uploaded roster data for this game (keeps depth chart).
+            </div>
+            <button
+              disabled={!selectedGame || loading.rosterClear}
+              onClick={handleClearRoster}
+              style={{
+                background: !selectedGame || loading.rosterClear ? "var(--surface2)" : "#5a1a1a",
+                color: !selectedGame || loading.rosterClear ? "var(--text3)" : "#ffaaaa",
+                border: "1px solid var(--border)", borderRadius: 7,
+                padding: "8px 18px", fontSize: 13, fontWeight: 600,
+                cursor: !selectedGame || loading.rosterClear ? "not-allowed" : "pointer",
+                whiteSpace: "nowrap",
+              }}>
+              {loading.rosterClear ? "Clearing…" : "Clear Roster Data"}
+            </button>
+          </div>
         </div>
       </div>
 

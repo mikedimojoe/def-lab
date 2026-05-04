@@ -279,6 +279,44 @@ export function computeOpponentFormations(rows, topN = 5) {
     });
 }
 
+// ── Drive analysis ────────────────────────────────────────────────────────────
+const DRIVE_STARTERS = new Set(["K","P","T","D","N"]);
+
+export const DRIVE_START_LABELS = {
+  K: "After Kickoff", P: "After Punt", T: "After Turnover",
+  D: "Turnover on Downs", N: "Other", "?": "—",
+};
+
+export function computeDrives(rows) {
+  const offense = filterRows(rows, { odk: "O" });
+  const drives = [];
+  let current = null;
+
+  offense.forEach(row => {
+    const p10 = String(row["P&10"] || "").trim().toUpperCase();
+    const isStart = DRIVE_STARTERS.has(p10) || current === null;
+    if (isStart) {
+      if (current && current.plays.length > 0) drives.push(current);
+      current = { startCode: p10 || "?", plays: [] };
+    }
+    if (current) current.plays.push(row);
+  });
+  if (current && current.plays.length > 0) drives.push(current);
+
+  return drives.map((d, i) => {
+    const run  = d.plays.filter(r => playType(r) === "Run").length;
+    const pass = d.plays.filter(r => playType(r) === "Pass").length;
+    return {
+      number: i + 1,
+      startCode: d.startCode,
+      total: d.plays.length,
+      run, pass,
+      runPct:  pct(run,  d.plays.length),
+      passPct: pct(pass, d.plays.length),
+    };
+  });
+}
+
 // ── Callsheet tendency ────────────────────────────────────────────────────────
 function tendency(rows) {
   const n = rows.length;
