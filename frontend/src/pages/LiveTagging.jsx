@@ -248,12 +248,13 @@ function ColumnManager({ config, onChange, onClose }) {
 
 // ── Main component ────────────────────────────────────────────────────────────
 export default function LiveTagging() {
-  const { selectedGame, liveRows, setLiveRows } = useApp();
+  const { selectedGame, liveRows, setLiveRows, liveUpdateCount } = useApp();
   const { user }    = useAuth();
   const canEdit = user?.role === "Admin" || user?.role === "Coach";
 
   const [rows,       setRows]      = useState([]);
   const [colConfig,  setColConfig] = useState(getColumnConfig);
+  const [dotVisible, setDotVisible] = useState(true);
   const [showColMgr, setColMgr]   = useState(false);
   const [sel,        setSel]       = useState(null);   // anchor {r, c}
   const [selEnd,     setSelEnd]    = useState(null);   // range end {r, c}
@@ -313,6 +314,14 @@ export default function LiveTagging() {
   useEffect(() => {
     if (!localChanges.current) setRows(liveRows);
   }, [liveRows]);
+
+  // Flash the live dot when server sends new data
+  useEffect(() => {
+    if (liveUpdateCount === 0) return;
+    setDotVisible(false);
+    const t = setTimeout(() => setDotVisible(true), 350);
+    return () => clearTimeout(t);
+  }, [liveUpdateCount]);
 
   const displayCols = colConfig.order.filter(c => colConfig.visible.includes(c));
   const numCols     = displayCols.length;
@@ -381,7 +390,7 @@ export default function LiveTagging() {
     const next = rowsRef.current.map((row, i) => {
       if (i !== curEdit.r) return row;
       const updated = { ...row, [col]: curVal };
-      if ((col === "DN" || col === "DIST") && !updated["DOWN GROUP"]) {
+      if (col === "DN" || col === "DIST") {
         const dg = buildDownGroup(updated["DN"], updated["DIST"]);
         if (dg) updated["DOWN GROUP"] = dg;
       }
@@ -474,10 +483,14 @@ export default function LiveTagging() {
       return;
     }
 
-    // Helper: get the value to commit (suggestion or typed)
+    // Helper: picks the confirmed suggestion value.
+    // - If navigated (sIdx ≥ 0): that suggestion
+    // - If suggestions exist but none navigated: first suggestion
+    // - Otherwise: null (use typed text)
     function pickedVal() {
-      if (!hasSug) return null;
-      return sIdx >= 0 ? suggs[sIdx].value : suggs[0].value;
+      if (sIdx >= 0) return suggs[sIdx].value;
+      if (hasSug)    return suggs[0].value;
+      return null;
     }
 
     if (e.key === "Escape") {
@@ -518,8 +531,22 @@ export default function LiveTagging() {
       return;
     }
 
-    // Arrow keys commit and move (when no suggestion active)
-    if (e.key === "ArrowRight") { e.preventDefault(); commitEdit(null); setTimeout(() => startEdit(ri, Math.min(ci + 1, numCols - 1)), 0); return; }
+    // ArrowRight: accept suggestion (if open) and move right
+    if (e.key === "ArrowRight") {
+      e.preventDefault();
+      if (hasSug) {
+        const val = pickedVal();
+        if (val) editValRef.current = val;
+        setSuggestions([]); setSuggIdx(-1);
+        commitEdit(null, val ?? undefined);
+      } else {
+        commitEdit(null);
+      }
+      setTimeout(() => startEdit(ri, Math.min(ci + 1, numCols - 1)), 0);
+      return;
+    }
+
+    // Arrow keys commit and move (no suggestions open)
     if (e.key === "ArrowLeft")  { e.preventDefault(); commitEdit(null); setTimeout(() => startEdit(ri, Math.max(ci - 1, 0)), 0); return; }
     if (e.key === "ArrowDown")  { e.preventDefault(); commitEdit(null); setTimeout(() => startEdit(Math.min(ri + 1, rowsRef.current.length - 1), ci), 0); return; }
     if (e.key === "ArrowUp")    { e.preventDefault(); commitEdit(null); setTimeout(() => startEdit(Math.max(ri - 1, 0), ci), 0); return; }
@@ -660,6 +687,15 @@ export default function LiveTagging() {
             W{selectedGame.week} — {selectedGame.opponent}
           </span>
         )}
+        {/* Live sync indicator */}
+        <span title="Live sync" style={{
+          width: 9, height: 9, borderRadius: "50%",
+          background: ACCENT,
+          display: "inline-block",
+          opacity: dotVisible ? 1 : 0,
+          transition: "opacity .15s",
+          flexShrink: 0,
+        }} />
         <span style={{ flex: 1 }} />
         <button onClick={() => setColMgr(v => !v)} style={btnStyle}>
           Columns ({visibleCount})

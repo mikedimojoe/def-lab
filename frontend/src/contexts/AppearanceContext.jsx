@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import { apiGetSettings, apiSaveSettings } from "../lib/api";
+import { apiGetSettings, apiSaveSettings, apiSaveUserSettings } from "../lib/api";
 
 const AppearanceContext = createContext(null);
 
@@ -55,6 +55,8 @@ export function AppearanceProvider({ children }) {
     setRunColor(run); setPassColor(pass);
     // Persist to server so all users pick it up on next load
     apiSaveSettings({ run_color: run, pass_color: pass }).catch(() => {});
+    // Also save to per-user settings
+    apiSaveUserSettings({ run_color: run, pass_color: pass }).catch(() => {});
   }
 
   function saveLogo(dataUrl) {
@@ -66,8 +68,17 @@ export function AppearanceProvider({ children }) {
     applyAppearance({ run: runColor, pass: passColor, teamPrimary: primary, teamSecondary: secondary });
   }
 
+  // Apply colors from user settings (localStorage + CSS vars) without saving to global settings
+  function applyUserColors(run, pass) {
+    if (run)  { localStorage.setItem("dl_run_color",  run);  setRunColor(run);  }
+    if (pass) { localStorage.setItem("dl_pass_color", pass); setPassColor(pass); }
+  }
+
   return (
-    <AppearanceContext.Provider value={{ runColor, passColor, logo, saveRunPassColors, saveLogo, applyTeamColors }}>
+    <AppearanceContext.Provider value={{
+      runColor, passColor, logo,
+      saveRunPassColors, saveLogo, applyTeamColors, applyUserColors,
+    }}>
       {children}
     </AppearanceContext.Provider>
   );

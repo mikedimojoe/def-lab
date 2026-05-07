@@ -102,3 +102,7 @@ export async function apiUploadImage(team_id, file) {
   if (!data.ok) throw new Error(data.error || 'Upload failed');
   return data.data;
 }
+
+// ── Per-user settings ─────────────────────────────────────────────────────────
+export const apiGetUserSettings  = ()     => req('/user_settings.php');
+export const apiSaveUserSettings = (data) => req('/user_settings.php', { method: 'POST', body: data });

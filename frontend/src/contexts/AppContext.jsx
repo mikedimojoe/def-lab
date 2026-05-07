@@ -17,6 +17,7 @@ export function AppProvider({ children }) {
   const [liveRows,       setLiveRows]       = useState([]);
   const [mode,           setMode]           = useState("prep");
   const [sidebarOpen,    setSidebarOpen]    = useState(true);
+  const [liveUpdateCount, setLiveUpdateCount] = useState(0);
 
   // Reload seasons when user changes
   useEffect(() => {
@@ -35,6 +36,33 @@ export function AppProvider({ children }) {
     apiGetPlays(selectedGame.id).then(setPlayRows).catch(() => setPlayRows([]));
     apiGetLiveRows(selectedGame.id).then(setLiveRows).catch(() => setLiveRows([]));
   }, [selectedGame?.id]);
+
+  // Live mode: poll server every 3 s, only update when rows actually changed
+  useEffect(() => {
+    if (mode !== "live" || !selectedGame) return;
+    const poll = () => {
+      apiGetLiveRows(selectedGame.id).then(serverRows => {
+        setLiveRows(prev => {
+          // More rows on server → always take server version
+          if (serverRows.length > prev.length) {
+            setLiveUpdateCount(c => c + 1);
+            return serverRows;
+          }
+          // Same count but content changed → update
+          if (serverRows.length === prev.length) {
+            const changed = serverRows.some(
+              (r, i) => JSON.stringify(r) !== JSON.stringify(prev[i])
+            );
+            if (changed) setLiveUpdateCount(c => c + 1);
+            return changed ? serverRows : prev;
+          }
+          return prev; // server has fewer → stale read, keep local
+        });
+      }).catch(() => {});
+    };
+    const id = setInterval(poll, 3000);
+    return () => clearInterval(id);
+  }, [mode, selectedGame?.id]);
 
   // Current season's games shorthand
   const games = gamesBySeason[selectedSeason?.id] || [];
@@ -108,6 +136,7 @@ export function AppProvider({ children }) {
       playRows, liveRows, setLiveRows, refreshPlayRows, refreshLiveRows,
       mode, setMode,
       sidebarOpen, setSidebarOpen,
+      liveUpdateCount,
     }}>
       {children}
     </AppContext.Provider>

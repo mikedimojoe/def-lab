@@ -1,8 +1,8 @@
 <?php
 define('DB_HOST', 'localhost');
-define('DB_NAME', 'YOUR_DB_NAME');
-define('DB_USER', 'YOUR_DB_USER');
-define('DB_PASS', 'YOUR_DB_PASS');
+define('DB_NAME', 'deflab');
+define('DB_USER', 'deflab');
+define('DB_PASS', 'DefLab2024!');
 define('DB_CHARSET', 'utf8mb4');
 
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';

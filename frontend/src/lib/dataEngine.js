@@ -67,7 +67,7 @@ export function rowDownGroup(row) {
 }
 
 function pct(n, total) {
-  return total === 0 ? 0 : Math.round((n / total) * 100 * 10) / 10;
+  return total === 0 ? 0 : Math.round((n / total) * 100);
 }
 
 function top3(arr, limit = 3) {
@@ -79,13 +79,13 @@ function top3(arr, limit = 3) {
     .map(([name, count]) => ({ name, count }));
 }
 
-// Canonical play type — case-insensitive so RUN/Run/run all work
+// Canonical play type — uses PLAY TYPE CALLED (analysis), falls back to PLAY TYPE
 function playType(row) {
-  const pt = String(row["PLAY TYPE"] || "").trim().toLowerCase();
+  const pt = String(row["PLAY TYPE CALLED"] || row["PLAY TYPE"] || "").trim().toLowerCase();
   if (pt === "run")  return "Run";
   if (pt === "pass") return "Pass";
   if (pt === "rpo")  return "RPO";
-  return String(row["PLAY TYPE"] || "").trim();
+  return String(row["PLAY TYPE CALLED"] || row["PLAY TYPE"] || "").trim();
 }
 
 // ── Filter helpers ────────────────────────────────────────────────────────────
@@ -135,12 +135,14 @@ function buildDDRows(filtered) {
       const dgRows = byGroup[dg];
       const run  = dgRows.filter(r => playType(r) === "Run").length;
       const pass = dgRows.filter(r => playType(r) === "Pass").length;
+      const rpo  = dgRows.filter(r => playType(r) === "RPO").length;
       return {
         downGroup: dg,
         parent: DOWN_GROUP_PARENT[dg] || "",
         total: dgRows.length,
-        run, runPct: pct(run, dgRows.length),
+        run,  runPct:  pct(run,  dgRows.length),
         pass, passPct: pct(pass, dgRows.length),
+        rpo,  rpoPct:  pct(rpo,  dgRows.length),
       };
     });
 }
@@ -334,10 +336,11 @@ export function computeDrives(rows) {
 // ── Callsheet tendency ────────────────────────────────────────────────────────
 function tendency(rows) {
   const n = rows.length;
-  if (!n) return { run: 0, pass: 0, n: 0 };
+  if (!n) return { run: 0, pass: 0, rpo: 0, n: 0 };
   const run  = rows.filter(r => playType(r) === "Run").length;
-  const pass = n - run;
-  return { run: pct(run, n), pass: pct(pass, n), n };
+  const pass = rows.filter(r => playType(r) === "Pass").length;
+  const rpo  = rows.filter(r => playType(r) === "RPO").length;
+  return { run: pct(run, n), pass: pct(pass, n), rpo: pct(rpo, n), n };
 }
 
 function topPersonnel(rows, topN = 4) {
@@ -353,96 +356,219 @@ function topPersonnel(rows, topN = 4) {
     });
 }
 
-export function computeCallsheetData(rows) {
-  const offense = filterRows(rows, { odk: "O" });
+// ── Drive-opener detection ─────────────────────────────────────────────────────
+function detectDriveOpenerIndices(offense) {
+  // Priority 1: DRIVE column (first play per drive value)
+  const hasDrive = offense.some(r => String(r["DRIVE"] || "").trim() !== "");
+  if (hasDrive) {
+    const seen = new Set();
+    const out  = new Set();
+    offense.forEach((r, i) => {
+      const drv = String(r["DRIVE"] || "").trim();
+      if (drv && !seen.has(drv)) { seen.add(drv); out.add(i); }
+    });
+    return out;
+  }
+  // Priority 2: P&10 column (drive-starter codes)
+  const haP10 = offense.some(r =>
+    ["K","P","T","D","N"].includes(String(r["P&10"] || "").trim().toUpperCase()));
+  if (haP10) {
+    const out = new Set();
+    offense.forEach((r, i) => {
+      if (["K","P","T","D","N"].includes(String(r["P&10"] || "").trim().toUpperCase())) out.add(i);
+    });
+    return out;
+  }
+  // Fallback: first row only
+  return new Set(offense.length > 0 ? [0] : []);
+}
 
-  // P&10 tiles
-  const p10Codes = [
-    { code: "K", title: "P&10 K", subtitle: "After Kickoff" },
-    { code: "P", title: "P&10 P", subtitle: "After Punt" },
-    { code: "T", title: "P&10 T", subtitle: "After Turnover" },
-    { code: "D", title: "P&10 D", subtitle: "Turnover on Downs" },
-    { code: "N", title: "P&10 N", subtitle: "Other (TB / MFGG)" },
-  ];
+export function computeCallsheetData(rows, { persFilter = [], fpFilter = [], driveFilter = [] } = {}) {
+  let offense = filterRows(rows, { odk: "O" });
 
-  const p10Tiles = p10Codes.map(({ code, title, subtitle }) => {
-    const sub = offense.filter(r => String(r["P&10"] || "").trim().toUpperCase() === code);
-    return { title, subtitle, ...tendency(sub), pers: topPersonnel(sub) };
+  // Personnel filter
+  if (persFilter.length > 0)
+    offense = offense.filter(r => persFilter.includes(String(r["PERSONNEL"] || "").trim()));
+  // FP filter
+  if (fpFilter.length > 0)
+    offense = offense.filter(r => fpFilter.includes(String(r["FP GROUP"] || "").trim()));
+  // Drive filter (multi-select array)
+  if (driveFilter.length > 0)
+    offense = offense.filter(r => driveFilter.includes(String(r["DRIVE"] || "").trim()));
+
+  // ── Previous play type: Map<row, "Run"|"Pass"|"RPO"|""> ──────────────────
+  // For each row: what play type was the previous play in the same drive?
+  // Drive openers (first play of a drive) get "" — no predecessor.
+  const openerIdx = detectDriveOpenerIndices(offense);
+
+  // Build Map so lookup is O(1) and there's no indexOf confusion
+  const prevTypeMap = new Map();
+  offense.forEach((r, i) => {
+    if (i === 0 || openerIdx.has(i)) {
+      prevTypeMap.set(r, "");                  // start of drive
+    } else {
+      prevTypeMap.set(r, playType(offense[i - 1]));
+    }
   });
 
-  // P&10 E (extended) — split by prev play type
-  const eAll  = offense.filter(r => String(r["P&10"] || "").trim().toUpperCase() === "E");
-  const eRun  = eAll.filter(r => String(r["PREV PLAY TYPE"] || "").trim().toUpperCase() === "RUN");
-  const ePass = eAll.filter(r => ["PASS","INC"].includes(String(r["PREV PLAY TYPE"] || "").trim().toUpperCase()));
-  if (eRun.length || ePass.length) {
-    p10Tiles.push({ title: "P&10 E", subtitle: "After Run",  ...tendency(eRun),  pers: topPersonnel(eRun) });
-    p10Tiles.push({ title: "P&10 E", subtitle: "After Pass", ...tendency(ePass), pers: topPersonnel(ePass) });
-  } else if (eAll.length) {
-    p10Tiles.push({ title: "P&10 E", subtitle: "Extended / New 1st", ...tendency(eAll), pers: topPersonnel(eAll) });
-  }
+  // ── 1st Down ─────────────────────────────────────────────────────────────
+  const driveOpenerRows = offense.filter((_, i) => openerIdx.has(i));
+  const d1All           = offense.filter(r => String(r["DN"] || "").trim() === "1");
+  const d1_10           = d1All.filter(r => rowDownGroup(r) === "1st & 10 (+)");
 
-  // 2nd down (split by prev play type)
-  const d2Buckets = [
+  // After conversion = 1st down that has a prev play (not a drive opener)
+  const afterConvAll  = d1All.filter(r => prevTypeMap.get(r) !== "");
+  const afterConvPass = afterConvAll.filter(r => prevTypeMap.get(r) === "Pass");
+  const afterConvRun  = afterConvAll.filter(r => prevTypeMap.get(r) === "Run");
+  const afterConvRpo  = afterConvAll.filter(r => prevTypeMap.get(r) === "RPO");
+
+  const d1Section = {
+    driveOpener: { ...tendency(driveOpenerRows), rows: driveOpenerRows },
+    d1_10:       { ...tendency(d1_10),           rows: d1_10 },
+    afterConv: {
+      all:  { ...tendency(afterConvAll),  rows: afterConvAll  },
+      pass: { ...tendency(afterConvPass), rows: afterConvPass },
+      run:  { ...tendency(afterConvRun),  rows: afterConvRun  },
+      rpo:  { ...tendency(afterConvRpo),  rows: afterConvRpo  },
+    },
+  };
+
+  // ── 2nd Down — grouped by what the previous play was ─────────────────────
+  const D2_BUCKETS = [
     { key: "2nd & 10+", label: "2nd & 10+" },
     { key: "2nd & 9-7", label: "2nd & 7-9" },
     { key: "2nd & 4-6", label: "2nd & 4-6" },
     { key: "2nd & 1-3", label: "2nd & 1-3" },
   ];
-  const d2Tiles = [];
-  d2Buckets.forEach(({ key, label }) => {
-    const bkt = offense.filter(r => rowDownGroup(r) === key);
-    if (!bkt.length) return;
 
-    const prevRun  = bkt.filter(r => String(r["PREV PLAY TYPE"] || "").trim().toUpperCase() === "RUN");
-    const prevPass = bkt.filter(r => ["PASS","INC"].includes(String(r["PREV PLAY TYPE"] || "").trim().toUpperCase()));
+  const d2Section = D2_BUCKETS.map(({ key, label }) => {
+    const bkt       = offense.filter(r => rowDownGroup(r) === key);
+    const afterPass = bkt.filter(r => prevTypeMap.get(r) === "Pass");
+    const afterRun  = bkt.filter(r => prevTypeMap.get(r) === "Run");
+    const afterRpo  = bkt.filter(r => prevTypeMap.get(r) === "RPO");
+    return {
+      label,
+      total:     bkt.length,
+      all:       tendency(bkt),
+      afterPass: tendency(afterPass),
+      afterRun:  tendency(afterRun),
+      afterRpo:  tendency(afterRpo),
+      hasDetail: afterPass.length > 0 || afterRun.length > 0 || afterRpo.length > 0,
+    };
+  }).filter(b => b.total > 0);
 
-    if (prevRun.length || prevPass.length) {
-      d2Tiles.push({ title: label, subtitle: "after Pass", ...tendency(prevPass), pers: topPersonnel(prevPass, 3) });
-      d2Tiles.push({ title: label, subtitle: "after Run",  ...tendency(prevRun),  pers: topPersonnel(prevRun, 3) });
-    } else {
-      d2Tiles.push({ title: label, subtitle: "",           ...tendency(bkt),      pers: topPersonnel(bkt, 3) });
-    }
-  });
-
-  // 3rd down
-  const d3Buckets = [
+  // ── 3rd Down ─────────────────────────────────────────────────────────────
+  const D3_BUCKETS = [
     { key: "3rd & 1-2", label: "3rd & 1-2" },
     { key: "3rd & 3-4", label: "3rd & 3-4" },
     { key: "3rd & 5-7", label: "3rd & 5-7" },
     { key: "3rd & 8+",  label: "3rd & 8+"  },
   ];
-  const d3Tiles = d3Buckets
+  const d3Tiles = D3_BUCKETS
     .map(({ key, label }) => {
       const bkt = offense.filter(r => rowDownGroup(r) === key);
       if (!bkt.length) return null;
-      return { title: label, subtitle: "", ...tendency(bkt), pers: topPersonnel(bkt) };
+      return { title: label, ...tendency(bkt), pers: topPersonnel(bkt) };
     })
     .filter(Boolean);
 
-  // Personnel tendency (top 90%)
-  const persMap = {};
-  offense.forEach(r => { const p = r["PERSONNEL"] || ""; if (p) persMap[p] = (persMap[p] || 0) + 1; });
-  const totalOff = offense.length;
-  let acc = 0;
-  const topPersList = [];
-  Object.entries(persMap).sort((a,b) => b[1]-a[1]).forEach(([pers, cnt]) => {
-    topPersList.push(pers);
-    acc += cnt;
-    return acc < totalOff * 0.9;
+  // ── 4th Down (only if data exists) ───────────────────────────────────────
+  const D4_BUCKETS = [
+    { key: "4th & 1-2", label: "4th & 1-2" },
+    { key: "4th & 3-4", label: "4th & 3-4" },
+    { key: "4th & 5-7", label: "4th & 5-7" },
+    { key: "4th & 8+",  label: "4th & 8+"  },
+  ];
+  const d4Tiles = D4_BUCKETS
+    .map(({ key, label }) => {
+      const bkt = offense.filter(r => rowDownGroup(r) === key);
+      if (!bkt.length) return null;
+      return { title: label, ...tendency(bkt), pers: topPersonnel(bkt) };
+    })
+    .filter(Boolean);
+
+  // Available drives and FP zones (for filter chips)
+  const allDrives = [...new Set(
+    rows.filter(r => r["ODK"] === "O").map(r => String(r["DRIVE"] || "").trim()).filter(Boolean)
+  )];
+  const FP_ZONE_ORDER = ["HIGH REDZONE","LOW REDZONE","PLUS TERRITORY","MINUS TERRITORY","BACKED UP"];
+  const presentFP = new Set(rows.filter(r => r["ODK"] === "O").map(r => String(r["FP GROUP"] || "").trim()).filter(Boolean));
+  const allFPZones = FP_ZONE_ORDER.filter(z => presentFP.has(z));
+  const allPersonnel = [...new Set(
+    rows.filter(r => r["ODK"] === "O").map(r => String(r["PERSONNEL"] || "").trim()).filter(Boolean)
+  )].sort((a, b) => {
+    // Sort by frequency
+    const fa = rows.filter(r => r["PERSONNEL"] === a).length;
+    const fb = rows.filter(r => r["PERSONNEL"] === b).length;
+    return fb - fa;
   });
 
-  const persTiles = topPersList.map(pers => {
-    const sub = offense.filter(r => r["PERSONNEL"] === pers);
-    const pct_val = pct(persMap[pers], totalOff);
-    const dgRows  = DOWN_GROUP_ORDER
-      .map(dg => {
-        const s = sub.filter(r => rowDownGroup(r) === dg);
-        if (!s.length) return null;
-        return { label: dg, ...tendency(s) };
-      })
-      .filter(Boolean);
-    return { title: `PERS ${pers}`, subtitle: `${pct_val}%`, ...tendency(sub), dgRows };
-  });
+  return { d1Section, d2Section, d3Tiles, d4Tiles, allDrives, allFPZones, allPersonnel };
+}
 
-  return { p10Tiles, d2Tiles, d3Tiles, persTiles };
+// ── Prep Callsheet (P&10-based, original structure) ───────────────────────────
+const P10_LABELS = {
+  K: "After Kickoff", P: "After Punt", T: "After Turnover",
+  D: "Turnover on Downs", N: "Other Drive Start",
+};
+
+export function computeCallsheetDataPrep(rows, { persFilter = [], fpFilter = [] } = {}) {
+  let offense = filterRows(rows, { odk: "O" });
+  if (persFilter.length > 0)
+    offense = offense.filter(r => persFilter.includes(String(r["PERSONNEL"] || "").trim()));
+  if (fpFilter.length > 0)
+    offense = offense.filter(r => fpFilter.includes(String(r["FP GROUP"] || "").trim()));
+
+  // ── P&10 tiles: group by P&10 column value ──────────────────────────────
+  const p10Map = {};
+  offense.forEach(r => {
+    const v = String(r["P&10"] || "").trim().toUpperCase();
+    if (!v) return;
+    if (!p10Map[v]) p10Map[v] = [];
+    p10Map[v].push(r);
+  });
+  const p10Tiles = Object.entries(p10Map)
+    .sort((a, b) => b[1].length - a[1].length)
+    .map(([key, sub]) => ({
+      title:    P10_LABELS[key] || key,
+      subtitle: key,
+      ...tendency(sub),
+      pers: topPersonnel(sub),
+    }));
+
+  // ── 2nd Down tiles ────────────────────────────────────────────────────────
+  const D2_BUCKETS = [
+    { key: "2nd & 10+", label: "2nd & 10+" },
+    { key: "2nd & 9-7", label: "2nd & 7-9" },
+    { key: "2nd & 4-6", label: "2nd & 4-6" },
+    { key: "2nd & 1-3", label: "2nd & 1-3" },
+  ];
+  const d2Tiles = D2_BUCKETS.map(({ key, label }) => {
+    const bkt = offense.filter(r => rowDownGroup(r) === key);
+    if (!bkt.length) return null;
+    return { title: label, ...tendency(bkt), pers: topPersonnel(bkt) };
+  }).filter(Boolean);
+
+  // ── 3rd Down tiles ────────────────────────────────────────────────────────
+  const D3_BUCKETS = [
+    { key: "3rd & 1-2", label: "3rd & 1-2" },
+    { key: "3rd & 3-4", label: "3rd & 3-4" },
+    { key: "3rd & 5-7", label: "3rd & 5-7" },
+    { key: "3rd & 8+",  label: "3rd & 8+"  },
+  ];
+  const d3Tiles = D3_BUCKETS.map(({ key, label }) => {
+    const bkt = offense.filter(r => rowDownGroup(r) === key);
+    if (!bkt.length) return null;
+    return { title: label, ...tendency(bkt), pers: topPersonnel(bkt) };
+  }).filter(Boolean);
+
+  // Available filter options (from unfiltered offense rows)
+  const raw = filterRows(rows, { odk: "O" });
+  const FP_ZONE_ORDER = ["HIGH REDZONE","LOW REDZONE","PLUS TERRITORY","MINUS TERRITORY","BACKED UP"];
+  const presentFP   = new Set(raw.map(r => String(r["FP GROUP"] || "").trim()).filter(Boolean));
+  const allFPZones  = FP_ZONE_ORDER.filter(z => presentFP.has(z));
+  const allPersonnel = [...new Set(raw.map(r => String(r["PERSONNEL"] || "").trim()).filter(Boolean))]
+    .sort((a, b) => raw.filter(r => r["PERSONNEL"] === b).length - raw.filter(r => r["PERSONNEL"] === a).length);
+
+  return { p10Tiles, d2Tiles, d3Tiles, allPersonnel, allFPZones };
 }

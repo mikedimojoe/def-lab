@@ -30,8 +30,12 @@ const ICONS = {
   opponent:   "M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z",
   callsheet:  "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M16 13H8M16 17H8M10 9H8",
   roster:     "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8z",
-  admin:      "M12 1l3 6 6.5 1-5 4.5 1.5 6.5L12 16l-6 3.5 1.5-6.5L2.5 8.5 9 7.5z",
-  upload:     "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12",
+  dashboard:   "M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM13 13h8v8h-8z",
+  admin:       "M12 1l3 6 6.5 1-5 4.5 1.5 6.5L12 16l-6 3.5 1.5-6.5L2.5 8.5 9 7.5z",
+  upload:      "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12",
+  improve:     "M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3M6.343 6.343l-.707-.707M6.343 17.657l-.707.707M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0z",
+  analytics2:  "M2 20h20M5 20V10l7-7 7 7v10M9 20v-5h6v5",
+  fieldpos:    "M3 12h4M17 12h4M12 3v4M12 17v4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8M12 12m-3 0a3 3 0 1 0 6 0 3 3 0 0 0-6 0",
   chevronL:   "M15 18l-6-6 6-6",
   chevronR:   "M9 18l6-6-6-6",
   chevronD:   "M6 9l6 6 6-6",
@@ -44,12 +48,14 @@ const ICONS = {
 };
 
 const TOP_NAV = [
-  { to: "/overview",   label: "Overview",    icon: "overview"   },
-  { to: "/formations", label: "Formations",  icon: "formations" },
-  { to: "/personnel",  label: "Personnel",   icon: "personnel"  },
-  { to: "/opponent",   label: "Opponent",    icon: "opponent"   },
-  { to: "/callsheet",  label: "Callsheet",   icon: "callsheet"  },
-  { to: "/roster",     label: "Roster",      icon: "roster"     },
+  { to: "/overview",       label: "Overview",          icon: "overview"   },
+  { to: "/game-overview",  label: "Game Overview",     icon: "dashboard"  },
+  { to: "/field-position", label: "Down & Distance",   icon: "fieldpos"   },
+  { to: "/formations",     label: "Formations",        icon: "formations" },
+  { to: "/personnel",      label: "Personnel",         icon: "personnel"  },
+  { to: "/opponent",       label: "Opponent",          icon: "opponent"   },
+  { to: "/callsheet",      label: "Callsheet",         icon: "callsheet"  },
+  { to: "/roster",         label: "Roster",            icon: "roster"     },
 ];
 
 // ── Inline mini-form ──────────────────────────────────────────────────────────
@@ -377,8 +383,10 @@ export default function Sidebar() {
   const canUpload = user?.role === "Admin" || user?.role === "Coach";
   const bottomNav = [
     { to: "/live",   label: "Live Tagging", icon: "live"   },
-    ...(canUpload ? [{ to: "/upload", label: "Upload", icon: "upload" }] : []),
-    ...(isAdmin   ? [{ to: "/admin",  label: "Admin",  icon: "admin"  }] : []),
+    ...(canUpload ? [{ to: "/upload",          label: "Upload",          icon: "upload"    }] : []),
+    ...(isAdmin   ? [{ to: "/admin",           label: "Admin",           icon: "admin"     }] : []),
+    ...(isAdmin   ? [{ to: "/auto-improve",    label: "🧪 Improve Lab",  icon: "improve"   }] : []),
+    ...(isAdmin   ? [{ to: "/auto-analytics",  label: "📊 Analytics Lab",icon: "analytics2"}] : []),
   ];
 
   // Sync sidebarOpen with width
@@ -402,20 +410,28 @@ export default function Sidebar() {
       <div style={{
         display: "flex", alignItems: "center",
         justifyContent: !collapsed ? "space-between" : "center",
-        padding: !collapsed ? "13px 10px 10px" : "13px 0 10px",
+        padding: !collapsed
+          ? `${Math.max(10, Math.round(Math.max(20, Math.min(50, width * 0.14)) * 0.2))}px 10px`
+          : `${Math.max(10, Math.round(Math.max(20, Math.min(50, width * 0.14)) * 0.2))}px 0`,
         borderBottom: "1px solid var(--border)", minHeight: 48,
       }}>
         {!collapsed && (
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
             {logo && (
               <img src={logo} alt="logo"
-                style={{ width: 22, height: 22, objectFit: "contain", borderRadius: 3, flexShrink: 0 }} />
+                style={{
+                  width:  Math.round(Math.max(20, Math.min(50, width * 0.14))),
+                  height: Math.round(Math.max(20, Math.min(50, width * 0.14))),
+                  objectFit: "contain", borderRadius: 4, flexShrink: 0,
+                }} />
             )}
             <button onClick={() => navigate("/")} style={{
               background: "none", border: "none", cursor: "pointer", padding: 0,
             }}>
               <span style={{
-                color: "var(--team-secondary, #5CBF8A)", fontWeight: 800, fontSize: 14, letterSpacing: 2,
+                color: "var(--team-secondary, #5CBF8A)", fontWeight: 800,
+                fontSize: Math.round(Math.max(11, Math.min(20, width * 0.065))),
+                letterSpacing: 2,
                 background: "var(--team-primary, #154734)", padding: "2px 8px", borderRadius: 4,
                 display: "inline-block",
               }}>

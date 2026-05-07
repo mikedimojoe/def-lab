@@ -1,20 +1,28 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useEffect } from "react";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { AppProvider }           from "./contexts/AppContext";
 import { ThemeProvider }         from "./contexts/ThemeContext";
 import { AppearanceProvider }    from "./contexts/AppearanceContext";
-import Layout      from "./components/Layout";
-import Login       from "./pages/Login";
-import Home        from "./pages/Home";
-import Overview    from "./pages/Overview";
-import Formations  from "./pages/Formations";
-import Personnel   from "./pages/Personnel";
-import LiveTagging from "./pages/LiveTagging";
-import Opponent    from "./pages/Opponent";
-import Callsheet   from "./pages/Callsheet";
-import Roster      from "./pages/Roster";
-import Admin       from "./pages/Admin";
-import Upload      from "./pages/Upload";
+import { useAppearance }         from "./contexts/AppearanceContext";
+import { useTheme }              from "./contexts/ThemeContext";
+import { apiGetUserSettings }    from "./lib/api";
+import Layout        from "./components/Layout";
+import Login         from "./pages/Login";
+import Home          from "./pages/Home";
+import Overview      from "./pages/Overview";
+import GameOverview  from "./pages/GameOverview";
+import Formations    from "./pages/Formations";
+import Personnel     from "./pages/Personnel";
+import LiveTagging   from "./pages/LiveTagging";
+import Opponent      from "./pages/Opponent";
+import Callsheet     from "./pages/Callsheet";
+import Roster        from "./pages/Roster";
+import Admin         from "./pages/Admin";
+import Upload        from "./pages/Upload";
+import AutoImprove   from "./pages/AutoImprove";
+import AutoAnalytics from "./pages/AutoAnalytics";
+import FieldPosition from "./pages/FieldPosition";
 
 function ProtectedRoute({ children, adminOnly = false, noPlayer = false }) {
   const { user, loading } = useAuth();
@@ -27,6 +35,17 @@ function ProtectedRoute({ children, adminOnly = false, noPlayer = false }) {
 
 function AppRoutes() {
   const { user, loading } = useAuth();
+  const { applyUserColors } = useAppearance();
+  const { setTheme } = useTheme();
+
+  useEffect(() => {
+    if (!user) return;
+    apiGetUserSettings().then(s => {
+      if (s.theme)                      setTheme(s.theme);
+      if (s.run_color || s.pass_color)  applyUserColors(s.run_color, s.pass_color);
+    }).catch(() => {});
+  }, [user?.id]);
+
   if (loading) return (
     <div style={{ minHeight: "100vh", background: "#111",
       display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -44,18 +63,22 @@ function AppRoutes() {
     <AppProvider>
       <Layout>
         <Routes>
-          <Route path="/"          element={<ProtectedRoute><Home /></ProtectedRoute>} />
-          <Route path="/login"     element={<Navigate to="/" replace />} />
-          <Route path="/overview"  element={<ProtectedRoute><Overview /></ProtectedRoute>} />
-          <Route path="/formations"element={<ProtectedRoute><Formations /></ProtectedRoute>} />
-          <Route path="/personnel" element={<ProtectedRoute><Personnel /></ProtectedRoute>} />
-          <Route path="/live"      element={<ProtectedRoute><LiveTagging /></ProtectedRoute>} />
-          <Route path="/opponent"  element={<ProtectedRoute><Opponent /></ProtectedRoute>} />
-          <Route path="/callsheet" element={<ProtectedRoute><Callsheet /></ProtectedRoute>} />
-          <Route path="/roster"    element={<ProtectedRoute><Roster /></ProtectedRoute>} />
-          <Route path="/upload"    element={<ProtectedRoute noPlayer><Upload /></ProtectedRoute>} />
-          <Route path="/admin"     element={<ProtectedRoute adminOnly><Admin /></ProtectedRoute>} />
-          <Route path="*"          element={<Navigate to="/" replace />} />
+          <Route path="/"               element={<ProtectedRoute><Home /></ProtectedRoute>} />
+          <Route path="/login"          element={<Navigate to="/" replace />} />
+          <Route path="/overview"       element={<ProtectedRoute><Overview /></ProtectedRoute>} />
+          <Route path="/game-overview"   element={<ProtectedRoute><GameOverview /></ProtectedRoute>} />
+          <Route path="/field-position"  element={<ProtectedRoute><FieldPosition /></ProtectedRoute>} />
+          <Route path="/formations"     element={<ProtectedRoute><Formations /></ProtectedRoute>} />
+          <Route path="/personnel"      element={<ProtectedRoute><Personnel /></ProtectedRoute>} />
+          <Route path="/live"           element={<ProtectedRoute><LiveTagging /></ProtectedRoute>} />
+          <Route path="/opponent"       element={<ProtectedRoute><Opponent /></ProtectedRoute>} />
+          <Route path="/callsheet"      element={<ProtectedRoute><Callsheet /></ProtectedRoute>} />
+          <Route path="/roster"         element={<ProtectedRoute><Roster /></ProtectedRoute>} />
+          <Route path="/upload"         element={<ProtectedRoute noPlayer><Upload /></ProtectedRoute>} />
+          <Route path="/auto-improve"   element={<ProtectedRoute adminOnly><AutoImprove /></ProtectedRoute>} />
+          <Route path="/auto-analytics" element={<ProtectedRoute adminOnly><AutoAnalytics /></ProtectedRoute>} />
+          <Route path="/admin"          element={<ProtectedRoute adminOnly><Admin /></ProtectedRoute>} />
+          <Route path="*"               element={<Navigate to="/" replace />} />
         </Routes>
       </Layout>
     </AppProvider>
