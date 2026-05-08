@@ -508,8 +508,14 @@ export function computeCallsheetData(rows, { persFilter = [], fpFilter = [], dri
 
 // ── Prep Callsheet (P&10-based, original structure) ───────────────────────────
 const P10_LABELS = {
-  K: "After Kickoff", P: "After Punt", T: "After Turnover",
-  D: "Turnover on Downs", N: "Other Drive Start",
+  K: "After Kickoff",
+  P: "After Punt",
+  T: "After Turnover",
+  D: "Turnover on Downs",
+  E: "Extended (New 1st Down)",
+  S: "1st & Short",
+  L: "1st & Long (10+ yds)",
+  N: "Other / Unclassified",
 };
 
 export function computeCallsheetDataPrep(rows, { persFilter = [], fpFilter = [] } = {}) {
@@ -536,7 +542,15 @@ export function computeCallsheetDataPrep(rows, { persFilter = [], fpFilter = [] 
       pers: topPersonnel(sub),
     }));
 
+  // ── prevTypeMap: what play type came before each row? ────────────────────
+  const openerIdx = detectDriveOpenerIndices(offense);
+  const prevTypeMap = new Map();
+  offense.forEach((r, i) => {
+    prevTypeMap.set(r, (i === 0 || openerIdx.has(i)) ? "" : playType(offense[i - 1]));
+  });
+
   // ── 2nd Down tiles ────────────────────────────────────────────────────────
+  // Order: long → short (10+, 7-9, 4-6, 1-3)
   const D2_BUCKETS = [
     { key: "2nd & 10+", label: "2nd & 10+" },
     { key: "2nd & 9-7", label: "2nd & 7-9" },
@@ -548,6 +562,20 @@ export function computeCallsheetDataPrep(rows, { persFilter = [], fpFilter = [] 
     if (!bkt.length) return null;
     return { title: label, ...tendency(bkt), pers: topPersonnel(bkt) };
   }).filter(Boolean);
+
+  // ── 2nd Down split by previous play type ─────────────────────────────────
+  // Always returns all 4 buckets (n=0 = N/A tile). Top 3 personnel each.
+  function d2BucketsByPrev(prevLabel) {
+    return D2_BUCKETS.map(({ key, label }) => {
+      const bkt = offense.filter(r => rowDownGroup(r) === key && prevTypeMap.get(r) === prevLabel);
+      return { title: label, ...tendency(bkt), pers: topPersonnel(bkt, 3) };
+    });
+  }
+  const d2ByPrevType = {
+    afterPass: d2BucketsByPrev("Pass"),
+    afterRun:  d2BucketsByPrev("Run"),
+    afterRpo:  d2BucketsByPrev("RPO"),
+  };
 
   // ── 3rd Down tiles ────────────────────────────────────────────────────────
   const D3_BUCKETS = [
@@ -570,5 +598,5 @@ export function computeCallsheetDataPrep(rows, { persFilter = [], fpFilter = [] 
   const allPersonnel = [...new Set(raw.map(r => String(r["PERSONNEL"] || "").trim()).filter(Boolean))]
     .sort((a, b) => raw.filter(r => r["PERSONNEL"] === b).length - raw.filter(r => r["PERSONNEL"] === a).length);
 
-  return { p10Tiles, d2Tiles, d3Tiles, allPersonnel, allFPZones };
+  return { p10Tiles, d2Tiles, d2ByPrevType, d3Tiles, allPersonnel, allFPZones };
 }

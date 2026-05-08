@@ -1149,6 +1149,171 @@ export default function AutoAnalytics() {
       >
         <BackfieldTendencyByDown rows={rows} />
       </ToolCard>
+
+      <ToolCard
+        title="Formation → Play Call Report"
+        source="Hudl IQ · PFF"
+        description="For each offensive formation: run/pass split and the top play calls with frequency bars. Pre-snap cheat sheet for your DC — know what's coming before the snap."
+      >
+        <FormationPlayCallReport rows={rows} />
+      </ToolCard>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Tool 9 — Formation → Play Call Report
+// For each OFF FORM: run/pass split + top play calls (OFF PLAY) ranked by freq.
+// ─────────────────────────────────────────────────────────────────────────────
+const FPC_DOWN_LABELS = ["All","1st","2nd","3rd","4th"];
+
+function FormationPlayCallReport({ rows }) {
+  const offense = rows.filter(r => r["ODK"] === "O");
+  const [selDown, setSelDown]   = useState("All");
+  const [expanded, setExpanded] = useState(null); // formation key
+
+  const data = useMemo(() => {
+    let filtered = offense;
+    if (selDown !== "All") {
+      const dnNum = FPC_DOWN_LABELS.indexOf(selDown);
+      filtered = offense.filter(r => String(r["DN"] || "").trim().startsWith(String(dnNum)));
+    }
+
+    const formMap = {};
+    filtered.forEach(r => {
+      const form = String(r["OFF FORM"] || "").trim() || "—";
+      if (!formMap[form]) formMap[form] = { total: 0, run: 0, pass: 0, rpo: 0, plays: {} };
+      formMap[form].total++;
+      const pt = playTypePTC(r);
+      if (pt === "run")  formMap[form].run++;
+      else if (pt === "pass") formMap[form].pass++;
+      else if (pt === "rpo")  formMap[form].rpo++;
+      const play = String(r["OFF PLAY"] || "").trim();
+      if (play) formMap[form].plays[play] = (formMap[form].plays[play] || 0) + 1;
+    });
+
+    return Object.entries(formMap)
+      .sort((a, b) => b[1].total - a[1].total)
+      .map(([form, d]) => {
+        const topPlays = Object.entries(d.plays)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 6)
+          .map(([play, n]) => ({ play, n, pct: pct(n, d.total) }));
+        return {
+          form,
+          total: d.total,
+          runPct:  pct(d.run,  d.total),
+          passPct: pct(d.pass, d.total),
+          rpoPct:  pct(d.rpo,  d.total),
+          topPlays,
+        };
+      });
+  }, [offense, selDown]);
+
+  if (!offense.length) return <NoData />;
+
+  const hasAnyRPO = data.some(d => d.rpoPct > 0);
+
+  return (
+    <div>
+      {/* Down filter */}
+      <div style={{ display: "flex", gap: 6, marginBottom: 14 }}>
+        {FPC_DOWN_LABELS.map(d => (
+          <button key={d} onClick={() => setSelDown(d)} style={{
+            background: selDown === d ? GREEN : "var(--surface2)",
+            color: selDown === d ? "#fff" : "var(--text3)",
+            border: "none", borderRadius: 6, padding: "5px 14px",
+            fontSize: 11, fontWeight: 700, cursor: "pointer",
+          }}>{d}</button>
+        ))}
+      </div>
+
+      {!data.length
+        ? <div style={{ color: "var(--text3)", fontSize: 12 }}>No data for {selDown} down.</div>
+        : (
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+            <thead>
+              <tr style={{ borderBottom: "2px solid var(--border)" }}>
+                <th style={th}>Formation</th>
+                <th style={{ ...th, textAlign: "right" }}>n</th>
+                <th style={{ ...th, textAlign: "right", color: RUN_COLOR }}>Run%</th>
+                <th style={{ ...th, textAlign: "right", color: PASS_COLOR }}>Pass%</th>
+                {hasAnyRPO && <th style={{ ...th, textAlign: "right", color: RPO_COLOR }}>RPO%</th>}
+                <th style={th}>Top Play Calls</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.map(row => (
+                <tr key={row.form}
+                  style={{
+                    borderBottom: "1px solid var(--border)",
+                    cursor: "pointer",
+                    background: expanded === row.form ? "var(--surface2)" : "transparent",
+                  }}
+                  onClick={() => setExpanded(expanded === row.form ? null : row.form)}
+                >
+                  <td style={{ ...td, fontWeight: 700, color: "var(--text)", maxWidth: 160,
+                    whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                    {row.form}
+                  </td>
+                  <td style={{ ...td, textAlign: "right", color: "var(--text3)" }}>{row.total}</td>
+                  <td style={{ ...td, textAlign: "right",
+                    color: row.runPct  >= 65 ? RUN_COLOR  : "var(--text2)",
+                    fontWeight: row.runPct  >= 65 ? 700 : 400 }}>{row.runPct}%</td>
+                  <td style={{ ...td, textAlign: "right",
+                    color: row.passPct >= 65 ? PASS_COLOR : "var(--text2)",
+                    fontWeight: row.passPct >= 65 ? 700 : 400 }}>{row.passPct}%</td>
+                  {hasAnyRPO && (
+                    <td style={{ ...td, textAlign: "right",
+                      color: row.rpoPct >= 65 ? RPO_COLOR : "var(--text2)",
+                      fontWeight: row.rpoPct >= 65 ? 700 : 400 }}>{row.rpoPct}%</td>
+                  )}
+                  <td style={{ ...td, minWidth: 200 }}>
+                    {/* Inline mini bars for top 3 plays */}
+                    {expanded === row.form ? (
+                      /* Expanded: full play list with bar */
+                      <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                        {row.topPlays.map(p => (
+                          <div key={p.play} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                            <div style={{
+                              height: 14, width: `${Math.max(p.pct, 4)}%`,
+                              background: ACCENT, borderRadius: 3, opacity: 0.8,
+                              minWidth: 4, flexShrink: 0,
+                            }} />
+                            <span style={{ color: "var(--text2)", fontSize: 11, whiteSpace: "nowrap" }}>
+                              {p.play}
+                            </span>
+                            <span style={{ color: "var(--text3)", fontSize: 10, marginLeft: "auto", paddingLeft: 6 }}>
+                              {p.pct}% ({p.n})
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      /* Collapsed: top 3 as pill chips */
+                      <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+                        {row.topPlays.slice(0, 3).map(p => (
+                          <span key={p.play} style={{
+                            background: "var(--bg)", color: "var(--text2)",
+                            fontSize: 10, padding: "2px 7px", borderRadius: 8,
+                            border: "1px solid var(--border)", whiteSpace: "nowrap",
+                          }}>
+                            {p.play} <span style={{ color: ACCENT, fontWeight: 700 }}>{p.pct}%</span>
+                          </span>
+                        ))}
+                        {row.topPlays.length > 3 && (
+                          <span style={{ color: "var(--text3)", fontSize: 10, alignSelf: "center" }}>
+                            +{row.topPlays.length - 3} more ▼
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
     </div>
   );
 }

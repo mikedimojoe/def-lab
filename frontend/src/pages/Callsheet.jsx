@@ -138,17 +138,89 @@ function SectionHeader({ title }) {
   );
 }
 
+// ── 2nd Down prep card (always shown, N/A when empty) ────────────────────────
+function D2PrepCard({ title, subtitle, subtitleColor, run, pass, rpo, n, pers }) {
+  return (
+    <div style={{
+      background: "var(--surface)", border: "1px solid var(--border)",
+      borderRadius: 8, overflow: "hidden", flex: 1, minWidth: 150,
+    }}>
+      <div style={{ background: "var(--surface2)", borderBottom: "1px solid var(--border)",
+        padding: "8px 12px" }}>
+        <div style={{ color: "var(--text)", fontWeight: 700, fontSize: 13 }}>{title}</div>
+        <div style={{ color: subtitleColor || "var(--accent)", fontSize: 10, fontWeight: 700,
+          textTransform: "uppercase", letterSpacing: .5, marginTop: 2 }}>
+          {subtitle}
+        </div>
+      </div>
+      <div style={{ padding: "10px 12px" }}>
+        {n === 0 ? (
+          <div style={{ color: "var(--text3)", fontSize: 13, textAlign: "center",
+            padding: "14px 0", fontWeight: 600 }}>N/A</div>
+        ) : (
+          <>
+            <RPOBar run={run} pass={pass} rpo={rpo} n={n} />
+            <div style={{ color: "var(--text3)", fontSize: 10, textAlign: "right", marginTop: 3 }}>
+              n={n}
+            </div>
+            <PersonnelBreakdown pers={pers} />
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+const D2_PREV_ROWS = [
+  { key: "afterPass", label: "After Pass", color: PASS_COLOR },
+  { key: "afterRun",  label: "After Run",  color: RUN_COLOR  },
+  { key: "afterRpo",  label: "After RPO",  color: RPO_COLOR  },
+];
+
+function D2PrepSection({ d2ByPrevType }) {
+  return (
+    <>
+      {D2_PREV_ROWS.map(({ key, label, color }) => (
+        <div key={key} style={{ marginBottom: 14 }}>
+          <div style={{
+            fontSize: 11, fontWeight: 700, color,
+            textTransform: "uppercase", letterSpacing: .6,
+            marginBottom: 6, paddingLeft: 2,
+          }}>
+            {label}
+          </div>
+          <div style={{ display: "flex", gap: 10 }}>
+            {(d2ByPrevType[key] || []).map((t, i) => (
+              <D2PrepCard
+                key={i}
+                title={t.title}
+                subtitle={label}
+                subtitleColor={color}
+                run={t.run} pass={t.pass} rpo={t.rpo} n={t.n}
+                pers={t.pers}
+              />
+            ))}
+          </div>
+        </div>
+      ))}
+    </>
+  );
+}
+
 // ── Tile row (prep mode) ──────────────────────────────────────────────────────
 function TileRow({ tiles, emptyMsg = "No data." }) {
   if (!tiles || tiles.length === 0) {
     return <p style={{ color: "var(--text3)", fontSize: 13, margin: "0 0 12px" }}>{emptyMsg}</p>;
   }
   return (
-    <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 4 }}>
+    <div style={{ display: "flex", gap: 10, flexWrap: "nowrap",
+      overflowX: "auto", paddingBottom: 6, marginBottom: 4 }}>
       {tiles.map((t, i) => (
-        <TendCard key={i} title={t.title} subtitle={t.subtitle} run={t.run} pass={t.pass} rpo={t.rpo} n={t.n}>
-          <PersonnelBreakdown pers={t.pers} />
-        </TendCard>
+        <div key={i} style={{ flex: "0 0 190px" }}>
+          <TendCard title={t.title} subtitle={t.subtitle} run={t.run} pass={t.pass} rpo={t.rpo} n={t.n}>
+            <PersonnelBreakdown pers={t.pers} />
+          </TendCard>
+        </div>
       ))}
     </div>
   );
@@ -256,19 +328,7 @@ function PrepCallsheet({ rows }) {
       <TileRow tiles={data.p10Tiles}
         emptyMsg="No P&10 data found. Make sure the P&10 column is filled in." />
       <SectionHeader title="2nd Down & Distance" />
-      {data.d2Tiles.length === 0
-        ? <p style={{ color: "var(--text3)", fontSize: 13, margin: "0 0 12px" }}>No 2nd down data found.</p>
-        : <div style={{ display: "flex", gap: 10, flexWrap: "nowrap", overflowX: "auto",
-            paddingBottom: 4, marginBottom: 4 }}>
-            {data.d2Tiles.map((t, i) => (
-              <div key={i} style={{ flex: "0 0 170px" }}>
-                <TendCard {...t}>
-                  <PersonnelBreakdown pers={t.pers} />
-                </TendCard>
-              </div>
-            ))}
-          </div>
-      }
+      <D2PrepSection d2ByPrevType={data.d2ByPrevType} />
       <SectionHeader title="3rd Down Groups" />
       <TileRow tiles={data.d3Tiles} emptyMsg="No 3rd down data found." />
     </>

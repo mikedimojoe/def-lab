@@ -433,14 +433,17 @@ export default function LiveTagging() {
 
   const handleCellClick = useCallback((ri, ci, shiftKey) => {
     gridRef.current?.focus();
+    // Commit any open edit immediately (blur timeout would also do it, but be explicit)
+    if (editCellRef.current) commitEdit(null);
     if (shiftKey && selRef.current) {
-      commitEdit(null);
       setSelEnd({ r: ri, c: ci });
     } else {
       setSelEnd(null);
-      startEdit(ri, ci);
+      setSel({ r: ri, c: ci });
+      // Don't enter edit mode on single click — user types to replace,
+      // double-click to edit existing value in-place.
     }
-  }, [startEdit, commitEdit]);
+  }, [commitEdit]);
 
   const handleCellDoubleClick = useCallback((ri, ci) => {
     startEdit(ri, ci);
