@@ -685,7 +685,7 @@ export default function LiveTagging() {
 
   // Current row values for hot button active state
   const selRow      = sel ? rows[sel.r] : null;
-  const selPlayType = String(selRow?.["PLAY TYPE"] || "").trim().toUpperCase();
+  const selPlayType = String(selRow?.["PLAY TYPE CALLED"] || "").trim().toUpperCase();
   const selDn       = String(selRow?.["DN"]        || "").trim();
   const selFpGroup  = String(selRow?.["FP GROUP"]  || "").trim();
 
@@ -755,7 +755,7 @@ export default function LiveTagging() {
           {[["RUN", RUN_COLOR, "#fff"], ["PASS", PASS_COLOR, "#fff"], ["RPO", "#D4782A", "#fff"]].map(([v, color, textCol]) => {
             const active = sel && selPlayType === v;
             return (
-              <button key={v} onClick={() => handleHotButton("PLAY TYPE", v)}
+              <button key={v} onClick={() => handleHotButton("PLAY TYPE CALLED", v)}
                 disabled={!sel}
                 style={{
                   ...hotBtnStyle,
