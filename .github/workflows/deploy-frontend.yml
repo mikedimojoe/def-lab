@@ -28,7 +28,19 @@ jobs:
         env:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
 
-      - name: Deploy to Hetzner
+      # Sicherstellen dass Verzeichnis existiert und Apache läuft
+      - name: Prepare server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HETZNER_HOST }}
+          username: root
+          key: ${{ secrets.HETZNER_SSH_KEY }}
+          script: |
+            mkdir -p /var/www/def-lab/api
+            chown -R www-data:www-data /var/www/def-lab
+            systemctl is-active apache2 || systemctl start apache2
+
+      - name: Upload frontend files
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.HETZNER_HOST }}
@@ -37,4 +49,14 @@ jobs:
           source: "frontend/dist/*"
           target: "/var/www/def-lab"
           strip_components: 2
-          rm: false
+
+      - name: Fix permissions & reload Apache
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HETZNER_HOST }}
+          username: root
+          key: ${{ secrets.HETZNER_SSH_KEY }}
+          script: |
+            chown -R www-data:www-data /var/www/def-lab
+            systemctl reload apache2
+            echo "✅ Frontend deployed to /var/www/def-lab"

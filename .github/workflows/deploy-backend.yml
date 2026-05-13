@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Deploy PHP API to Hetzner
+      - name: Upload PHP API files
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.HETZNER_HOST }}
@@ -21,4 +21,16 @@ jobs:
           source: "backend/api/*"
           target: "/var/www/def-lab/api"
           strip_components: 2
-          rm: false
+
+      - name: Fix permissions & run DB setup
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HETZNER_HOST }}
+          username: root
+          key: ${{ secrets.HETZNER_SSH_KEY }}
+          script: |
+            chown -R www-data:www-data /var/www/def-lab/api
+            chmod 644 /var/www/def-lab/api/*.php
+            # DB-Tabellen anlegen/aktualisieren (idempotent)
+            php /var/www/def-lab/api/setup.php
+            echo "✅ PHP Backend deployed to /var/www/def-lab/api"
