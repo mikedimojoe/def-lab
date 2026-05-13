@@ -1,9 +1,9 @@
-name: Deploy Backend → Railway
+name: Deploy Backend → Hetzner
 
 on:
   push:
     branches: [master]
-    paths: ["backend/**"]
+    paths: ["backend/api/**"]
   workflow_dispatch:
 
 jobs:
@@ -12,11 +12,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Railway CLI
-        run: npm install -g @railway/cli
-
-      - name: Deploy backend to Railway
-        run: railway up --service backend --detach
-        working-directory: backend
-        env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+      - name: Deploy PHP API to Hetzner
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.HETZNER_HOST }}
+          username: root
+          key: ${{ secrets.HETZNER_SSH_KEY }}
+          source: "backend/api/*"
+          target: "/var/www/def-lab/api"
+          strip_components: 2
+          rm: false

@@ -1,15 +1,10 @@
-name: Deploy Frontend → GitHub Pages
+name: Deploy Frontend → Hetzner
 
 on:
   push:
     branches: [master]
     paths: ["frontend/**"]
   workflow_dispatch:
-
-permissions:
-  contents: write
-  pages: write
-  id-token: write
 
 jobs:
   build-and-deploy:
@@ -31,18 +26,15 @@ jobs:
         run: npm run build
         working-directory: frontend
         env:
-          # VITE_API_URL = absolute origin of the PHP backend, e.g. https://def-lab.de
-          # Set this secret in GitHub → Settings → Secrets → Actions
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
 
-      - name: Add CNAME + 404 for SPA routing
-        run: |
-          echo "def-lab.de" > frontend/dist/CNAME
-          cp frontend/dist/index.html frontend/dist/404.html
-
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+      - name: Deploy to Hetzner
+        uses: appleboy/scp-action@v0.1.7
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./frontend/dist
-          force_orphan: true
+          host: ${{ secrets.HETZNER_HOST }}
+          username: root
+          key: ${{ secrets.HETZNER_SSH_KEY }}
+          source: "frontend/dist/*"
+          target: "/var/www/def-lab"
+          strip_components: 2
+          rm: false
