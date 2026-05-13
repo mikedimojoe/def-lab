@@ -1,0 +1,8 @@
+[
+  {"id":1,"name":"Unicorns of Love","short":"UOL","league":"GFL","division":"Süd","season":"2025","wins":5,"losses":1,"points_for":198,"points_against":112,"color":"#ff6b35"},
+  {"id":2,"name":"Schwäbisch Hall Unicorns","short":"SHA","league":"GFL","division":"Süd","season":"2025","wins":4,"losses":2,"points_for":176,"points_against":134,"color":"#7c3aed"},
+  {"id":3,"name":"New Yorker Lions Braunschweig","short":"BSL","league":"GFL","division":"Nord","season":"2025","wins":5,"losses":1,"points_for":210,"points_against":98,"color":"#10b981"},
+  {"id":4,"name":"Dresden Monarchs","short":"DRS","league":"GFL","division":"Nord","season":"2025","wins":3,"losses":3,"points_for":154,"points_against":156,"color":"#f59e0b"},
+  {"id":5,"name":"Munich Cowboys","short":"MCO","league":"GFL","division":"Süd","season":"2025","wins":2,"losses":4,"points_for":132,"points_against":168,"color":"#00c3ff"},
+  {"id":6,"name":"Berlin Rebels","short":"BER","league":"GFL","division":"Nord","season":"2025","wins":1,"losses":5,"points_for":98,"points_against":201,"color":"#f87171"}
+]

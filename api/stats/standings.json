@@ -1,0 +1,8 @@
+[
+  {"id":3,"name":"New Yorker Lions Braunschweig","short":"BSL","division":"Nord","wins":5,"losses":1,"pct":0.833,"points_for":210,"points_against":98,"diff":112,"color":"#10b981"},
+  {"id":1,"name":"Unicorns of Love","short":"UOL","division":"Süd","wins":5,"losses":1,"pct":0.833,"points_for":198,"points_against":112,"diff":86,"color":"#ff6b35"},
+  {"id":2,"name":"Schwäbisch Hall Unicorns","short":"SHA","division":"Süd","wins":4,"losses":2,"pct":0.667,"points_for":176,"points_against":134,"diff":42,"color":"#7c3aed"},
+  {"id":4,"name":"Dresden Monarchs","short":"DRS","division":"Nord","wins":3,"losses":3,"pct":0.500,"points_for":154,"points_against":156,"diff":-2,"color":"#f59e0b"},
+  {"id":5,"name":"Munich Cowboys","short":"MCO","division":"Süd","wins":2,"losses":4,"pct":0.333,"points_for":132,"points_against":168,"diff":-36,"color":"#00c3ff"},
+  {"id":6,"name":"Berlin Rebels","short":"BER","division":"Nord","wins":1,"losses":5,"pct":0.167,"points_for":98,"points_against":201,"diff":-103,"color":"#f87171"}
+]
