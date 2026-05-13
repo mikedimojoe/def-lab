@@ -1,0 +1,110 @@
+// ── DEF LAB API Client ────────────────────────────────────────────────────────
+// Centralised fetch wrapper for the PHP backend.
+// VITE_API_URL: absolute base of the PHP server (e.g. https://def-lab.de).
+// Omit for local dev — Vite proxy forwards /api to the backend automatically.
+// Session cookie sent automatically via credentials: 'include'.
+
+const BASE = (import.meta.env.VITE_API_URL ?? '') + '/api';
+
+async function req(path, options = {}) {
+  const { body, ...rest } = options;
+  const isForm = body instanceof FormData;
+  const res = await fetch(BASE + path, {
+    credentials: 'include',
+    headers: isForm ? undefined : (body ? { 'Content-Type': 'application/json' } : undefined),
+    body: isForm ? body : (body !== undefined ? JSON.stringify(body) : undefined),
+    ...rest,
+  });
+  // 401 = session expired → signal AuthContext to clear user (soft, no page reload)
+  if (res.status === 401 && !path.includes('auth.php')) {
+    window.dispatchEvent(new CustomEvent('auth:expired'));
+    throw new Error('Session abgelaufen – bitte neu einloggen.');
+  }
+  let data;
+  try { data = await res.json(); } catch { throw new Error('Server error'); }
+  if (!data.ok) throw new Error(data.error || 'Request failed');
+  return data.data;
+}
+
+// ── Auth ──────────────────────────────────────────────────────────────────────
+export const apiLogin  = (username, password) =>
+  req('/auth.php?action=login',  { method: 'POST', body: { username, password } });
+export const apiLogout = () =>
+  req('/auth.php?action=logout', { method: 'POST' });
+export const apiMe     = () =>
+  req('/auth.php?action=me');
+export const apiChangePassword = (password) =>
+  req('/auth.php?action=change_password', { method: 'POST', body: { password } });
+
+// ── Teams ─────────────────────────────────────────────────────────────────────
+export const apiGetTeams    = ()               => req('/teams.php');
+export const apiCreateTeam  = (name, c1, c2)   =>
+  req('/teams.php', { method: 'POST', body: { name, color1: c1, color2: c2 } });
+export const apiUpdateTeam  = (id, changes)    =>
+  req('/teams.php?id=' + id, { method: 'PUT', body: changes });
+export const apiDeleteTeam  = (id)             =>
+  req('/teams.php?id=' + id, { method: 'DELETE' });
+
+// ── Users ─────────────────────────────────────────────────────────────────────
+export const apiGetUsers    = ()  => req('/users.php');
+export const apiCreateUser  = (username, password, role, display_name, team_id) =>
+  req('/users.php', { method: 'POST', body: { username, password, role, display_name, team_id } });
+export const apiUpdateUser  = (id, changes) =>
+  req('/users.php?id=' + id, { method: 'PUT', body: changes });
+export const apiDeleteUser  = (id) =>
+  req('/users.php?id=' + id, { method: 'DELETE' });
+
+// ── Seasons ───────────────────────────────────────────────────────────────────
+export const apiGetSeasons    = ()             => req('/seasons.php');
+export const apiCreateSeason  = (year, name, team_id) =>
+  req('/seasons.php', { method: 'POST', body: { year, name, team_id } });
+export const apiDeleteSeason  = (id)           =>
+  req('/seasons.php?id=' + id, { method: 'DELETE' });
+
+// ── Games ─────────────────────────────────────────────────────────────────────
+export const apiGetGames    = (season_id)      => req('/games.php?season_id=' + season_id);
+export const apiCreateGame  = (season_id, week, opponent, date = '') =>
+  req('/games.php', { method: 'POST', body: { season_id, week, opponent, date } });
+export const apiDeleteGame  = (id)             =>
+  req('/games.php?id=' + id, { method: 'DELETE' });
+
+// ── Plays ─────────────────────────────────────────────────────────────────────
+export const apiGetPlays    = (game_id)        => req('/plays.php?game_id=' + game_id);
+export const apiSavePlays   = (game_id, rows)  =>
+  req('/plays.php?game_id=' + game_id, { method: 'POST', body: rows });
+
+// ── Live Rows ─────────────────────────────────────────────────────────────────
+export const apiGetLiveRows   = (game_id)      => req('/liverows.php?game_id=' + game_id);
+export const apiSaveLiveRows  = (game_id, rows) =>
+  req('/liverows.php?game_id=' + game_id, { method: 'POST', body: rows });
+
+// ── Roster ────────────────────────────────────────────────────────────────────
+export const apiGetRoster   = (game_id)        => req('/roster.php?game_id=' + game_id);
+export const apiSaveRoster  = (game_id, data)  =>
+  req('/roster.php?game_id=' + game_id, { method: 'POST', body: data });
+
+// ── Formation Images (team-based) ─────────────────────────────────────────────
+export const apiGetImages   = (team_id) => req('/images.php?team_id=' + team_id);
+export const apiDeleteImage = (team_id, norm_name) =>
+  req('/images.php?team_id=' + team_id + '&norm_name=' + encodeURIComponent(norm_name),
+    { method: 'DELETE' });
+
+export async function apiUploadImage(team_id, file) {
+  const form = new FormData();
+  form.append('image', file);
+  const res = await fetch(BASE + '/images.php?team_id=' + team_id, {
+    credentials: 'include',
+    method: 'POST',
+    body: form,
+  });
+  let data;
+  try { data = await res.json(); } catch { throw new Error('Server error'); }
+  if (!data.ok) throw new Error(data.error || 'Upload failed');
+  return data.data;
+}
+
+// ── Settings ──────────────────────────────────────────────────────────────────
+export const apiGetSettings      = ()      => req('/settings.php');
+export const apiSaveSettings     = (data)  => req('/settings.php', { method: 'POST', body: data });
+export const apiGetUserSettings  = ()      => req('/user_settings.php');
+export const apiSaveUserSettings = (data)  => req('/user_settings.php', { method: 'POST', body: data });
