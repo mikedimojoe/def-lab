@@ -187,12 +187,13 @@ function TeamsSection() {
 
 // ── Users section ─────────────────────────────────────────────────────────────
 function UsersSection() {
-  const [users,  setUsers]  = useState([]);
-  const [teams,  setTeams]  = useState([]);
-  const [modal,  setModal]  = useState(null);
-  const [target, setTarget] = useState(null);
-  const [form,   setForm]   = useState({});
-  const [err,    setErr]    = useState("");
+  const [users,       setUsers]       = useState([]);
+  const [teams,       setTeams]       = useState([]);
+  const [teamFilter,  setTeamFilter]  = useState("all");
+  const [modal,       setModal]       = useState(null);
+  const [target,      setTarget]      = useState(null);
+  const [form,        setForm]        = useState({});
+  const [err,         setErr]         = useState("");
 
   useEffect(() => {
     apiGetUsers().then(setUsers).catch(() => {});
@@ -232,17 +233,45 @@ function UsersSection() {
 
   const ROLES = ["Admin", "Analyst", "Coach", "Player"];
 
+  // Filter users by selected team
+  const filteredUsers = teamFilter === "all"
+    ? users
+    : teamFilter === "none"
+      ? users.filter(u => !u.team_id)
+      : users.filter(u => String(u.team_id) === teamFilter);
+
   return (
     <section style={sec}>
-      <div style={{ display: "flex", alignItems: "center", marginBottom: 14 }}>
-        <h3 style={secH}>Users</h3>
-        <Btn variant="primary" onClick={() => open("create")} style={{ marginLeft: "auto" }}>
-          + New User
-        </Btn>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14, flexWrap: "wrap" }}>
+        <h3 style={{ ...secH, marginBottom: 0 }}>Users</h3>
+
+        {/* Team filter dropdown */}
+        <select
+          value={teamFilter}
+          onChange={e => setTeamFilter(e.target.value)}
+          style={{
+            background: "var(--surface2)", color: "var(--text2)",
+            border: "1px solid var(--border)", borderRadius: 6,
+            padding: "5px 10px", fontSize: 12, cursor: "pointer",
+            outline: "none", flex: 1, maxWidth: 200,
+          }}
+        >
+          <option value="all">Alle Teams ({users.length})</option>
+          <option value="none">Kein Team ({users.filter(u => !u.team_id).length})</option>
+          {teams.map(t => (
+            <option key={t.id} value={String(t.id)}>
+              {t.name} ({users.filter(u => String(u.team_id) === String(t.id)).length})
+            </option>
+          ))}
+        </select>
+
+        <Btn variant="primary" onClick={() => open("create")}>+ New User</Btn>
       </div>
 
-      {users.length === 0
-        ? <p style={{ color: "var(--text3)", fontSize: 13 }}>No users.</p>
+      {filteredUsers.length === 0
+        ? <p style={{ color: "var(--text3)", fontSize: 13 }}>
+            {users.length === 0 ? "No users." : "No users in this team."}
+          </p>
         : (
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
             <thead>
@@ -251,14 +280,24 @@ function UsersSection() {
               </tr>
             </thead>
             <tbody>
-              {users.map(u => {
+              {filteredUsers.map(u => {
                 const team = teams.find(t => t.id === u.team_id);
                 return (
                   <tr key={u.id} style={{ borderBottom: "1px solid var(--bg)" }}>
                     <td style={td}>{u.display_name}</td>
                     <td style={td}>{u.username}</td>
                     <td style={td}>{u.role}</td>
-                    <td style={td}>{team?.name || "—"}</td>
+                    <td style={td}>
+                      {team ? (
+                        <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+                          <span style={{
+                            width: 8, height: 8, borderRadius: "50%",
+                            background: team.color1, flexShrink: 0,
+                          }}/>
+                          {team.name}
+                        </span>
+                      ) : "—"}
+                    </td>
                     <td style={{ ...td, textAlign: "right" }}>
                       <Btn onClick={() => open("edit", u)} style={{ marginRight: 6 }}>Edit</Btn>
                       <Btn variant="danger" onClick={() => apiDeleteUser(u.id).then(refresh)}>Delete</Btn>

@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { useAuth }  from "../contexts/AuthContext";
-import { useApp }   from "../contexts/AppContext";
+import { useAuth }      from "../contexts/AuthContext";
+import { useApp }       from "../contexts/AppContext";
+import { useAppearance } from "../contexts/AppearanceContext";
 import { apiLogout } from "../lib/api";
 
 const TOP_NAV = [
@@ -10,13 +11,14 @@ const TOP_NAV = [
   { to: "/field-position", label: "Down & Distance", icon: "📐" },
   { to: "/formations",     label: "Formations",      icon: "🔲" },
   { to: "/personnel",      label: "Personnel",       icon: "👥" },
-  { to: "/opponent",       label: "Opponent",        icon: "🎯" },
   { to: "/callsheet",      label: "Callsheet",       icon: "📋" },
   { to: "/roster",         label: "Roster",          icon: "📝" },
 ];
 
 const LIVE_NAV = [
-  { to: "/live",           label: "Live Tagging",    icon: "⚡" },
+  { to: "/live",                   label: "Live Tagging", icon: "⚡" },
+  { to: "/drawings",               label: "Draw",         icon: "✏️" },
+  { to: "/drawings?tab=viewer",    label: "Viewer",       icon: "👁" },
 ];
 
 // Visible to Coach + Admin (not Player)
@@ -76,18 +78,28 @@ function InlineForm({ placeholder, onCommit, onCancel }) {
 
 // ── NavItem ───────────────────────────────────────────────────────────────────
 function NavItem({ to, icon, label }) {
+  // For links with query params (e.g. /drawings?tab=viewer), match the full href
+  const hasQuery = to.includes("?");
   return (
     <NavLink
       to={to}
-      style={({ isActive }) => ({
-        display: "flex", alignItems: "center", gap: 9,
-        padding: "7px 12px 7px 16px", borderRadius: 6, margin: "1px 6px",
-        fontSize: 12, fontWeight: isActive ? 600 : 400,
-        color: isActive ? "var(--accent)" : "var(--text2)",
-        background: isActive ? "rgba(92,191,138,.08)" : "transparent",
-        textDecoration: "none", transition: "background .12s, color .12s",
-        cursor: "pointer",
-      })}
+      end={hasQuery}
+      style={({ isActive }) => {
+        // Custom active: for query-param links, check current URL includes query
+        const active = hasQuery
+          ? window.location.pathname + window.location.search === to ||
+            window.location.search.includes(to.split("?")[1])
+          : isActive && window.location.search === "";
+        return {
+          display: "flex", alignItems: "center", gap: 9,
+          padding: "7px 12px 7px 16px", borderRadius: 6, margin: "1px 6px",
+          fontSize: 12, fontWeight: active ? 600 : 400,
+          color: active ? "var(--accent)" : "var(--text2)",
+          background: active ? "rgba(92,191,138,.08)" : "transparent",
+          textDecoration: "none", transition: "background .12s, color .12s",
+          cursor: "pointer",
+        };
+      }}
     >
       <span style={{ fontSize: 14, lineHeight: 1 }}>{icon}</span>
       <span>{label}</span>
@@ -97,13 +109,14 @@ function NavItem({ to, icon, label }) {
 
 // ── Sidebar ───────────────────────────────────────────────────────────────────
 export default function Sidebar() {
-  const { user, logout }          = useAuth();
+  const { user, logout }           = useAuth();
+  const { teamIcon }               = useAppearance();
   const {
     seasons, selectedSeason, selectSeason,
     games,   selectedGame,   setSelectedGame,
     mode,    setMode,
     sidebarOpen, setSidebarOpen,
-    liveUpdateCount,
+    activeUsers,
   } = useApp();
   const navigate = useNavigate();
 
@@ -148,8 +161,13 @@ export default function Sidebar() {
         padding: "14px 12px 10px 16px",
         borderBottom: "1px solid var(--border)",
       }}>
-        <NavLink to="/overview" style={{ textDecoration: "none" }}>
-          <span style={{ fontWeight: 800, fontSize: 15, color: "var(--accent)", letterSpacing: 1 }}>
+        <NavLink to="/overview" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 8 }}>
+          <img src={teamIcon || "/icon.png"} alt="icon"
+            style={{ width: 28, height: 28, borderRadius: 7, objectFit: "cover", flexShrink: 0 }} />
+          <span style={{
+            fontFamily: "'Space Grotesk', sans-serif",
+            fontWeight: 800, fontSize: 19, color: "var(--accent)", letterSpacing: 3,
+          }}>
             DEF LAB
           </span>
         </NavLink>
@@ -159,8 +177,8 @@ export default function Sidebar() {
             background: "transparent", border: "none", color: "var(--text3)",
             fontSize: 14, cursor: "pointer", padding: 2,
           }}
-          title="Collapse sidebar"
-        >✕</button>
+          title="Sidebar einklappen"
+        >‹</button>
       </div>
 
       {/* Mode toggle */}
@@ -184,11 +202,11 @@ export default function Sidebar() {
               {m === "live" ? (
                 <span>
                   ● LIVE
-                  {liveUpdateCount > 0 && (
+                  {activeUsers > 0 && (
                     <span style={{
                       marginLeft: 4, background: "#fff", color: "#C0392B",
-                      borderRadius: 10, padding: "0 5px", fontSize: 10,
-                    }}>{liveUpdateCount > 99 ? "99+" : liveUpdateCount}</span>
+                      borderRadius: 10, padding: "0 5px", fontSize: 10, fontWeight: 800,
+                    }}>{activeUsers}</span>
                   )}
                 </span>
               ) : "PREP"}

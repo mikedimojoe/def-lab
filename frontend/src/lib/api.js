@@ -77,6 +77,13 @@ export const apiSavePlays   = (game_id, rows)  =>
 export const apiGetLiveRows   = (game_id)      => req('/liverows.php?game_id=' + game_id);
 export const apiSaveLiveRows  = (game_id, rows) =>
   req('/liverows.php?game_id=' + game_id, { method: 'POST', body: rows });
+export const apiPatchLiveRow  = (game_id, sort_order, fields) =>
+  req('/liverows.php?game_id=' + game_id, { method: 'PATCH', body: { sort_order, fields } });
+
+export const apiGetDrawingState = (game_id) =>
+  req('/drawingstate.php?game_id=' + game_id);
+export const apiPutDrawingState = (game_id, play_idx) =>
+  req('/drawingstate.php?game_id=' + game_id, { method: 'PUT', body: { play_idx } });
 
 // ── Roster ────────────────────────────────────────────────────────────────────
 export const apiGetRoster   = (game_id)        => req('/roster.php?game_id=' + game_id);
@@ -103,8 +110,17 @@ export async function apiUploadImage(team_id, file) {
   return data.data;
 }
 
+// ── Drawings ─────────────────────────────────────────────────────────────────
+export const apiGetDrawings  = (game_id)                      => req(`/drawings.php?game_id=${game_id}`);
+export const apiSaveDrawing  = (game_id, play_index, strokes) => req(`/drawings.php?game_id=${game_id}`, { method: 'POST', body: { play_index, strokes } });
+export const apiDeleteDrawing = (game_id, play_index)         => req(`/drawings.php?game_id=${game_id}&play_index=${play_index}`, { method: 'DELETE' });
+
 // ── Settings ──────────────────────────────────────────────────────────────────
 export const apiGetSettings      = ()      => req('/settings.php');
 export const apiSaveSettings     = (data)  => req('/settings.php', { method: 'POST', body: data });
 export const apiGetUserSettings  = ()      => req('/user_settings.php');
 export const apiSaveUserSettings = (data)  => req('/user_settings.php', { method: 'POST', body: data });
+
+// ── Heartbeat / Active Users ──────────────────────────────────────────────────
+export const apiHeartbeat       = () => req('/heartbeat.php', { method: 'POST' });
+export const apiGetActiveUsers  = () => req('/heartbeat.php');

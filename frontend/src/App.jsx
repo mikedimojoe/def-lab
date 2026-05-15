@@ -15,7 +15,6 @@ import GameOverview  from "./pages/GameOverview";
 import Formations    from "./pages/Formations";
 import Personnel     from "./pages/Personnel";
 import LiveTagging   from "./pages/LiveTagging";
-import Opponent      from "./pages/Opponent";
 import Callsheet     from "./pages/Callsheet";
 import Roster        from "./pages/Roster";
 import Admin         from "./pages/Admin";
@@ -24,6 +23,7 @@ import FieldPosition  from "./pages/FieldPosition";
 import CallsheetTest  from "./pages/CallsheetTest";
 import Print         from "./pages/Print";
 import Settings      from "./pages/Settings";
+import Drawings from "./pages/Drawings";
 
 function ProtectedRoute({ children, adminOnly = false, noPlayer = false }) {
   const { user, loading } = useAuth();
@@ -71,10 +71,10 @@ function AppRoutes() {
           <Route path="/formations"      element={<ProtectedRoute><Formations /></ProtectedRoute>} />
           <Route path="/personnel"       element={<ProtectedRoute><Personnel /></ProtectedRoute>} />
           <Route path="/live"            element={<ProtectedRoute><LiveTagging /></ProtectedRoute>} />
-          <Route path="/opponent"        element={<ProtectedRoute><Opponent /></ProtectedRoute>} />
           <Route path="/callsheet"       element={<ProtectedRoute><Callsheet /></ProtectedRoute>} />
           <Route path="/callsheet-test"  element={<ProtectedRoute><CallsheetTest /></ProtectedRoute>} />
           <Route path="/roster"          element={<ProtectedRoute><Roster /></ProtectedRoute>} />
+          <Route path="/drawings"        element={<ProtectedRoute><Drawings /></ProtectedRoute>} />
           <Route path="/print"           element={<ProtectedRoute noPlayer><Print /></ProtectedRoute>} />
           <Route path="/field-position"  element={<ProtectedRoute><FieldPosition /></ProtectedRoute>} />
           <Route path="/upload"          element={<ProtectedRoute noPlayer><Upload /></ProtectedRoute>} />

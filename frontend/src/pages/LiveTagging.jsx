@@ -13,11 +13,18 @@ const GREEN      = "#154734";
 const RUN_COLOR  = "var(--run-color)";
 const PASS_COLOR = "var(--pass-color)";
 
-function newRow(n) {
+function newRow(n, prevRow = null) {
   const r = {};
   ALL_COLUMNS.forEach(c => { r[c] = ""; });
   r["PLAY #"] = String(n);
   r["ODK"]    = "O";
+  if (prevRow) {
+    // Auto-fill prev play context from the previous row
+    const prevType   = String(prevRow["PLAY TYPE CALLED"] ?? prevRow["PLAY TYPE"] ?? "").trim();
+    const prevResult = String(prevRow["RESULT"] ?? "").trim();
+    if (prevType)   r["PREV PLAY TYPE"]   = prevType;
+    if (prevResult) r["PREV PLAY RESULT"] = prevResult;
+  }
   return r;
 }
 
@@ -292,55 +299,13 @@ export default function LiveTagging() {
     setSuggestions([]); setSuggIdx(-1);
   }, [selectedGame?.id]);
 
-  // Multi-user sync: if server has more rows than local, append the difference
-  useEffect(() => {
-    if (!selectedGame) return;
-    const poll = () => {
-      apiGetLiveRows(selectedGame.id).then(serverRows => {
-        setRows(current => {
-          if (serverRows.length > current.length) {
-            const merged = [...current, ...serverRows.slice(current.length)];
-            setLiveRows(merged);
-            return merged;
-          }
-          return current;
-        });
-      }).catch(() => {});
-    };
-    const id = setInterval(poll, 3000);
-    return () => clearInterval(id);
-  }, [selectedGame?.id, setLiveRows]);
-
-  // Multi-user sync: if server has more rows than local, append the difference
-  useEffect(() => {
-    if (!selectedGame) return;
-    const poll = () => {
-      apiGetLiveRows(selectedGame.id).then(serverRows => {
-        setRows(current => {
-          if (serverRows.length > current.length) {
-            const merged = [...current, ...serverRows.slice(current.length)];
-            setLiveRows(merged);
-            return merged;
-          }
-          return current;
-        });
-      }).catch(() => {});
-    };
-    const id = setInterval(poll, 3000);
-    return () => clearInterval(id);
-  }, [selectedGame?.id, setLiveRows]);
+  // Keep a ref to liveRows so persist can always see the latest server state
+  const liveRowsRef = useRef(liveRows);
+  liveRowsRef.current = liveRows;
 
   useEffect(() => {
     if (!localChanges.current) setRows(liveRows);
   }, [liveRows]);
-
-  // Flash the live dot when server sends new data
-  useEffect(() => {
-    if (liveUpdateCount === 0) return;
-    setDotVisible(false);
-    const t = setTimeout(() => setDotVisible(true), 350);
-    return () => clearTimeout(t);
-  }, [liveUpdateCount]);
 
   // Flash the live dot when server sends new data
   useEffect(() => {
@@ -388,14 +353,25 @@ export default function LiveTagging() {
       : (rowsRef.current[r]?.[displayCols[c]] ?? ""));
   }, [canEdit, displayCols]);
 
+  // Safe persist: never saves fewer rows than server already has (prevents data loss
+  // when two users edit simultaneously). Only deleteRow bypasses this.
   const persist = useCallback((next) => {
     localChanges.current = true;
-    setRows(next);
-    if (selectedGame) { saveToServer(selectedGame.id, next); setLiveRows(next); }
+    const srv = liveRowsRef.current;
+    // If server has extra rows we don't know about, append them
+    const safe = srv.length > next.length
+      ? [...next, ...srv.slice(next.length)]
+      : next;
+    setRows(safe);
+    if (selectedGame) { saveToServer(selectedGame.id, safe); setLiveRows(safe); }
   }, [selectedGame?.id, saveToServer, setLiveRows]);
 
   const addRow = useCallback(() => {
-    const next = [...rowsRef.current, newRow(rowsRef.current.length + 1)];
+    // Always base on latest server state to avoid row-count mismatch
+    const base = liveRowsRef.current.length > rowsRef.current.length
+      ? liveRowsRef.current : rowsRef.current;
+    const prevRow = base.length > 0 ? base[base.length - 1] : null;
+    const next = [...base, newRow(base.length + 1, prevRow)];
     localChanges.current = true;
     setRows(next);
     if (selectedGame) { saveToServer(selectedGame.id, next); setLiveRows(next); }
@@ -403,9 +379,13 @@ export default function LiveTagging() {
   }, [selectedGame?.id, saveToServer, setLiveRows, startEdit]);
 
   const deleteRow = useCallback((ri) => {
-    persist(rowsRef.current.filter((_, i) => i !== ri));
+    // Explicit delete — bypass safe-merge so row count actually decreases
+    const next = rowsRef.current.filter((_, i) => i !== ri);
+    localChanges.current = true;
+    setRows(next);
+    if (selectedGame) { saveToServer(selectedGame.id, next); setLiveRows(next); }
     setSel(null); setEditCell(null);
-  }, [persist]);
+  }, [selectedGame?.id, saveToServer, setLiveRows]);
 
   // commitEdit optionally accepts an override value (for suggestion confirm)
   const commitEdit = useCallback((nextSel, overrideVal) => {
@@ -536,7 +516,9 @@ export default function LiveTagging() {
       const isLastRow = ri === rowsRef.current.length - 1;
       if (isLastRow && canEdit) {
         commitEdit(null, val ?? undefined);
-        const next = [...rowsRef.current, newRow(rowsRef.current.length + 1)];
+        const base = rowsRef.current;
+        const prevRow = base.length > 0 ? base[base.length - 1] : null;
+        const next = [...base, newRow(base.length + 1, prevRow)];
         localChanges.current = true;
         setRows(next);
         if (selectedGame) { saveToServer(selectedGame.id, next); setLiveRows(next); }

@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import { apiGetSettings } from "../lib/api";
+import { apiGetSettings, apiSaveSettings } from "../lib/api";
 
 const AppearanceContext = createContext(null);
 
@@ -27,14 +27,15 @@ export function AppearanceProvider({ children }) {
   const [runColor,  setRunColor]  = useState(() => localStorage.getItem("dl_run_color")  || "#7B6EA0");
   const [passColor, setPassColor] = useState(() => localStorage.getItem("dl_pass_color") || "#4472C4");
   const [rpoColor,  setRpoColor]  = useState(() => localStorage.getItem("dl_rpo_color")  || "#D4782A");
-  const [logo,      setLogoState] = useState(() => localStorage.getItem("dl_logo")       || null);
+  const [teamIcon,  setTeamIcon]  = useState(() => localStorage.getItem("dl_team_icon")  || null);
 
-  // On mount: fetch server-side colors and override local
+  // On mount: fetch server-side settings and override local
   useEffect(() => {
     apiGetSettings().then(s => {
       if (s.run_color)  { localStorage.setItem("dl_run_color",  s.run_color);  setRunColor(s.run_color);  }
       if (s.pass_color) { localStorage.setItem("dl_pass_color", s.pass_color); setPassColor(s.pass_color); }
       if (s.rpo_color)  { localStorage.setItem("dl_rpo_color",  s.rpo_color);  setRpoColor(s.rpo_color);  }
+      if (s.team_icon)  { localStorage.setItem("dl_team_icon",  s.team_icon);  setTeamIcon(s.team_icon);  }
     }).catch(() => {});
   }, []);
 
@@ -43,14 +44,13 @@ export function AppearanceProvider({ children }) {
     applyAppearance({ run: runColor, pass: passColor, rpo: rpoColor });
   }, [runColor, passColor, rpoColor]);
 
-  // Favicon
+  // Update favicon when team icon changes
   useEffect(() => {
-    if (logo) {
-      let link = document.querySelector("link[rel~='icon']");
-      if (!link) { link = document.createElement("link"); link.rel = "icon"; document.head.appendChild(link); }
-      link.href = logo;
-    }
-  }, [logo]);
+    const url = teamIcon || "/icon.png";
+    let link = document.querySelector("link[rel~='icon']");
+    if (!link) { link = document.createElement("link"); link.rel = "icon"; document.head.appendChild(link); }
+    link.href = url;
+  }, [teamIcon]);
 
   function saveColors(run, pass, rpo) {
     localStorage.setItem("dl_run_color",  run);
@@ -68,9 +68,10 @@ export function AppearanceProvider({ children }) {
     if (rpo)  { setRpoColor(rpo);  localStorage.setItem("dl_rpo_color",  rpo);  }
   }
 
-  function saveLogo(dataUrl) {
-    localStorage.setItem("dl_logo", dataUrl);
-    setLogoState(dataUrl);
+  function saveTeamIcon(dataUrl) {
+    localStorage.setItem("dl_team_icon", dataUrl);
+    setTeamIcon(dataUrl);
+    apiSaveSettings({ team_icon: dataUrl }).catch(() => {});
   }
 
   function applyTeamColors(primary, secondary) {
@@ -79,8 +80,8 @@ export function AppearanceProvider({ children }) {
 
   return (
     <AppearanceContext.Provider value={{
-      runColor, passColor, rpoColor,
-      saveColors, saveRunPassColors, saveLogo, applyTeamColors, applyUserColors,
+      runColor, passColor, rpoColor, teamIcon,
+      saveColors, saveRunPassColors, saveTeamIcon, applyTeamColors, applyUserColors,
     }}>
       {children}
     </AppearanceContext.Provider>

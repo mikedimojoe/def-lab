@@ -19,7 +19,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $u = require_auth();
   $data = body();
-  $json = json_encode($data);
+  // Load existing settings and merge — individual keys are updated, others preserved
+  $stmt = db()->prepare("SELECT settings_json FROM user_settings WHERE user_id = ?");
+  $stmt->execute([$u['id']]);
+  $row = $stmt->fetch();
+  $existing = $row ? (json_decode($row['settings_json'], true) ?: []) : [];
+  $merged = array_merge($existing, $data);
+  $json = json_encode($merged);
   db()->prepare("INSERT INTO user_settings (user_id, settings_json) VALUES (?,?) ON DUPLICATE KEY UPDATE settings_json=VALUES(settings_json)")
     ->execute([$u['id'], $json]);
   json_ok(true);

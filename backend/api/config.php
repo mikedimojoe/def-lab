@@ -13,7 +13,7 @@ if (in_array($origin, $allowed)) {
     header('Access-Control-Allow-Origin: https://def-lab.de');
 }
 header('Access-Control-Allow-Credentials: true');
-header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+header('Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 header('Content-Type: application/json; charset=utf-8');
 
@@ -45,6 +45,14 @@ function body(): array {
 function uid(): string { return bin2hex(random_bytes(8)) . base_convert(time(), 10, 36); }
 
 session_name('dl_session');
+ini_set('session.gc_maxlifetime', 604800); // 7 days
+session_set_cookie_params([
+    'lifetime' => 604800,
+    'path'     => '/',
+    'secure'   => true,
+    'httponly' => true,
+    'samesite' => 'Lax',
+]);
 session_start();
 
 function current_user(): ?array { return $_SESSION['user'] ?? null; }

@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import {
   apiGetSeasons, apiGetGames, apiGetPlays, apiGetLiveRows,
+  apiHeartbeat, apiGetActiveUsers,
 } from "../lib/api";
 import { useAuth } from "./AuthContext";
 
@@ -18,6 +19,7 @@ export function AppProvider({ children }) {
   const [mode,           setMode]           = useState("prep");
   const [sidebarOpen,    setSidebarOpen]    = useState(true);
   const [liveUpdateCount, setLiveUpdateCount] = useState(0);
+  const [activeUsers,     setActiveUsers]     = useState(1);
 
   // Reload seasons when user changes
   useEffect(() => {
@@ -37,32 +39,35 @@ export function AppProvider({ children }) {
     apiGetLiveRows(selectedGame.id).then(setLiveRows).catch(() => setLiveRows([]));
   }, [selectedGame?.id]);
 
-  // Poll server every 3 s regardless of mode — liveRows must always be current
+  // Poll live rows every 2 s — server is always authoritative
   useEffect(() => {
     if (!selectedGame) return;
     const poll = () => {
       apiGetLiveRows(selectedGame.id).then(serverRows => {
         setLiveRows(prev => {
-          // More rows on server → always take server version
-          if (serverRows.length > prev.length) {
-            setLiveUpdateCount(c => c + 1);
-            return serverRows;
-          }
-          // Same count but content changed → update
-          if (serverRows.length === prev.length) {
-            const changed = serverRows.some(
-              (r, i) => JSON.stringify(r) !== JSON.stringify(prev[i])
-            );
-            if (changed) setLiveUpdateCount(c => c + 1);
-            return changed ? serverRows : prev;
-          }
-          return prev; // server has fewer → stale read, keep local
+          if (!serverRows.length && prev.length) return prev;
+          const changed = serverRows.length !== prev.length ||
+            serverRows.some((r, i) => JSON.stringify(r) !== JSON.stringify(prev[i]));
+          if (changed) setLiveUpdateCount(c => c + 1);
+          return changed ? serverRows : prev;
         });
       }).catch(() => {});
     };
-    const id = setInterval(poll, 3000);
+    const id = setInterval(poll, 2000);
     return () => clearInterval(id);
   }, [selectedGame?.id]);
+
+  // Heartbeat: tell server we're alive every 30 s, fetch active user count every 30 s
+  useEffect(() => {
+    if (!user) return;
+    const tick = () => {
+      apiHeartbeat().catch(() => {});
+      apiGetActiveUsers().then(d => setActiveUsers(d.active ?? 1)).catch(() => {});
+    };
+    tick(); // immediate on login
+    const id = setInterval(tick, 30000);
+    return () => clearInterval(id);
+  }, [user?.id]);
 
   // Current season's games shorthand
   const games = gamesBySeason[selectedSeason?.id] || [];
@@ -136,7 +141,7 @@ export function AppProvider({ children }) {
       playRows, liveRows, setLiveRows, refreshPlayRows, refreshLiveRows,
       mode, setMode,
       sidebarOpen, setSidebarOpen,
-      liveUpdateCount,
+      liveUpdateCount, activeUsers,
     }}>
       {children}
     </AppContext.Provider>

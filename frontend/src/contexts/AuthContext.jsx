@@ -22,17 +22,8 @@ export function AuthProvider({ children }) {
     return () => window.removeEventListener('auth:expired', handle);
   }, []);
 
-  // Auto-logout when browser tab/window is closed
-  useEffect(() => {
-    if (!user) return;
-    const handleUnload = () => {
-      // sendBeacon is fire-and-forget — works even during page unload
-      const base = (import.meta.env.VITE_API_URL ?? '') + '/api';
-      navigator.sendBeacon(base + '/auth.php?action=logout');
-    };
-    window.addEventListener('beforeunload', handleUnload);
-    return () => window.removeEventListener('beforeunload', handleUnload);
-  }, [user]);
+  // No auto-logout on page close/reload — session persists for 7 days.
+  // Users log out explicitly via the Logout button.
 
   async function login(username, password) {
     const u = await apiLogin(username, password);

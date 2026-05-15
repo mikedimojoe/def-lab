@@ -407,6 +407,8 @@ export default function Formations() {
             zoom: 0.65;
           }
           .formations-no-print { display: none !important; }
+          .formation-row:nth-child(2n) { page-break-after: always; }
+          .formation-row { break-inside: avoid-page; }
           @page { margin: 8mm; size: A4 portrait; }
         }
       `}</style>
@@ -433,7 +435,7 @@ export default function Formations() {
       </div>
 
       {/* ── Formation Auswahl ── */}
-      <div style={{ marginBottom: 14 }}>
+      <div className="formations-no-print" style={{ marginBottom: 14 }}>
         <div style={{ fontSize: 10, color: "var(--text3)", fontWeight: 700,
           letterSpacing: .5, marginBottom: 7 }}>FORMATION AUSWAHL</div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
@@ -454,7 +456,7 @@ export default function Formations() {
       {selForms.length > 0 && (
         <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
           {selForms.map(form => (
-            <div key={form}>
+            <div key={form} className="formation-row">
               {/* Formation-Zeilen-Header + Backfield-Chips */}
               <div style={{
                 marginBottom: 10, paddingBottom: 10,
@@ -467,7 +469,7 @@ export default function Formations() {
                   </span>
                 </div>
                 {(bfsByForm[form] || []).length > 0 && (
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                  <div className="formations-no-print" style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                     {(bfsByForm[form] || []).map(({ bf, count }) => (
                       <Chip key={bf}
                         label={bf === "—" ? "Kein BF" : bf}
@@ -481,7 +483,7 @@ export default function Formations() {
               </div>
 
               {/* Cards nebeneinander, eine pro Backfield */}
-              <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "flex-start" }}>
+              <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "stretch" }}>
                 {effectiveBFsFor(form).map(bf => {
                   const plays = filterPlays(allRows, form, bf);
                   if (!plays.length) return null;

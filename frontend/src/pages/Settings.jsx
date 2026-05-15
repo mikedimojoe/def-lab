@@ -75,12 +75,36 @@ function PlayTypePreview({ run, pass, rpo }) {
 // ── Main page ─────────────────────────────────────────────────────────────────
 export default function Settings() {
   const { theme, toggle, setTheme } = useTheme();
-  const { runColor, passColor, rpoColor, saveColors } = useAppearance();
+  const { runColor, passColor, rpoColor, saveColors, teamIcon, saveTeamIcon } = useAppearance();
 
   const [run,  setRun]  = useState(runColor);
   const [pass, setPass] = useState(passColor);
   const [rpo,  setRpo]  = useState(rpoColor);
   const [saved, setSaved] = useState(false);
+  const [iconSaved, setIconSaved] = useState(false);
+
+  function handleIconUpload(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      // Resize to max 256px via canvas
+      const img = new Image();
+      img.onload = () => {
+        const size = 256;
+        const canvas = document.createElement("canvas");
+        canvas.width = size; canvas.height = size;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, size, size);
+        const dataUrl = canvas.toDataURL("image/png");
+        saveTeamIcon(dataUrl);
+        setIconSaved(true);
+        setTimeout(() => setIconSaved(false), 2000);
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
 
   function handleSave() {
     saveColors(run, pass, rpo);
@@ -104,6 +128,38 @@ export default function Settings() {
       </div>
 
       {/* ── Appearance ── */}
+      {/* ── Team Icon ── */}
+      <Card title="Team Icon">
+        <Row label="Icon" hint="Wird in der Sidebar und Login-Seite angezeigt">
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <img
+              src={teamIcon || "/icon.png"}
+              alt="Team Icon"
+              style={{ width: 52, height: 52, borderRadius: 12, objectFit: "cover", border: "1px solid var(--border)" }}
+            />
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              <label style={{
+                padding: "7px 16px", borderRadius: 7, cursor: "pointer",
+                background: GREEN, color: "#fff", fontSize: 12, fontWeight: 700,
+                display: "inline-block",
+              }}>
+                {iconSaved ? "✓ Gespeichert" : "Bild auswählen"}
+                <input type="file" accept="image/*" onChange={handleIconUpload}
+                  style={{ display: "none" }} />
+              </label>
+              {teamIcon && (
+                <button onClick={() => saveTeamIcon(null)} style={{
+                  padding: "5px 12px", borderRadius: 7, border: "1px solid var(--border)",
+                  background: "transparent", color: "var(--text3)", fontSize: 11, cursor: "pointer",
+                }}>
+                  Zurücksetzen
+                </button>
+              )}
+            </div>
+          </div>
+        </Row>
+      </Card>
+
       <Card title="Erscheinungsbild">
         <Row label="Dark / Light Mode" hint="Beeinflusst die gesamte App">
           <div style={{ display: "flex", gap: 0, border: "1px solid var(--border)", borderRadius: 8, overflow: "hidden" }}>

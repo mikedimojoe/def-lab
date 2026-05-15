@@ -727,8 +727,6 @@ export default function Callsheet() {
             : mode === "live" ? "No live data yet."
             : "No playdata uploaded. Go to Admin → Upload .xlsx"}
         </div>
-      ) : mode === "live" ? (
-        <LiveCallsheet rows={rows} />
       ) : (
         <PrepCallsheet rows={rows} />
       )}
